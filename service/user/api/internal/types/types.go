@@ -8,9 +8,17 @@ type GetUserInfoReq struct {
 }
 
 type GetUserInfoResp struct {
-	UserInfo UserInfo        `json:"userInfo"`
-	Profile  UserProfileInfo `json:"profile,omitempty"`
-	Stat     UserStatInfo    `json:"stat,omitempty"`
+	UserInfo UserInfo `json:"userInfo"`
+}
+
+type GetUserProfileInfoReq struct {
+	UserId uint64 `path:"id"`
+}
+
+type GetUserProfileInfoResp struct {
+	Code    int             `json:"code"`
+	Msg     string          `json:"msg"`
+	Profile UserProfileInfo `json:"profile,omitempty"`
 }
 
 type GetUserStatReq struct {
@@ -36,6 +44,19 @@ type LoginResp struct {
 	RefreshExpireIn int64  `json:"refreshExpireIn"`
 }
 
+type RefreshReq struct {
+	RefreshToken string `json:"refreshToken" validate:"required"`
+}
+
+type RefreshResp struct {
+	Code            int    `json:"code"`
+	Msg             string `json:"msg"`
+	AccessToken     string `json:"accessToken"`
+	AccessExpireIn  int64  `json:"accessExpireIn"`
+	RefreshToken    string `json:"refreshToken"` // 新的RefreshToken
+	RefreshExpireIn int64  `json:"refreshExpireIn"`
+}
+
 type RegisterReq struct {
 	Username string `json:"username" validate:"required,min=3,max=20"`
 	Password string `json:"password" validate:"required,min=8,max=16"`
@@ -45,6 +66,16 @@ type RegisterResp struct {
 	Code   int    `json:"code"`
 	Msg    string `json:"msg"`
 	UserId uint64 `json:"userId"`
+}
+
+type UpdateAvatarReq struct {
+	Avatar string `json:"avatar" validate:"required,url"` // 头像URL
+}
+
+type UpdateAvatarResp struct {
+	Code   int    `json:"code"`
+	Msg    string `json:"msg"`
+	Avatar string `json:"avatar,omitempty"` // 新的头像URL
 }
 
 type UpdateUserProfileInfoReq struct {

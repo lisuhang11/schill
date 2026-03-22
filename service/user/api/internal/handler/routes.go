@@ -24,6 +24,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/user/register",
 				Handler: RegisterHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/user/token/refresh",
+				Handler: RefreshHandler(serverCtx),
+			},
 		},
 	)
 
@@ -32,7 +37,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodGet,
 				Path:    "/user/:id",
-				Handler: GetUserInfoByIdHandler(serverCtx),
+				Handler: GetUserInfoHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/user/:id/profile",
+				Handler: GetUserProfileInfoHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
@@ -40,9 +50,9 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: GetUserStatHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodGet,
-				Path:    "/user/info",
-				Handler: GetUserInfoHandler(serverCtx),
+				Method:  http.MethodPost,
+				Path:    "/user/avatar",
+				Handler: UpdateAvatarHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodPost,

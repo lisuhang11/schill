@@ -36,20 +36,19 @@ type LoginResp {
 	RefreshExpireIn int64  `json:"refreshExpireIn"`
 }
 
-
 // 刷新Token请求
 type RefreshReq {
-    RefreshToken string `json:"refreshToken" validate:"required"`
+	RefreshToken string `json:"refreshToken" validate:"required"`
 }
 
 // 刷新Token响应
 type RefreshResp {
-    Code            int    `json:"code"`
-    Msg             string `json:"msg"`
-    AccessToken     string `json:"accessToken"`
-    AccessExpireIn  int64  `json:"accessExpireIn"`
-    RefreshToken    string `json:"refreshToken"` // 新的RefreshToken
-    RefreshExpireIn int64  `json:"refreshExpireIn"`
+	Code            int    `json:"code"`
+	Msg             string `json:"msg"`
+	AccessToken     string `json:"accessToken"`
+	AccessExpireIn  int64  `json:"accessExpireIn"`
+	RefreshToken    string `json:"refreshToken"` // 新的RefreshToken
+	RefreshExpireIn int64  `json:"refreshExpireIn"`
 }
 
 // 用户基本信息
@@ -90,16 +89,26 @@ type UserStatInfo {
 	LastActiveTime  int64  `json:"lastActiveTime"`
 }
 
-// 获取用户拓展信息请求（通过ID）
+// 获取用户基本信息请求
+type GetUserInfoReq {
+	UserId uint64 `path:"id"`
+}
+
+// 获取用户基本信息响应
+type GetUserInfoResp {
+	UserInfo UserInfo `json:"userInfo"`
+}
+
+// 获取用户拓展信息请求
 type GetUserProfileInfoReq {
 	UserId uint64 `path:"id"`
 }
 
 // 获取用户拓展信息响应
 type GetUserProfileInfoResp {
-	UserInfo UserInfo        `json:"userInfo"`
-	Profile  UserProfileInfo `json:"profile,omitempty"`
-	Stat     UserStatInfo    `json:"stat,omitempty"`
+	Code    int             `json:"code"`
+	Msg     string          `json:"msg"`
+	Profile UserProfileInfo `json:"profile,omitempty"`
 }
 
 // 更新用户拓展信息请求（从token中获取userId）
@@ -114,7 +123,7 @@ type UpdateUserProfileInfoResp {
 	UserProfile UserProfileInfo `json:"userProfile,omitempty"`
 }
 
-// 获取用户统计请求（通过ID）
+// 获取用户统计请求
 type GetUserStatReq {
 	UserId uint64 `path:"id"`
 }
@@ -124,16 +133,31 @@ type GetUserStatResp {
 	Stat UserStatInfo `json:"stat"`
 }
 
+// 更新头像请求（从token中获取userId）
+type UpdateAvatarReq {
+	Avatar string `json:"avatar" validate:"required,url"` // 头像URL
+}
+
+// 更新头像响应
+type UpdateAvatarResp {
+	Code   int    `json:"code"`
+	Msg    string `json:"msg"`
+	Avatar string `json:"avatar,omitempty"` // 新的头像URL
+}
+
 // 公开接口（无需认证）
 service user-api {
+	// 注册
 	@handler Register
 	post /user/register (RegisterReq) returns (RegisterResp)
 
+	// 登录
 	@handler Login
 	post /user/login (LoginReq) returns (LoginResp)
 
-	@handler
-	POST /user/token/refresh
+	// 刷新令牌
+	@handler Refresh
+	post /user/token/refresh (RefreshReq) returns (RefreshResp)
 }
 
 // 需认证的接口（JWT）
@@ -141,17 +165,25 @@ service user-api {
 	jwt: Jwt
 )
 service user-api {
+	// 获取用户基本信息
 	@handler GetUserInfo
-	get /user/info returns (GetUserInfoResp)
-
-	@handler GetUserInfoById
 	get /user/:id (GetUserInfoReq) returns (GetUserInfoResp)
 
-	@handler UpdateUserProfileInfo
-	post /user/info (UpdateUserProfileInfoReq) returns (UpdateUserProfileInfoResp)
+	// 获取用户拓展信息
+	@handler GetUserProfileInfo
+	get /user/:id/profile (GetUserProfileInfoReq) returns (GetUserProfileInfoResp)
 
+	// 获取用户统计信息
 	@handler GetUserStat
 	get /user/:id/stat (GetUserStatReq) returns (GetUserStatResp)
+
+	// 更新用户头像
+	@handler UpdateAvatar
+	post /user/avatar (UpdateAvatarReq) returns (UpdateAvatarResp)
+
+	// 更新用户拓展信息
+	@handler UpdateUserProfileInfo
+	post /user/info (UpdateUserProfileInfoReq) returns (UpdateUserProfileInfoResp)
 }
 
 // goctl api go -api user.api -dir . style=gozero
