@@ -24,6 +24,8 @@ type (
 	RegisterResp              = pb.RegisterResp
 	UpdateUserProfileInfoReq  = pb.UpdateUserProfileInfoReq
 	UpdateUserProfileInfoResp = pb.UpdateUserProfileInfoResp
+	UpdateUserStatusReq       = pb.UpdateUserStatusReq
+	UpdateUserStatusResp      = pb.UpdateUserStatusResp
 	UserInfo                  = pb.UserInfo
 	UserProfile               = pb.UserProfile
 	UserStat                  = pb.UserStat
@@ -32,6 +34,7 @@ type (
 		Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterResp, error)
 		Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginResp, error)
 		GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error)
+		UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error)
 		UpdateUserProfileInfo(ctx context.Context, in *UpdateUserProfileInfoReq, opts ...grpc.CallOption) (*UpdateUserProfileInfoResp, error)
 		GetUserStat(ctx context.Context, in *GetUserStatReq, opts ...grpc.CallOption) (*GetUserStatResp, error)
 	}
@@ -60,6 +63,11 @@ func (m *defaultUserCenter) Login(ctx context.Context, in *LoginReq, opts ...grp
 func (m *defaultUserCenter) GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error) {
 	client := pb.NewUserCenterClient(m.cli.Conn())
 	return client.GetUserInfo(ctx, in, opts...)
+}
+
+func (m *defaultUserCenter) UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error) {
+	client := pb.NewUserCenterClient(m.cli.Conn())
+	return client.UpdateUserStatus(ctx, in, opts...)
 }
 
 func (m *defaultUserCenter) UpdateUserProfileInfo(ctx context.Context, in *UpdateUserProfileInfoReq, opts ...grpc.CallOption) (*UpdateUserProfileInfoResp, error) {

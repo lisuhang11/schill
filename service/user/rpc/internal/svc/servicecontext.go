@@ -3,24 +3,29 @@ package svc
 import (
 	"SChill/service/user/rpc/internal/config"
 	"SChill/service/user/rpc/internal/model"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 type ServiceContext struct {
-	Config           config.Config
-	Conn             sqlx.SqlConn // 添加 Conn 字段
-	UserModel        model.UserModel
-	UserProfileModel model.UserProfileModel
-	UserStatModel    model.UserStatModel
+	Config config.Config
+	DB     *gorm.DB
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	conn := sqlx.NewMysql(c.Mysql.DataSource)
+	db, err := gorm.Open(mysql.Open(c.Mysql.DataSource), &gorm.Config{})
+	if err != nil {
+		panic("数据库连接失败: " + err.Error())
+	}
+
+	// 自动迁移（仅开发/测试阶段，生产环境建议手动管理）
+	err = db.AutoMigrate(&model.User{}, &model.UserProfile{}, &model.UserStat{})
+	if err != nil {
+		panic("数据库表迁移失败: " + err.Error())
+	}
+
 	return &ServiceContext{
-		Config:           c,
-		Conn:             conn, // 注入连接
-		UserModel:        model.NewUserModel(conn),
-		UserProfileModel: model.NewUserProfileModel(conn),
-		UserStatModel:    model.NewUserStatModel(conn),
+		Config: c,
+		DB:     db,
 	}
 }

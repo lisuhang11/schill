@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"SChill/service/user/rpc/internal/model"
@@ -12,6 +11,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
 type UpdateUserProfileInfoLogic struct {
@@ -29,83 +29,71 @@ func NewUpdateUserProfileInfoLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *UpdateUserProfileInfoLogic) UpdateUserProfileInfo(in *pb.UpdateUserProfileInfoReq) (*pb.UpdateUserProfileInfoResp, error) {
-	// 参数校验
-	if in.UserProfile == nil {
-		return nil, status.Error(codes.InvalidArgument, "user profile is required")
+	if in.UserProfile == nil || in.UserProfile.UserId == 0 {
+		return nil, status.Error(codes.InvalidArgument, "invalid user profile")
 	}
 	userId := in.UserProfile.UserId
-	if userId == 0 {
-		return nil, status.Error(codes.InvalidArgument, "user id is required")
+
+	// 先检查用户扩展信息是否存在
+	var profile model.UserProfile
+	err := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", userId).First(&profile).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, status.Error(codes.NotFound, "user profile not found")
+		}
+		logx.Errorf("find user profile failed: %v", err)
+		return nil, status.Error(codes.Internal, "database error")
 	}
 
-	// 转换 birthday 字符串为 sql.NullTime
-	var birthdaySql sql.NullTime
+	// 构建更新字段
+	updates := make(map[string]interface{})
+
+	if in.UserProfile.Gender == 1 || in.UserProfile.Gender == 2 {
+		updates["gender"] = in.UserProfile.Gender
+	}
 	if in.UserProfile.Birthday != "" {
 		t, err := time.Parse("2006-01-02", in.UserProfile.Birthday)
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "invalid birthday format: %v", err)
 		}
-		birthdaySql = sql.NullTime{
-			Time:  t,
-			Valid: true,
-		}
-	} else {
-		birthdaySql = sql.NullTime{Valid: false}
+		updates["birthday"] = &t
 	}
+	// 以下字段允许更新为空字符串
+	updates["signature"] = in.UserProfile.Signature
+	updates["location"] = in.UserProfile.Location
+	updates["website"] = in.UserProfile.Website
+	updates["company"] = in.UserProfile.Company
+	updates["job_title"] = in.UserProfile.JobTitle
+	updates["education"] = in.UserProfile.Education
 
-	// 构造 model 对象
-	profileModel := &model.UserProfile{
-		UserId:    userId,
-		Gender:    in.UserProfile.Gender,
-		Birthday:  birthdaySql,
-		Signature: in.UserProfile.Signature,
-		Location:  in.UserProfile.Location,
-		Website:   in.UserProfile.Website,
-		Company:   in.UserProfile.Company,
-		JobTitle:  in.UserProfile.JobTitle,
-		Education: in.UserProfile.Education,
-	}
-
-	// 先检查是否存在，若不存在则返回
-	_, err := l.svcCtx.UserProfileModel.FindOneByUserId(l.ctx, userId)
-	if err == model.ErrNotFound {
-		logx.Errorf("insert user profile failed: %v", err)
-		return nil, status.Error(codes.Internal, "user not exists")
-	} else if err != nil {
-		logx.Errorf("find user profile failed: %v", err)
-		return nil, status.Error(codes.Internal, "find user profile failed")
-	} else {
-		// 更新记录
-		err = l.svcCtx.UserProfileModel.UpdateByUserId(l.ctx, profileModel)
-		if err != nil {
+	// 执行更新
+	if len(updates) > 0 {
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&profile).Updates(updates).Error; err != nil {
 			logx.Errorf("update user profile failed: %v", err)
-			return nil, status.Error(codes.Internal, "update user profile failed")
+			return nil, status.Error(codes.Internal, "update failed")
 		}
 	}
 
-	// 查询更新后的完整数据（可选，确保返回最新）
-	updated, err := l.svcCtx.UserProfileModel.FindOneByUserId(l.ctx, userId)
-	if err != nil {
-		logx.Errorf("find updated user profile failed: %v", err)
-		// 即使查询失败，仍返回请求的数据，但记录错误
-	} else {
-		profileModel = updated
+	// 查询更新后的数据
+	var updatedProfile model.UserProfile
+	if err := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", userId).First(&updatedProfile).Error; err != nil {
+		logx.Errorf("fetch updated profile failed: %v", err)
+		updatedProfile = profile // 降级使用旧数据
 	}
 
 	// 转换为 pb 返回
 	pbProfile := &pb.UserProfile{
-		UserId:    profileModel.UserId,
-		Gender:    profileModel.Gender,
-		Birthday:  profileModel.Birthday.Time.Format("2006-01-02"),
-		Signature: profileModel.Signature,
-		Location:  profileModel.Location,
-		Website:   profileModel.Website,
-		Company:   profileModel.Company,
-		JobTitle:  profileModel.JobTitle,
-		Education: profileModel.Education,
+		UserId:    updatedProfile.UserID,
+		Gender:    int64(updatedProfile.Gender),
+		Signature: updatedProfile.Signature,
+		Location:  updatedProfile.Location,
+		Website:   updatedProfile.Website,
+		Company:   updatedProfile.Company,
+		JobTitle:  updatedProfile.JobTitle,
+		Education: updatedProfile.Education,
 	}
-	if !profileModel.Birthday.Valid {
-		pbProfile.Birthday = ""
+	if updatedProfile.Birthday != nil {
+		pbProfile.Birthday = updatedProfile.Birthday.Format("2006-01-02")
 	}
 
 	return &pb.UpdateUserProfileInfoResp{

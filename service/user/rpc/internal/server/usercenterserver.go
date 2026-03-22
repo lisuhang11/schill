@@ -38,6 +38,11 @@ func (s *UserCenterServer) GetUserInfo(ctx context.Context, in *pb.GetUserInfoRe
 	return l.GetUserInfo(in)
 }
 
+func (s *UserCenterServer) UpdateUserStatus(ctx context.Context, in *pb.UpdateUserStatusReq) (*pb.UpdateUserStatusResp, error) {
+	l := logic.NewUpdateUserStatusLogic(ctx, s.svcCtx)
+	return l.UpdateUserStatus(in)
+}
+
 func (s *UserCenterServer) UpdateUserProfileInfo(ctx context.Context, in *pb.UpdateUserProfileInfoReq) (*pb.UpdateUserProfileInfoResp, error) {
 	l := logic.NewUpdateUserProfileInfoLogic(ctx, s.svcCtx)
 	return l.UpdateUserProfileInfo(in)

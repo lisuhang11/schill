@@ -36,6 +36,22 @@ type LoginResp {
 	RefreshExpireIn int64  `json:"refreshExpireIn"`
 }
 
+
+// 刷新Token请求
+type RefreshReq {
+    RefreshToken string `json:"refreshToken" validate:"required"`
+}
+
+// 刷新Token响应
+type RefreshResp {
+    Code            int    `json:"code"`
+    Msg             string `json:"msg"`
+    AccessToken     string `json:"accessToken"`
+    AccessExpireIn  int64  `json:"accessExpireIn"`
+    RefreshToken    string `json:"refreshToken"` // 新的RefreshToken
+    RefreshExpireIn int64  `json:"refreshExpireIn"`
+}
+
 // 用户基本信息
 type UserInfo {
 	Id        uint64 `json:"id"`
@@ -74,13 +90,13 @@ type UserStatInfo {
 	LastActiveTime  int64  `json:"lastActiveTime"`
 }
 
-// 获取用户信息请求（通过ID）
-type GetUserInfoReq {
+// 获取用户拓展信息请求（通过ID）
+type GetUserProfileInfoReq {
 	UserId uint64 `path:"id"`
 }
 
-// 获取用户信息响应
-type GetUserInfoResp {
+// 获取用户拓展信息响应
+type GetUserProfileInfoResp {
 	UserInfo UserInfo        `json:"userInfo"`
 	Profile  UserProfileInfo `json:"profile,omitempty"`
 	Stat     UserStatInfo    `json:"stat,omitempty"`
@@ -115,6 +131,9 @@ service user-api {
 
 	@handler Login
 	post /user/login (LoginReq) returns (LoginResp)
+
+	@handler
+	POST /user/token/refresh
 }
 
 // 需认证的接口（JWT）

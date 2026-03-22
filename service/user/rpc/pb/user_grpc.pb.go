@@ -22,6 +22,7 @@ const (
 	UserCenter_Register_FullMethodName              = "/user.UserCenter/Register"
 	UserCenter_Login_FullMethodName                 = "/user.UserCenter/Login"
 	UserCenter_GetUserInfo_FullMethodName           = "/user.UserCenter/GetUserInfo"
+	UserCenter_UpdateUserStatus_FullMethodName      = "/user.UserCenter/UpdateUserStatus"
 	UserCenter_UpdateUserProfileInfo_FullMethodName = "/user.UserCenter/UpdateUserProfileInfo"
 	UserCenter_GetUserStat_FullMethodName           = "/user.UserCenter/GetUserStat"
 )
@@ -35,6 +36,7 @@ type UserCenterClient interface {
 	Register(ctx context.Context, in *RegisterReq, opts ...grpc.CallOption) (*RegisterResp, error)
 	Login(ctx context.Context, in *LoginReq, opts ...grpc.CallOption) (*LoginResp, error)
 	GetUserInfo(ctx context.Context, in *GetUserInfoReq, opts ...grpc.CallOption) (*GetUserInfoResp, error)
+	UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error)
 	UpdateUserProfileInfo(ctx context.Context, in *UpdateUserProfileInfoReq, opts ...grpc.CallOption) (*UpdateUserProfileInfoResp, error)
 	GetUserStat(ctx context.Context, in *GetUserStatReq, opts ...grpc.CallOption) (*GetUserStatResp, error)
 }
@@ -77,6 +79,16 @@ func (c *userCenterClient) GetUserInfo(ctx context.Context, in *GetUserInfoReq, 
 	return out, nil
 }
 
+func (c *userCenterClient) UpdateUserStatus(ctx context.Context, in *UpdateUserStatusReq, opts ...grpc.CallOption) (*UpdateUserStatusResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateUserStatusResp)
+	err := c.cc.Invoke(ctx, UserCenter_UpdateUserStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userCenterClient) UpdateUserProfileInfo(ctx context.Context, in *UpdateUserProfileInfoReq, opts ...grpc.CallOption) (*UpdateUserProfileInfoResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateUserProfileInfoResp)
@@ -106,6 +118,7 @@ type UserCenterServer interface {
 	Register(context.Context, *RegisterReq) (*RegisterResp, error)
 	Login(context.Context, *LoginReq) (*LoginResp, error)
 	GetUserInfo(context.Context, *GetUserInfoReq) (*GetUserInfoResp, error)
+	UpdateUserStatus(context.Context, *UpdateUserStatusReq) (*UpdateUserStatusResp, error)
 	UpdateUserProfileInfo(context.Context, *UpdateUserProfileInfoReq) (*UpdateUserProfileInfoResp, error)
 	GetUserStat(context.Context, *GetUserStatReq) (*GetUserStatResp, error)
 	mustEmbedUnimplementedUserCenterServer()
@@ -126,6 +139,9 @@ func (UnimplementedUserCenterServer) Login(context.Context, *LoginReq) (*LoginRe
 }
 func (UnimplementedUserCenterServer) GetUserInfo(context.Context, *GetUserInfoReq) (*GetUserInfoResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
+}
+func (UnimplementedUserCenterServer) UpdateUserStatus(context.Context, *UpdateUserStatusReq) (*UpdateUserStatusResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserStatus not implemented")
 }
 func (UnimplementedUserCenterServer) UpdateUserProfileInfo(context.Context, *UpdateUserProfileInfoReq) (*UpdateUserProfileInfoResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserProfileInfo not implemented")
@@ -208,6 +224,24 @@ func _UserCenter_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserCenter_UpdateUserStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateUserStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserCenterServer).UpdateUserStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserCenter_UpdateUserStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserCenterServer).UpdateUserStatus(ctx, req.(*UpdateUserStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserCenter_UpdateUserProfileInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateUserProfileInfoReq)
 	if err := dec(in); err != nil {
@@ -262,6 +296,10 @@ var UserCenter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserInfo",
 			Handler:    _UserCenter_GetUserInfo_Handler,
+		},
+		{
+			MethodName: "UpdateUserStatus",
+			Handler:    _UserCenter_UpdateUserStatus_Handler,
 		},
 		{
 			MethodName: "UpdateUserProfileInfo",
