@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package user;
+option go_package = "/pb";
+
+// 用户基本信息
+message UserInfo {
+  uint64 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string phone = 4;
+  string email = 5;
+  string avatar = 6;
+  int32 status = 7;
+  bool isAdmin = 8;
+  int64 createdAt = 9;
+}
+
+// 用户扩展信息
+message UserProfile {
+  uint64 userId = 1;
+  int64 gender = 2;
+  string birthday = 3;      // 格式：YYYY-MM-DD
+  string signature = 4;
+  string location = 5;
+  string website = 6;
+  string company = 7;
+  string jobTitle = 8;
+  string education = 9;
+}
+
+// 用户统计信息
+message UserStat {
+  uint64 userId = 1;
+  uint64 postCount = 2;
+  uint64 commentCount = 3;
+  uint64 followerCount = 4;
+  uint64 followingCount = 5;
+  uint64 likeCount = 6;
+  uint64 collectionCount = 7;
+  int64 lastActiveTime = 8;
+}
+
+// 注册请求
+message RegisterReq {
+  string username = 1;
+  string password = 2;
+}
+
+// 注册响应
+message RegisterResp {
+  uint64 userId = 1;
+}
+
+// 登录请求
+message LoginReq {
+  string username = 1;
+  string password = 2;
+}
+
+// 登录响应
+message LoginResp {
+  uint64 userId = 1;
+}
+
+// 获取用户信息请求
+message GetUserInfoReq {
+  uint64 userId = 1;
+}
+
+// 获取用户信息响应
+message GetUserInfoResp {
+  UserInfo userInfo = 1;
+  UserProfile profile = 2;
+  UserStat stat = 3;
+}
+
+// 更新用户拓展信息请求
+message UpdateUserProfileInfoReq {
+  UserProfile userProfile = 1;
+}
+
+// 更新用户拓展信息响应
+message UpdateUserProfileInfoResp {
+  UserProfile userProfile = 1;
+}
+
+// 获取用户统计请求
+message GetUserStatReq {
+  uint64 userId = 1;
+}
+
+// 获取用户统计响应
+message GetUserStatResp {
+  UserStat stat = 1;
+}
+
+// gRPC服务定义
+service UserCenter {
+  rpc Register(RegisterReq) returns (RegisterResp);
+  rpc Login(LoginReq) returns (LoginResp);
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp);
+  rpc UpdateUserProfileInfo(UpdateUserProfileInfoReq) returns (UpdateUserProfileInfoResp);
+  rpc GetUserStat(GetUserStatReq) returns (GetUserStatResp);
+}
+
+// goctl rpc protoc user.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./
