@@ -1,0 +1,17 @@
+Name: content-api
+Host: 0.0.0.0
+Port: 8890
+
+Jwt:
+  AccessSecret: "your-256-bit-secret"
+  AccessExpire: 86400
+  RefreshSecret: "another-random-secret"
+  RefreshExpire: 604800
+
+# contentRpc服务调用
+ContentRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: content.rpc
+  Timeout: 5000

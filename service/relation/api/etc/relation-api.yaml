@@ -1,0 +1,17 @@
+Name: relation-api
+Host: 0.0.0.0
+Port: 8889
+
+Jwt:
+  AccessSecret: "your-256-bit-secret"
+  AccessExpire: 86400
+  RefreshSecret: "another-random-secret"
+  RefreshExpire: 604800
+
+# relationRpc服务调用
+RelationRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: relation.rpc
+  Timeout: 5000

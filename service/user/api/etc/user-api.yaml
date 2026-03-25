@@ -1,0 +1,26 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 8888
+MaxBytes: 10485760  # 10MB，单位字节
+
+Jwt:
+  AccessSecret: "your-256-bit-secret"
+  AccessExpire: 86400        # Access Token 有效期：24 小时
+  RefreshSecret: "another-random-secret"
+  RefreshExpire: 604800        # Refresh Token 有效期：7 天
+
+# userRpc服务调用
+UserRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+  Timeout: 5000          # 5 秒
+
+# MinIO 配置
+MinIO:
+  Endpoint: "localhost:9000"
+  AccessKey: "admin"
+  SecretKey: "admin123"
+  UseSSL: false
+  Bucket: "my-bucket"

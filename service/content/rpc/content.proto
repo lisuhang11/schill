@@ -1,0 +1,138 @@
+syntax = "proto3";
+
+package content;
+option go_package = "/pb";
+
+// 动态内容项
+message PostContentItem {
+  int32 type = 1;
+  string content = 2;
+  int32 sort = 3;
+}
+
+// 帖子基本信息
+message PostInfo {
+  uint64 id = 1;
+  uint64 userId = 2;
+  string title = 3;
+  string cover = 4;
+  uint64 commentCount = 5;
+  uint64 collectionCount = 6;
+  uint64 upvoteCount = 7;
+  uint64 shareCount = 8;
+  int32 visibility = 9;
+  int32 isTop = 10;
+  int32 isEssence = 11;
+  int32 isLock = 12;
+  int64 latestRepliedAt = 13;
+  string tags = 14;
+  int64 createdAt = 15;
+  int64 updatedAt = 16;
+}
+
+// 帖子话题信息
+message PostTopic {
+  uint64 postId = 1;
+  uint64 topicId = 2;
+  string topicName = 3;
+}
+
+// 创建帖子请求
+message CreatePostReq {
+  uint64 userId = 1;
+  string title = 2;
+  string cover = 3;
+  int32 visibility = 4;
+  repeated PostContentItem contents = 5;
+  repeated string topics = 6;
+  string tags = 7;
+}
+
+// 创建帖子响应
+message CreatePostResp {
+  uint64 postId = 1;
+}
+
+// 更新帖子请求
+message UpdatePostReq {
+  uint64 postId = 1;
+  uint64 userId = 2;
+  string title = 3;
+  string cover = 4;
+  int32 visibility = 5;
+  repeated PostContentItem contents = 6;
+  repeated string topics = 7;
+  string tags = 8;
+}
+
+// 更新帖子响应
+message UpdatePostResp {
+  bool success = 1;
+}
+
+// 删除帖子请求
+message DeletePostReq {
+  uint64 postId = 1;
+  uint64 userId = 2;
+}
+
+// 删除帖子响应
+message DeletePostResp {
+  bool success = 1;
+}
+
+// 获取帖子详情请求
+message GetPostDetailReq {
+  uint64 postId = 1;
+}
+
+// 获取帖子详情响应
+message GetPostDetailResp {
+  PostInfo post = 1;
+  repeated PostContentItem contents = 2;
+  repeated PostTopic topics = 3;
+}
+
+// 获取帖子列表请求
+message GetPostListReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+// 获取帖子列表响应
+message GetPostListResp {
+  int64 total = 1;
+  repeated PostInfo list = 2;
+}
+
+// 批量获取帖子请求
+message BatchGetPostReq {
+  repeated uint64 postIds = 1;
+}
+
+// 批量获取帖子响应
+message BatchGetPostResp {
+  repeated PostInfo posts = 1;
+}
+
+// 增加浏览量请求
+message IncViewCountReq {
+  uint64 postId = 1;
+}
+
+// 增加浏览量响应
+message IncViewCountResp {
+  bool success = 1;
+}
+
+// gRPC服务定义
+service ContentCenter {
+  rpc CreatePost(CreatePostReq) returns (CreatePostResp);
+  rpc UpdatePost(UpdatePostReq) returns (UpdatePostResp);
+  rpc DeletePost(DeletePostReq) returns (DeletePostResp);
+  rpc GetPostDetail(GetPostDetailReq) returns (GetPostDetailResp);
+  rpc GetPostList(GetPostListReq) returns (GetPostListResp);
+  rpc BatchGetPost(BatchGetPostReq) returns (BatchGetPostResp);
+  rpc IncViewCount(IncViewCountReq) returns (IncViewCountResp);
+}

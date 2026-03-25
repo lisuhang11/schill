@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package relation;
+option go_package = "/pb";
+
+// 关注关系信息
+message FollowInfo {
+  uint64 userId = 1;
+  string username = 2;
+  string avatar = 3;
+  int64 followTime = 4;
+}
+
+// 关注请求
+message FollowReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+// 关注响应
+message FollowResp {
+  bool success = 1;
+}
+
+// 取消关注请求
+message UnfollowReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+// 取消关注响应
+message UnfollowResp {
+  bool success = 1;
+}
+
+// 检查关注状态请求
+message CheckFollowStatusReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+// 检查关注状态响应
+message CheckFollowStatusResp {
+  bool isFollow = 1;
+}
+
+// 获取关注列表请求
+message GetFollowingListReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+// 获取关注列表响应
+message GetFollowingListResp {
+  int64 total = 1;
+  repeated FollowInfo list = 2;
+}
+
+// 获取粉丝列表请求
+message GetFollowerListReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+// 获取粉丝列表响应
+message GetFollowerListResp {
+  int64 total = 1;
+  repeated FollowInfo list = 2;
+}
+
+// 批量检查关注状态请求
+message BatchCheckFollowStatusReq {
+  uint64 userId = 1;
+  repeated uint64 targetUserIds = 2;
+}
+
+// 关注状态项
+message FollowStatusItem {
+  uint64 userId = 1;
+  bool isFollow = 2;
+}
+
+// 批量检查关注状态响应
+message BatchCheckFollowStatusResp {
+  repeated FollowStatusItem status = 1;
+}
+
+// gRPC服务定义
+service RelationCenter {
+  rpc Follow(FollowReq) returns (FollowResp);
+  rpc Unfollow(UnfollowReq) returns (UnfollowResp);
+  rpc CheckFollowStatus(CheckFollowStatusReq) returns (CheckFollowStatusResp);
+  rpc GetFollowingList(GetFollowingListReq) returns (GetFollowingListResp);
+  rpc GetFollowerList(GetFollowerListReq) returns (GetFollowerListResp);
+  rpc BatchCheckFollowStatus(BatchCheckFollowStatusReq) returns (BatchCheckFollowStatusResp);
+}
+
+// goctl rpc protoc relation.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

@@ -1,0 +1,125 @@
+syntax = "v1"
+
+info (
+	title:  "关系服务API"
+	desc:   "提供用户关注、粉丝等关系管理接口"
+	author: "系统"
+)
+
+// 通用分页请求
+type PageReq {
+	Page     int64 `form:"page,default=1" validate:"min=1"`
+	PageSize int64 `form:"pageSize,default=20" validate:"min=1,max=100"`
+}
+
+// 关注用户请求
+type FollowReq {
+	TargetUserId uint64 `json:"targetUserId" validate:"required"`
+}
+
+// 关注用户响应
+type FollowResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 取消关注请求（路径参数）
+type UnfollowReq {
+	TargetUserId uint64 `path:"targetUserId" validate:"required"`
+}
+
+// 取消关注响应
+type UnfollowResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 关注状态响应
+type FollowStatusResp {
+	Code     int    `json:"code"`
+	Msg      string `json:"msg"`
+	IsFollow bool   `json:"isFollow"`
+}
+
+// 关注关系信息
+type FollowInfo {
+	UserId     uint64 `json:"userId"`
+	Username   string `json:"username"`
+	Avatar     string `json:"avatar"`
+	FollowTime int64  `json:"followTime"` // 关注时间（时间戳）
+}
+
+// 关注列表响应
+type FollowListResp {
+	Code  int          `json:"code"`
+	Msg   string       `json:"msg"`
+	Total int64        `json:"total"`
+	List  []FollowInfo `json:"list"`
+}
+
+// 获取关注列表请求
+type GetFollowingListReq {
+	UserId uint64 `form:"userId,optional"`
+	PageReq
+}
+
+// 获取粉丝列表请求
+type GetFollowerListReq {
+	UserId uint64 `form:"userId,optional"`
+	PageReq
+}
+
+// 检查关注状态请求
+type CheckFollowStatusReq {
+	TargetUserId uint64 `form:"targetUserId" validate:"required"`
+}
+
+// 批量检查关注状态请求
+type BatchCheckFollowStatusReq {
+	TargetUserIds []uint64 `json:"targetUserIds" validate:"required,min=1,max=100"`
+}
+
+// 批量关注状态响应项
+type FollowStatusItem {
+	UserId   uint64 `json:"userId"`
+	IsFollow bool   `json:"isFollow"`
+}
+
+// 批量关注状态响应
+type BatchCheckFollowStatusResp {
+	Code   int                `json:"code"`
+	Msg    string             `json:"msg"`
+	Status []FollowStatusItem `json:"status"`
+}
+
+// 需认证的接口（JWT）
+@server (
+	jwt: Jwt
+)
+service relation-api {
+	// 关注用户
+	@handler Follow
+	post /relation/follow (FollowReq) returns (FollowResp)
+
+	// 取消关注
+	@handler Unfollow
+	delete /relation/follow/:targetUserId (UnfollowReq) returns (UnfollowResp)
+
+	// 获取用户关注列表（可传userId查他人）
+	@handler GetFollowingList
+	get /relation/following (GetFollowingListReq) returns (FollowListResp)
+
+	// 获取用户粉丝列表（可传userId查他人）
+	@handler GetFollowerList
+	get /relation/follower (GetFollowerListReq) returns (FollowListResp)
+
+	// 检查当前用户是否关注了目标用户
+	@handler CheckFollowStatus
+	get /relation/follow/status (CheckFollowStatusReq) returns (FollowStatusResp)
+
+	// 批量检查当前用户是否关注了多个目标用户
+	@handler BatchCheckFollowStatus
+	post /relation/follow/status/batch (BatchCheckFollowStatusReq) returns (BatchCheckFollowStatusResp)
+}
+
+// goctl api go -api relation.api -dir . style=gozero

@@ -1,0 +1,131 @@
+syntax = "v1"
+
+info (
+	title:  "评论服务API"
+	desc:   "提供抖音风格的评论、回复、点赞等接口"
+	author: "系统"
+)
+
+// ==================== 评论相关类型定义 ====================
+
+// 评论信息
+type CommentInfo {
+	Id              uint64 `json:"id"`
+	GroupId         uint64 `json:"groupId"`
+	UserId          uint64 `json:"userId"`
+	ParentId        uint64 `json:"parentId"`
+	ReplyToUserId   uint64 `json:"replyToUserId"`
+	Content         string `json:"content"`
+	Level           int32  `json:"level"`
+	ReplyCount      int32  `json:"replyCount"`
+	LikeCount       int32  `json:"likeCount"`
+	CreatedAt       int64  `json:"createdAt"`
+	Username        string `json:"username"`
+	Avatar          string `json:"avatar"`
+	ReplyToUsername string `json:"replyToUsername"`
+	IsLiked         bool   `json:"isLiked"`
+}
+
+// 评论项（抖音风格：根评论 + 前3条回复）
+type CommentItem {
+	Root          CommentInfo   `json:"root"`
+	Replies       []CommentInfo `json:"replies"`
+	HasMoreReplies bool          `json:"hasMoreReplies"`
+}
+
+// 评论列表响应
+type CommentListResp {
+	Code  int           `json:"code"`
+	Msg   string        `json:"msg"`
+	Total int64         `json:"total"`
+	List  []CommentItem `json:"list"`
+}
+
+// 获取评论列表请求（游标分页）
+type GetCommentListReq {
+	GroupId    uint64 `form:"groupId" validate:"required"`
+	Cursor     int64  `form:"cursor,default=0"`
+	PageSize   int64  `form:"pageSize,default=20" validate:"min=1,max=50"`
+	SortType   string `form:"sortType,default=time"` // hot/time
+}
+
+// 获取回复列表请求
+type GetReplyListReq {
+	CommentId uint64 `form:"commentId" validate:"required"`
+	Cursor    int64  `form:"cursor,default=0"`
+	PageSize  int64  `form:"pageSize,default=20" validate:"min=1,max=50"`
+}
+
+// 创建评论请求
+type CreateCommentReq {
+	GroupId       uint64 `json:"groupId" validate:"required"`
+	ParentId      uint64 `json:"parentId,default=0"`
+	ReplyToUserId uint64 `json:"replyToUserId,default=0"`
+	Content       string `json:"content" validate:"required,max=2000"`
+}
+
+// 创建评论响应
+type CreateCommentResp {
+	Code    int         `json:"code"`
+	Msg     string      `json:"msg"`
+	Comment CommentInfo `json:"comment"`
+}
+
+// 删除评论请求
+type DeleteCommentReq {
+	CommentId uint64 `path:"commentId" validate:"required"`
+}
+
+// 删除评论响应
+type DeleteCommentResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 评论投票请求
+type VoteCommentReq {
+	CommentId uint64 `path:"commentId" validate:"required"`
+	VoteType  int32  `json:"voteType" validate:"oneof=0 1 2"` // 0取消,1点赞,2点踩
+}
+
+// 评论投票响应
+type VoteCommentResp {
+	Code         int    `json:"code"`
+	Msg          string `json:"msg"`
+	LikeCount    int32  `json:"likeCount"`
+	DislikeCount int32  `json:"dislikeCount"`
+	IsLiked      bool   `json:"isLiked"`
+	IsDisliked   bool   `json:"isDisliked"`
+}
+
+// ==================== 路由定义 ====================
+
+// 需认证的接口（JWT）
+@server (
+	jwt: Jwt
+)
+service comment-api {
+	// 创建评论
+	@handler CreateComment
+	post /comment (CreateCommentReq) returns (CreateCommentResp)
+
+	// 删除评论
+	@handler DeleteComment
+	delete /comment/:commentId (DeleteCommentReq) returns (DeleteCommentResp)
+
+	// 评论点赞/点踩
+	@handler VoteComment
+	post /comment/:commentId/vote (VoteCommentReq) returns (VoteCommentResp)
+}
+
+service comment-api {
+	// 获取评论列表（抖音风格，两层展开）
+	@handler GetCommentList
+	get /comment/list (GetCommentListReq) returns (CommentListResp)
+
+	// 获取回复列表（展开更多回复）
+	@handler GetReplyList
+	get /comment/replies (GetReplyListReq) returns (CommentListResp)
+}
+
+// goctl api go -api comment.api -dir . style=gozero

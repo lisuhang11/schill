@@ -1,0 +1,179 @@
+syntax = "v1"
+
+info (
+	title:  "内容服务API"
+	desc:   "提供帖子发布、编辑、删除、查询等接口"
+	author: "系统"
+)
+
+// 通用分页请求
+type PageReq {
+	Page     int64 `form:"page,default=1" validate:"min=1"`
+	PageSize int64 `form:"pageSize,default=20" validate:"min=1,max=100"`
+}
+
+// 动态内容项
+type PostContentItem {
+	Type    int32  `json:"type"`
+	Content string `json:"content"`
+	Sort    int32  `json:"sort"`
+}
+
+// 创建动态请求
+type CreatePostReq {
+	Title     string           `json:"title" validate:"required"`
+	Cover     string           `json:"cover"`
+	Visibility int32          `json:"visibility"`
+	Contents  []PostContentItem `json:"contents" validate:"required"`
+	Topics    []string         `json:"topics"`
+	Tags      string           `json:"tags"`
+}
+
+// 创建动态响应
+type CreatePostResp {
+	Code   int    `json:"code"`
+	Msg    string `json:"msg"`
+	PostId uint64 `json:"postId"`
+}
+
+// 更新动态请求
+type UpdatePostReq {
+	PostId     uint64           `json:"postId" validate:"required"`
+	Title      string           `json:"title" validate:"required"`
+	Cover      string           `json:"cover"`
+	Visibility int32          `json:"visibility"`
+	Contents   []PostContentItem `json:"contents" validate:"required"`
+	Topics     []string         `json:"topics"`
+	Tags       string           `json:"tags"`
+}
+
+// 更新动态响应
+type UpdatePostResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 删除动态请求
+type DeletePostReq {
+	PostId uint64 `path:"postId" validate:"required"`
+}
+
+// 删除动态响应
+type DeletePostResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 动态话题信息
+type PostTopic {
+	PostId    uint64 `json:"postId"`
+	TopicId   uint64 `json:"topicId"`
+	TopicName string `json:"topicName"`
+}
+
+// 动态信息
+type PostInfo {
+	Id              uint64 `json:"id"`
+	UserId          uint64 `json:"userId"`
+	Title           string `json:"title"`
+	Cover           string `json:"cover"`
+	CommentCount    uint64 `json:"commentCount"`
+	CollectionCount uint64 `json:"collectionCount"`
+	UpvoteCount     uint64 `json:"upvoteCount"`
+	ShareCount      uint64 `json:"shareCount"`
+	Visibility      int32  `json:"visibility"`
+	IsTop           int32  `json:"isTop"`
+	IsEssence       int32  `json:"isEssence"`
+	IsLock          int32  `json:"isLock"`
+	LatestRepliedAt int64  `json:"latestRepliedAt"`
+	Tags            string `json:"tags"`
+	CreatedAt       int64  `json:"createdAt"`
+	UpdatedAt       int64  `json:"updatedAt"`
+}
+
+// 动态详情响应
+type PostDetailResp {
+	Code     int               `json:"code"`
+	Msg      string            `json:"msg"`
+	Post     PostInfo          `json:"post"`
+	Contents []PostContentItem `json:"contents"`
+	Topics   []PostTopic       `json:"topics"`
+}
+
+// 动态列表响应
+type PostListResp {
+	Code  int        `json:"code"`
+	Msg   string     `json:"msg"`
+	Total int64      `json:"total"`
+	List  []PostInfo `json:"list"`
+}
+
+// 获取动态列表请求
+type GetPostListReq {
+	UserId uint64 `form:"userId,optional"`
+	PageReq
+}
+
+// 获取动态详情请求
+type GetPostDetailReq {
+	PostId uint64 `path:"postId" validate:"required"`
+}
+
+// 批量获取动态请求
+type BatchGetPostReq {
+	PostIds []uint64 `json:"postIds" validate:"required,min=1,max=100"`
+}
+
+// 批量获取动态响应
+type BatchGetPostResp {
+	Code  int        `json:"code"`
+	Msg   string     `json:"msg"`
+	Posts []PostInfo `json:"posts"`
+}
+
+// 增加浏览量请求
+type IncViewCountReq {
+	PostId uint64 `path:"postId" validate:"required"`
+}
+
+// 增加浏览量响应
+type IncViewCountResp {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+}
+
+// 需认证的接口（JWT）
+@server (
+	jwt: Jwt
+)
+service content-api {
+	// 创建动态
+	@handler CreatePost
+	post /content/post (CreatePostReq) returns (CreatePostResp)
+
+	// 更新动态
+	@handler UpdatePost
+	put /content/post (UpdatePostReq) returns (UpdatePostResp)
+
+	// 删除动态
+	@handler DeletePost
+	delete /content/post/:postId (DeletePostReq) returns (DeletePostResp)
+}
+
+service content-api {
+	// 获取动态详情
+	@handler GetPostDetail
+	get /content/post/:postId (GetPostDetailReq) returns (PostDetailResp)
+
+	// 获取动态列表
+	@handler GetPostList
+	get /content/post/list (GetPostListReq) returns (PostListResp)
+
+	// 批量获取动态
+	@handler BatchGetPost
+	post /content/post/batch (BatchGetPostReq) returns (BatchGetPostResp)
+
+	// 增加浏览量
+	@handler IncViewCount
+	post /content/post/:postId/view (IncViewCountReq) returns (IncViewCountResp)
+}

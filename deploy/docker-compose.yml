@@ -1,0 +1,61 @@
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER}
+
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.0
+    environment:
+      - TZ=${TZ}
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379   # 新增：监听所有网络接口
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+    ports:
+      - "${ETCD_PORT}:2379"
+    networks:
+      - backend
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: 'schill'
+    privileged: true
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - backend
+    restart: always
+
+
+  redis:
+    image: redis:7.0
+    environment:
+      - TZ=${TZ}
+    privileged: true
+    volumes:
+      - ${DATA_PATH_HOST}/redis:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+    networks:
+      - backend
+    restart: always
+
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - TZ=${TZ}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      # - MINIO_ETCD_ENDPOINTS=http://etcd:2379   # 如需与 etcd 集成，取消注释
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - ${DATA_PATH_HOST}/minio:/data
+    networks:
+      - backend
+    restart: always
