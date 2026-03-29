@@ -5,14 +5,18 @@ package svc
 
 import (
 	"SChill/service/comment/api/internal/config"
+	"SChill/service/comment/rpc/commentcenter"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
-	Config config.Config
+	Config     config.Config
+	CommentRpc commentcenter.CommentCenter
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
 	return &ServiceContext{
-		Config: c,
+		Config:     c,
+		CommentRpc: commentcenter.NewCommentCenter(zrpc.MustNewClient(c.CommentRpc)),
 	}
 }

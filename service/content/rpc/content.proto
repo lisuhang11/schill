@@ -136,3 +136,6 @@ service ContentCenter {
   rpc BatchGetPost(BatchGetPostReq) returns (BatchGetPostResp);
   rpc IncViewCount(IncViewCountReq) returns (IncViewCountResp);
 }
+
+
+// goctl rpc protoc content.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

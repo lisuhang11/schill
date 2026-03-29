@@ -45,7 +45,7 @@ const handleSubmit = async () => {
   loading.value = true
   try {
     await createComment({
-      groupId: props.groupId,
+      postId: props.postId,
       parentId: props.parentId || 0,
       replyToUserId: props.replyToUserId || 0,
       content: content.value

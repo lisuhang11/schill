@@ -1,102 +1,116 @@
-# SChill Service Startup Script (Windows PowerShell)
-# Start all RPC and API services in order
-
-# Set console encoding to UTF-8
-$OutputEncoding = [System.Text.Encoding]::UTF8
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$env:LANG = "zh_CN.UTF-8"
-
-# Change code page to UTF-8
-chcp 65001 | Out-Null
+# SoChill Microservices Startup Script - Windows PowerShell
+# Start all API and RPC services
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  SChill Service Startup Script" -ForegroundColor Cyan
+Write-Host "  SoChill Microservices Startup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Get project root directory reliably
-$scriptPath = $MyInvocation.MyCommand.Path
-$scriptsDir = Split-Path -Parent $scriptPath
-$PROJECT_ROOT = Split-Path -Parent $scriptsDir
-Write-Host "Project Root: $PROJECT_ROOT" -ForegroundColor Yellow
+# Get script directory
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$projectRoot = Split-Path -Parent $scriptPath
+
+Write-Host "Project Root: $projectRoot" -ForegroundColor Green
 Write-Host ""
 
 # Define service list
-$SERVICES = @(
-    @{ Name = "user-rpc"; Path = "service/user/rpc"; Cmd = "go run user.go" },
-    @{ Name = "content-rpc"; Path = "service/content/rpc"; Cmd = "go run content.go" },
-    @{ Name = "relation-rpc"; Path = "service/relation/rpc"; Cmd = "go run relation.go" },
-    @{ Name = "user-api"; Path = "service/user/api"; Cmd = "go run user.go" },
-    @{ Name = "content-api"; Path = "service/content/api"; Cmd = "go run content.go" },
-    @{ Name = "relation-api"; Path = "service/relation/api"; Cmd = "go run relation.go" },
-    @{ Name = "comment-api"; Path = "service/comment/api"; Cmd = "go run comment.go" }
+$services = @(
+    @{ Name = "User RPC"; Path = "service/user/rpc"; File = "user.go" },
+    @{ Name = "User API"; Path = "service/user/api"; File = "user.go" },
+    @{ Name = "Relation RPC"; Path = "service/relation/rpc"; File = "relation.go" },
+    @{ Name = "Relation API"; Path = "service/relation/api"; File = "relation.go" },
+    @{ Name = "Content RPC"; Path = "service/content/rpc"; File = "content.go" },
+    @{ Name = "Content API"; Path = "service/content/api"; File = "content.go" },
+    @{ Name = "Comment RPC"; Path = "service/comment/rpc"; File = "comment.go" },
+    @{ Name = "Comment API"; Path = "service/comment/api"; File = "comment.go" }
 )
 
 # Store all processes
 $processes = @()
 
-function Start-Service {
+# Start service function
+function Start-Service-Internal {
     param(
-        [hashtable]$service
+        [string]$name,
+        [string]$path,
+        [string]$file
     )
     
-    $servicePath = Join-Path $PROJECT_ROOT $service.Path
+    $fullPath = Join-Path $projectRoot $path
+    $fullFilePath = Join-Path $fullPath $file
     
-    if (-not (Test-Path $servicePath)) {
-        Write-Host "[ERROR] Service directory not found: $servicePath" -ForegroundColor Red
-        return $false
+    if (-not (Test-Path $fullFilePath)) {
+        Write-Host "[ERROR] File not found: $fullFilePath" -ForegroundColor Red
+        return $null
     }
     
-    Write-Host "[Starting] $($service.Name)..." -ForegroundColor Green
+    Write-Host "[START] $name..." -ForegroundColor Yellow
     
     try {
-        $process = Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit", "-Command", "cd '$servicePath'; $($service.Cmd)" -PassThru -WindowStyle Normal
-        $processes += $process
-        Write-Host "[SUCCESS] $($service.Name) started (PID: $($process.Id))" -ForegroundColor Green
-        Start-Sleep -Seconds 2
-        return $true
-    } catch {
-        Write-Host "[FAILED] Cannot start $($service.Name): $_" -ForegroundColor Red
-        return $false
+        $process = Start-Process -FilePath "go" -ArgumentList "run", $file -WorkingDirectory $fullPath -PassThru -WindowStyle Normal
+        Write-Host "[OK] $name started (PID: $($process.Id))" -ForegroundColor Green
+        return $process
+    }
+    catch {
+        Write-Host "[FAIL] $name failed to start: $_" -ForegroundColor Red
+        return $null
     }
 }
 
+# Stop all services function
+function Stop-AllServices-Internal {
+    Write-Host ""
+    Write-Host "Stopping all services..." -ForegroundColor Yellow
+    
+    foreach ($process in $processes) {
+        if ($process -and -not $process.HasExited) {
+            try {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                Write-Host "[STOP] Service PID $($process.Id) stopped" -ForegroundColor Gray
+            }
+            catch {
+                Write-Host "[WARN] Failed to stop service PID $($process.Id)" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
+# Register Ctrl+C event handler
+Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action {
+    Stop-AllServices-Internal
+} | Out-Null
+
+# Start all services
 Write-Host "Starting services..." -ForegroundColor Cyan
 Write-Host ""
 
-$successCount = 0
-foreach ($service in $SERVICES) {
-    if (Start-Service $service) {
-        $successCount++
+foreach ($service in $services) {
+    $process = Start-Service-Internal -name $service.Name -path $service.Path -file $service.File
+    if ($process) {
+        $processes += $process
     }
-    Write-Host ""
+    Start-Sleep -Milliseconds 500
 }
 
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "Startup Complete!" -ForegroundColor Cyan
-Write-Host "Successfully started: $successCount / $($SERVICES.Count) services" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "Press Ctrl+C to stop all services" -ForegroundColor Gray
 Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  All services started!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Service List:" -ForegroundColor White
+foreach ($service in $services) {
+    Write-Host "  - $($service.Name)" -ForegroundColor Gray
+}
+Write-Host ""
+Write-Host "Press Ctrl+C to stop all services" -ForegroundColor Yellow
 Write-Host ""
 
-# Wait for user interrupt
+# Keep script running
 try {
     while ($true) {
         Start-Sleep -Seconds 1
     }
-} finally {
-    Write-Host ""
-    Write-Host "Stopping all services..." -ForegroundColor Yellow
-    foreach ($process in $processes) {
-        if (-not $process.HasExited) {
-            try {
-                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
-                Write-Host "Stopped process PID: $($process.Id)" -ForegroundColor Gray
-            } catch {
-                Write-Host "Failed to stop process PID: $($process.Id)" -ForegroundColor Red
-            }
-        }
-    }
-    Write-Host "All services stopped" -ForegroundColor Green
+}
+finally {
+    Stop-AllServices-Internal
 }

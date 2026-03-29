@@ -1,12 +1,13 @@
 import request from '@/utils/request'
-import type { PostInfo, PostDetail } from '@/types'
+import type { PostInfo, PostDetail, PostContentItem, PostTopic } from '@/types'
 
 export interface CreatePostReq {
   title: string
-  cover?: string
-  type: number
-  content: string
-  topics?: string[]
+  cover: string
+  visibility: number
+  contents: PostContentItem[]
+  topics: string[]
+  tags: string
 }
 
 export interface CreatePostResp {
@@ -16,10 +17,11 @@ export interface CreatePostResp {
 export interface UpdatePostReq {
   postId: number
   title: string
-  cover?: string
-  type: number
-  content: string
-  topics?: string[]
+  cover: string
+  visibility: number
+  contents: PostContentItem[]
+  topics: string[]
+  tags: string
 }
 
 export interface UpdatePostResp {}

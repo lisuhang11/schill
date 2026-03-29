@@ -20,7 +20,7 @@
         </div>
         <CommentInput 
           v-if="showReplyInput" 
-          :groupId="groupId"
+          :postId="postId"
           :parentId="commentItem.root.id"
           :replyToUserId="commentItem.root.userId"
           @commentCreated="onReplyCreated"
@@ -59,7 +59,7 @@ import CommentInput from './CommentInput.vue'
 
 interface Props {
   commentItem: CommentItemType
-  groupId: number
+  postId: number
 }
 
 const props = defineProps<Props>()

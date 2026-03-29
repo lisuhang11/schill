@@ -164,66 +164,66 @@ CREATE TABLE `post_topic` (
 
 -- 评论主表（comment）
 CREATE TABLE `comment` (
-                           `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '评论ID（分布式环境可用雪花ID）',
-                           `group_id` BIGINT UNSIGNED NOT NULL COMMENT '作品/视频ID（分片键）',
-                           `user_id` BIGINT UNSIGNED NOT NULL COMMENT '发表用户ID',
-                           `parent_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '父评论ID，0表示根评论',
-                           `reply_to_user_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '@回复的目标用户ID（冗余，避免关联查询）',
-                           `level` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '层级：1一级评论，2二级回复，3三级...',
-                           `status` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态：1正常，2隐藏，3删除（软删除）',
-                           `reply_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '直接回复数（冗余）',
-                           `like_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '点赞数（冗余）',
-                           `dislike_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '点踩数（冗余）',
-                           `ip` VARCHAR(45) NOT NULL DEFAULT '' COMMENT '发布IP',
-                           `ip_loc` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'IP所在地',
-                           `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间（毫秒精度）',
-                           `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
-                           `deleted_at` DATETIME(3) DEFAULT NULL COMMENT '软删除时间',
-                           PRIMARY KEY (`id`),
-                           KEY `idx_group_parent` (`group_id`, `parent_id`),
-                           KEY `idx_group_created` (`group_id`, `created_at`),
-                           KEY `idx_user_created` (`user_id`, `created_at`),
-                           KEY `idx_parent_created` (`parent_id`, `created_at`)
+        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '评论ID（分布式环境可用雪花ID）',
+        `post_id` BIGINT UNSIGNED NOT NULL COMMENT '动态ID',
+        `user_id` BIGINT UNSIGNED NOT NULL COMMENT '发表用户ID',
+        `parent_id` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '父评论ID，0表示根评论',
+        `reply_to_user_id` BIGINT UNSIGNED DEFAULT NULL COMMENT '@回复的目标用户ID（冗余，避免关联查询）',
+        `level` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '层级：1一级评论，2二级回复，3三级...',
+        `status` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '状态：1正常，2隐藏，3删除（软删除）',
+        `reply_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '直接回复数（冗余）',
+        `like_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '点赞数（冗余）',
+        `dislike_count` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '点踩数（冗余）',
+        `ip` VARCHAR(45) NOT NULL DEFAULT '' COMMENT '发布IP',
+        `ip_loc` VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'IP所在地',
+        `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '创建时间（毫秒精度）',
+        `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
+        `deleted_at` DATETIME(3) DEFAULT NULL COMMENT '软删除时间',
+        PRIMARY KEY (`id`),
+        KEY `idx_post_parent` (`post_id`, `parent_id`),
+        KEY `idx_post_created` (`post_id`, `created_at`),
+        KEY `idx_user_created` (`user_id`, `created_at`),
+        KEY `idx_parent_created` (`parent_id`, `created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='统一评论表'
 
 -- 评论内容表
 CREATE TABLE `comment_content` (
-                                   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                                   `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
-                                   `content` MEDIUMTEXT NOT NULL COMMENT '评论内容（支持富文本、Markdown）',
-                                   `content_type` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '内容类型：1纯文本，2Markdown，3HTML',
-                                   `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-                                   `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-                                   PRIMARY KEY (`id`),
-                                   UNIQUE KEY `uk_comment_id` (`comment_id`),
-                                   KEY `idx_created_at` (`created_at`)
+        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
+        `content` MEDIUMTEXT NOT NULL COMMENT '评论内容（支持富文本、Markdown）',
+        `content_type` TINYINT UNSIGNED NOT NULL DEFAULT 1 COMMENT '内容类型：1纯文本，2Markdown，3HTML',
+        `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_comment_id` (`comment_id`),
+        KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='评论内容表';
 
 
 -- 评论投票表
 CREATE TABLE `comment_vote` (
-                                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                                `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
-                                `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-                                `vote_type` TINYINT UNSIGNED NOT NULL COMMENT '1:点赞, 2:点踩',
-                                `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-                                `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-                                PRIMARY KEY (`id`),
-                                UNIQUE KEY `uk_comment_user` (`comment_id`, `user_id`),
-                                KEY `idx_user_comment` (`user_id`, `comment_id`)
+        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
+        `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+        `vote_type` TINYINT UNSIGNED NOT NULL COMMENT '1:点赞, 2:点踩',
+        `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `uk_comment_user` (`comment_id`, `user_id`),
+        KEY `idx_user_comment` (`user_id`, `comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='评论投票记录表';
 
 -- 评论统计表
 CREATE TABLE `comment_stat` (
-                                `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
-                                `reply_count` INT UNSIGNED NOT NULL DEFAULT 0,
-                                `like_count` INT UNSIGNED NOT NULL DEFAULT 0,
-                                `dislike_count` INT UNSIGNED NOT NULL DEFAULT 0,
-                                `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-                                PRIMARY KEY (`comment_id`)
+        `comment_id` BIGINT UNSIGNED NOT NULL COMMENT '评论ID',
+        `reply_count` INT UNSIGNED NOT NULL DEFAULT 0,
+        `like_count` INT UNSIGNED NOT NULL DEFAULT 0,
+        `dislike_count` INT UNSIGNED NOT NULL DEFAULT 0,
+        `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (`comment_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='评论统计数据表';
 

@@ -1,9 +1,4 @@
-export interface ApiResponse<T = any> {
-  code: number
-  msg: string
-  data?: T
-}
-
+// 用户相关类型
 export interface UserInfo {
   id: number
   username: string
@@ -39,18 +34,11 @@ export interface UserStatInfo {
   lastActiveTime: number
 }
 
-export interface PostInfo {
-  id: number
-  userId: number
-  title: string
-  cover: string
+// 内容相关类型
+export interface PostContentItem {
   type: number
-  status: number
-  viewCount: number
-  likeCount: number
-  commentCount: number
-  createdAt: number
-  updatedAt: number
+  content: string
+  sort: number
 }
 
 export interface PostTopic {
@@ -59,15 +47,35 @@ export interface PostTopic {
   topicName: string
 }
 
+export interface PostInfo {
+  id: number
+  userId: number
+  title: string
+  cover: string
+  commentCount: number
+  collectionCount: number
+  upvoteCount: number
+  shareCount: number
+  visibility: number
+  isTop: number
+  isEssence: number
+  isLock: number
+  latestRepliedAt: number
+  tags: string
+  createdAt: number
+  updatedAt: number
+}
+
 export interface PostDetail {
   post: PostInfo
-  content: string
+  contents: PostContentItem[]
   topics: PostTopic[]
 }
 
+// 评论相关类型
 export interface CommentInfo {
   id: number
-  groupId: number
+  postId: number
   userId: number
   parentId: number
   replyToUserId: number
@@ -88,9 +96,15 @@ export interface CommentItem {
   hasMoreReplies: boolean
 }
 
+// 关系相关类型
 export interface FollowInfo {
   userId: number
   username: string
   avatar: string
   followTime: number
+}
+
+export interface FollowStatusItem {
+  userId: number
+  isFollow: boolean
 }

@@ -5,7 +5,7 @@ package types
 
 type CommentInfo struct {
 	Id              uint64 `json:"id"`
-	GroupId         uint64 `json:"groupId"`
+	PostId          uint64 `json:"postId"`
 	UserId          uint64 `json:"userId"`
 	ParentId        uint64 `json:"parentId"`
 	ReplyToUserId   uint64 `json:"replyToUserId"`
@@ -34,7 +34,7 @@ type CommentListResp struct {
 }
 
 type CreateCommentReq struct {
-	GroupId       uint64 `json:"groupId" validate:"required"`
+	PostId        uint64 `json:"postId" validate:"required"`
 	ParentId      uint64 `json:"parentId,default=0"`
 	ReplyToUserId uint64 `json:"replyToUserId,default=0"`
 	Content       string `json:"content" validate:"required,max=2000"`
@@ -56,7 +56,7 @@ type DeleteCommentResp struct {
 }
 
 type GetCommentListReq struct {
-	GroupId  uint64 `form:"groupId" validate:"required"`
+	PostId   uint64 `form:"postId" validate:"required"`
 	Cursor   int64  `form:"cursor,default=0"`
 	PageSize int64  `form:"pageSize,default=20" validate:"min=1,max=50"`
 	SortType string `form:"sortType,default=time"` // hot/time

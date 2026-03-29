@@ -21,27 +21,93 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 帖子基本信息
-type PostInfo struct {
+// 动态内容项
+type PostContentItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                     // 帖子ID
-	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`             // 发布者用户ID
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`                // 帖子标题
-	Cover         string                 `protobuf:"bytes,4,opt,name=cover,proto3" json:"cover,omitempty"`                // 封面图URL
-	Type          int32                  `protobuf:"varint,5,opt,name=type,proto3" json:"type,omitempty"`                 // 帖子类型：1-图文，2-视频，3-链接等
-	Status        int32                  `protobuf:"varint,6,opt,name=status,proto3" json:"status,omitempty"`             // 状态：0-草稿，1-已发布，2-审核中，3-已删除等
-	ViewCount     int64                  `protobuf:"varint,7,opt,name=viewCount,proto3" json:"viewCount,omitempty"`       // 浏览量
-	LikeCount     int64                  `protobuf:"varint,8,opt,name=likeCount,proto3" json:"likeCount,omitempty"`       // 点赞数
-	CommentCount  int64                  `protobuf:"varint,9,opt,name=commentCount,proto3" json:"commentCount,omitempty"` // 评论数
-	CreatedAt     int64                  `protobuf:"varint,10,opt,name=createdAt,proto3" json:"createdAt,omitempty"`      // 创建时间（Unix时间戳，秒）
-	UpdatedAt     int64                  `protobuf:"varint,11,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`      // 更新时间（Unix时间戳，秒）
+	Type          int32                  `protobuf:"varint,1,opt,name=type,proto3" json:"type,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	Sort          int32                  `protobuf:"varint,3,opt,name=sort,proto3" json:"sort,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *PostContentItem) Reset() {
+	*x = PostContentItem{}
+	mi := &file_content_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PostContentItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostContentItem) ProtoMessage() {}
+
+func (x *PostContentItem) ProtoReflect() protoreflect.Message {
+	mi := &file_content_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostContentItem.ProtoReflect.Descriptor instead.
+func (*PostContentItem) Descriptor() ([]byte, []int) {
+	return file_content_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *PostContentItem) GetType() int32 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *PostContentItem) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *PostContentItem) GetSort() int32 {
+	if x != nil {
+		return x.Sort
+	}
+	return 0
+}
+
+// 帖子基本信息
+type PostInfo struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId          uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`
+	Title           string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Cover           string                 `protobuf:"bytes,4,opt,name=cover,proto3" json:"cover,omitempty"`
+	CommentCount    uint64                 `protobuf:"varint,5,opt,name=commentCount,proto3" json:"commentCount,omitempty"`
+	CollectionCount uint64                 `protobuf:"varint,6,opt,name=collectionCount,proto3" json:"collectionCount,omitempty"`
+	UpvoteCount     uint64                 `protobuf:"varint,7,opt,name=upvoteCount,proto3" json:"upvoteCount,omitempty"`
+	ShareCount      uint64                 `protobuf:"varint,8,opt,name=shareCount,proto3" json:"shareCount,omitempty"`
+	Visibility      int32                  `protobuf:"varint,9,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	IsTop           int32                  `protobuf:"varint,10,opt,name=isTop,proto3" json:"isTop,omitempty"`
+	IsEssence       int32                  `protobuf:"varint,11,opt,name=isEssence,proto3" json:"isEssence,omitempty"`
+	IsLock          int32                  `protobuf:"varint,12,opt,name=isLock,proto3" json:"isLock,omitempty"`
+	LatestRepliedAt int64                  `protobuf:"varint,13,opt,name=latestRepliedAt,proto3" json:"latestRepliedAt,omitempty"`
+	Tags            string                 `protobuf:"bytes,14,opt,name=tags,proto3" json:"tags,omitempty"`
+	CreatedAt       int64                  `protobuf:"varint,15,opt,name=createdAt,proto3" json:"createdAt,omitempty"`
+	UpdatedAt       int64                  `protobuf:"varint,16,opt,name=updatedAt,proto3" json:"updatedAt,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
 func (x *PostInfo) Reset() {
 	*x = PostInfo{}
-	mi := &file_content_proto_msgTypes[0]
+	mi := &file_content_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -53,7 +119,7 @@ func (x *PostInfo) String() string {
 func (*PostInfo) ProtoMessage() {}
 
 func (x *PostInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_content_proto_msgTypes[0]
+	mi := &file_content_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -66,7 +132,7 @@ func (x *PostInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostInfo.ProtoReflect.Descriptor instead.
 func (*PostInfo) Descriptor() ([]byte, []int) {
-	return file_content_proto_rawDescGZIP(), []int{0}
+	return file_content_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *PostInfo) GetId() uint64 {
@@ -97,39 +163,74 @@ func (x *PostInfo) GetCover() string {
 	return ""
 }
 
-func (x *PostInfo) GetType() int32 {
-	if x != nil {
-		return x.Type
-	}
-	return 0
-}
-
-func (x *PostInfo) GetStatus() int32 {
-	if x != nil {
-		return x.Status
-	}
-	return 0
-}
-
-func (x *PostInfo) GetViewCount() int64 {
-	if x != nil {
-		return x.ViewCount
-	}
-	return 0
-}
-
-func (x *PostInfo) GetLikeCount() int64 {
-	if x != nil {
-		return x.LikeCount
-	}
-	return 0
-}
-
-func (x *PostInfo) GetCommentCount() int64 {
+func (x *PostInfo) GetCommentCount() uint64 {
 	if x != nil {
 		return x.CommentCount
 	}
 	return 0
+}
+
+func (x *PostInfo) GetCollectionCount() uint64 {
+	if x != nil {
+		return x.CollectionCount
+	}
+	return 0
+}
+
+func (x *PostInfo) GetUpvoteCount() uint64 {
+	if x != nil {
+		return x.UpvoteCount
+	}
+	return 0
+}
+
+func (x *PostInfo) GetShareCount() uint64 {
+	if x != nil {
+		return x.ShareCount
+	}
+	return 0
+}
+
+func (x *PostInfo) GetVisibility() int32 {
+	if x != nil {
+		return x.Visibility
+	}
+	return 0
+}
+
+func (x *PostInfo) GetIsTop() int32 {
+	if x != nil {
+		return x.IsTop
+	}
+	return 0
+}
+
+func (x *PostInfo) GetIsEssence() int32 {
+	if x != nil {
+		return x.IsEssence
+	}
+	return 0
+}
+
+func (x *PostInfo) GetIsLock() int32 {
+	if x != nil {
+		return x.IsLock
+	}
+	return 0
+}
+
+func (x *PostInfo) GetLatestRepliedAt() int64 {
+	if x != nil {
+		return x.LatestRepliedAt
+	}
+	return 0
+}
+
+func (x *PostInfo) GetTags() string {
+	if x != nil {
+		return x.Tags
+	}
+	return ""
 }
 
 func (x *PostInfo) GetCreatedAt() int64 {
@@ -146,65 +247,12 @@ func (x *PostInfo) GetUpdatedAt() int64 {
 	return 0
 }
 
-// 帖子内容信息
-type PostContent struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`  // 所属帖子ID
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"` // 帖子正文内容（支持富文本/Markdown）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PostContent) Reset() {
-	*x = PostContent{}
-	mi := &file_content_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PostContent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PostContent) ProtoMessage() {}
-
-func (x *PostContent) ProtoReflect() protoreflect.Message {
-	mi := &file_content_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PostContent.ProtoReflect.Descriptor instead.
-func (*PostContent) Descriptor() ([]byte, []int) {
-	return file_content_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *PostContent) GetPostId() uint64 {
-	if x != nil {
-		return x.PostId
-	}
-	return 0
-}
-
-func (x *PostContent) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
 // 帖子话题信息
 type PostTopic struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`      // 帖子ID
-	TopicId       uint64                 `protobuf:"varint,2,opt,name=topicId,proto3" json:"topicId,omitempty"`    // 话题ID
-	TopicName     string                 `protobuf:"bytes,3,opt,name=topicName,proto3" json:"topicName,omitempty"` // 话题名称（冗余字段，便于展示）
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
+	TopicId       uint64                 `protobuf:"varint,2,opt,name=topicId,proto3" json:"topicId,omitempty"`
+	TopicName     string                 `protobuf:"bytes,3,opt,name=topicName,proto3" json:"topicName,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -263,12 +311,13 @@ func (x *PostTopic) GetTopicName() string {
 // 创建帖子请求
 type CreatePostReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        uint64                 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`  // 用户ID（发布者）
-	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`     // 标题
-	Cover         string                 `protobuf:"bytes,3,opt,name=cover,proto3" json:"cover,omitempty"`     // 封面URL
-	Type          int32                  `protobuf:"varint,4,opt,name=type,proto3" json:"type,omitempty"`      // 帖子类型
-	Content       string                 `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"` // 帖子内容
-	Topics        []string               `protobuf:"bytes,6,rep,name=topics,proto3" json:"topics,omitempty"`   // 关联的话题名称列表
+	UserId        uint64                 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Cover         string                 `protobuf:"bytes,3,opt,name=cover,proto3" json:"cover,omitempty"`
+	Visibility    int32                  `protobuf:"varint,4,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	Contents      []*PostContentItem     `protobuf:"bytes,5,rep,name=contents,proto3" json:"contents,omitempty"`
+	Topics        []string               `protobuf:"bytes,6,rep,name=topics,proto3" json:"topics,omitempty"`
+	Tags          string                 `protobuf:"bytes,7,opt,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -324,18 +373,18 @@ func (x *CreatePostReq) GetCover() string {
 	return ""
 }
 
-func (x *CreatePostReq) GetType() int32 {
+func (x *CreatePostReq) GetVisibility() int32 {
 	if x != nil {
-		return x.Type
+		return x.Visibility
 	}
 	return 0
 }
 
-func (x *CreatePostReq) GetContent() string {
+func (x *CreatePostReq) GetContents() []*PostContentItem {
 	if x != nil {
-		return x.Content
+		return x.Contents
 	}
-	return ""
+	return nil
 }
 
 func (x *CreatePostReq) GetTopics() []string {
@@ -345,10 +394,17 @@ func (x *CreatePostReq) GetTopics() []string {
 	return nil
 }
 
+func (x *CreatePostReq) GetTags() string {
+	if x != nil {
+		return x.Tags
+	}
+	return ""
+}
+
 // 创建帖子响应
 type CreatePostResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"` // 新创建的帖子ID
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -393,13 +449,14 @@ func (x *CreatePostResp) GetPostId() uint64 {
 // 更新帖子请求
 type UpdatePostReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`  // 帖子ID
-	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`  // 操作用户ID（用于权限校验）
-	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`     // 标题
-	Cover         string                 `protobuf:"bytes,4,opt,name=cover,proto3" json:"cover,omitempty"`     // 封面URL
-	Type          int32                  `protobuf:"varint,5,opt,name=type,proto3" json:"type,omitempty"`      // 帖子类型
-	Content       string                 `protobuf:"bytes,6,opt,name=content,proto3" json:"content,omitempty"` // 帖子内容
-	Topics        []string               `protobuf:"bytes,7,rep,name=topics,proto3" json:"topics,omitempty"`   // 关联的话题名称列表
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
+	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`
+	Title         string                 `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
+	Cover         string                 `protobuf:"bytes,4,opt,name=cover,proto3" json:"cover,omitempty"`
+	Visibility    int32                  `protobuf:"varint,5,opt,name=visibility,proto3" json:"visibility,omitempty"`
+	Contents      []*PostContentItem     `protobuf:"bytes,6,rep,name=contents,proto3" json:"contents,omitempty"`
+	Topics        []string               `protobuf:"bytes,7,rep,name=topics,proto3" json:"topics,omitempty"`
+	Tags          string                 `protobuf:"bytes,8,opt,name=tags,proto3" json:"tags,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -462,18 +519,18 @@ func (x *UpdatePostReq) GetCover() string {
 	return ""
 }
 
-func (x *UpdatePostReq) GetType() int32 {
+func (x *UpdatePostReq) GetVisibility() int32 {
 	if x != nil {
-		return x.Type
+		return x.Visibility
 	}
 	return 0
 }
 
-func (x *UpdatePostReq) GetContent() string {
+func (x *UpdatePostReq) GetContents() []*PostContentItem {
 	if x != nil {
-		return x.Content
+		return x.Contents
 	}
-	return ""
+	return nil
 }
 
 func (x *UpdatePostReq) GetTopics() []string {
@@ -483,10 +540,17 @@ func (x *UpdatePostReq) GetTopics() []string {
 	return nil
 }
 
+func (x *UpdatePostReq) GetTags() string {
+	if x != nil {
+		return x.Tags
+	}
+	return ""
+}
+
 // 更新帖子响应
 type UpdatePostResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // 是否更新成功
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -531,8 +595,8 @@ func (x *UpdatePostResp) GetSuccess() bool {
 // 删除帖子请求
 type DeletePostReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"` // 帖子ID
-	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"` // 操作用户ID（用于权限校验）
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
+	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -584,7 +648,7 @@ func (x *DeletePostReq) GetUserId() uint64 {
 // 删除帖子响应
 type DeletePostResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // 是否删除成功
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -629,7 +693,7 @@ func (x *DeletePostResp) GetSuccess() bool {
 // 获取帖子详情请求
 type GetPostDetailReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"` // 帖子ID
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -674,9 +738,9 @@ func (x *GetPostDetailReq) GetPostId() uint64 {
 // 获取帖子详情响应
 type GetPostDetailResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Post          *PostInfo              `protobuf:"bytes,1,opt,name=post,proto3" json:"post,omitempty"`       // 帖子基本信息
-	Content       *PostContent           `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"` // 帖子正文内容
-	Topics        []*PostTopic           `protobuf:"bytes,3,rep,name=topics,proto3" json:"topics,omitempty"`   // 帖子关联的话题列表
+	Post          *PostInfo              `protobuf:"bytes,1,opt,name=post,proto3" json:"post,omitempty"`
+	Contents      []*PostContentItem     `protobuf:"bytes,2,rep,name=contents,proto3" json:"contents,omitempty"`
+	Topics        []*PostTopic           `protobuf:"bytes,3,rep,name=topics,proto3" json:"topics,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -718,9 +782,9 @@ func (x *GetPostDetailResp) GetPost() *PostInfo {
 	return nil
 }
 
-func (x *GetPostDetailResp) GetContent() *PostContent {
+func (x *GetPostDetailResp) GetContents() []*PostContentItem {
 	if x != nil {
-		return x.Content
+		return x.Contents
 	}
 	return nil
 }
@@ -735,10 +799,9 @@ func (x *GetPostDetailResp) GetTopics() []*PostTopic {
 // 获取帖子列表请求
 type GetPostListReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        uint64                 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`     // 用户ID（可选，用于筛选某个用户的帖子）
-	Type          int32                  `protobuf:"varint,2,opt,name=type,proto3" json:"type,omitempty"`         // 帖子类型（可选，0表示不过滤）
-	Page          int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`         // 页码，从1开始
-	PageSize      int64                  `protobuf:"varint,4,opt,name=pageSize,proto3" json:"pageSize,omitempty"` // 每页数量
+	UserId        uint64                 `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
+	Page          int64                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,3,opt,name=pageSize,proto3" json:"pageSize,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -780,13 +843,6 @@ func (x *GetPostListReq) GetUserId() uint64 {
 	return 0
 }
 
-func (x *GetPostListReq) GetType() int32 {
-	if x != nil {
-		return x.Type
-	}
-	return 0
-}
-
 func (x *GetPostListReq) GetPage() int64 {
 	if x != nil {
 		return x.Page
@@ -804,8 +860,8 @@ func (x *GetPostListReq) GetPageSize() int64 {
 // 获取帖子列表响应
 type GetPostListResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"` // 总数
-	List          []*PostInfo            `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`    // 帖子列表
+	Total         int64                  `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	List          []*PostInfo            `protobuf:"bytes,2,rep,name=list,proto3" json:"list,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -857,7 +913,7 @@ func (x *GetPostListResp) GetList() []*PostInfo {
 // 批量获取帖子请求
 type BatchGetPostReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostIds       []uint64               `protobuf:"varint,1,rep,packed,name=postIds,proto3" json:"postIds,omitempty"` // 帖子ID列表
+	PostIds       []uint64               `protobuf:"varint,1,rep,packed,name=postIds,proto3" json:"postIds,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -902,7 +958,7 @@ func (x *BatchGetPostReq) GetPostIds() []uint64 {
 // 批量获取帖子响应
 type BatchGetPostResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Posts         []*PostInfo            `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"` // 帖子基本信息列表
+	Posts         []*PostInfo            `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -947,7 +1003,7 @@ func (x *BatchGetPostResp) GetPosts() []*PostInfo {
 // 增加浏览量请求
 type IncViewCountReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"` // 帖子ID
+	PostId        uint64                 `protobuf:"varint,1,opt,name=postId,proto3" json:"postId,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -992,7 +1048,7 @@ func (x *IncViewCountReq) GetPostId() uint64 {
 // 增加浏览量响应
 type IncViewCountResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"` // 是否成功
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1038,44 +1094,60 @@ var File_content_proto protoreflect.FileDescriptor
 
 const file_content_proto_rawDesc = "" +
 	"\n" +
-	"\rcontent.proto\x12\acontent\"\xa6\x02\n" +
+	"\rcontent.proto\x12\acontent\"S\n" +
+	"\x0fPostContentItem\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\x05R\x04type\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12\x12\n" +
+	"\x04sort\x18\x03 \x01(\x05R\x04sort\"\xd4\x03\n" +
 	"\bPostInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x16\n" +
 	"\x06userId\x18\x02 \x01(\x04R\x06userId\x12\x14\n" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12\x14\n" +
-	"\x05cover\x18\x04 \x01(\tR\x05cover\x12\x12\n" +
-	"\x04type\x18\x05 \x01(\x05R\x04type\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\x05R\x06status\x12\x1c\n" +
-	"\tviewCount\x18\a \x01(\x03R\tviewCount\x12\x1c\n" +
-	"\tlikeCount\x18\b \x01(\x03R\tlikeCount\x12\"\n" +
-	"\fcommentCount\x18\t \x01(\x03R\fcommentCount\x12\x1c\n" +
-	"\tcreatedAt\x18\n" +
-	" \x01(\x03R\tcreatedAt\x12\x1c\n" +
-	"\tupdatedAt\x18\v \x01(\x03R\tupdatedAt\"?\n" +
-	"\vPostContent\x12\x16\n" +
-	"\x06postId\x18\x01 \x01(\x04R\x06postId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"[\n" +
+	"\x05cover\x18\x04 \x01(\tR\x05cover\x12\"\n" +
+	"\fcommentCount\x18\x05 \x01(\x04R\fcommentCount\x12(\n" +
+	"\x0fcollectionCount\x18\x06 \x01(\x04R\x0fcollectionCount\x12 \n" +
+	"\vupvoteCount\x18\a \x01(\x04R\vupvoteCount\x12\x1e\n" +
+	"\n" +
+	"shareCount\x18\b \x01(\x04R\n" +
+	"shareCount\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\t \x01(\x05R\n" +
+	"visibility\x12\x14\n" +
+	"\x05isTop\x18\n" +
+	" \x01(\x05R\x05isTop\x12\x1c\n" +
+	"\tisEssence\x18\v \x01(\x05R\tisEssence\x12\x16\n" +
+	"\x06isLock\x18\f \x01(\x05R\x06isLock\x12(\n" +
+	"\x0flatestRepliedAt\x18\r \x01(\x03R\x0flatestRepliedAt\x12\x12\n" +
+	"\x04tags\x18\x0e \x01(\tR\x04tags\x12\x1c\n" +
+	"\tcreatedAt\x18\x0f \x01(\x03R\tcreatedAt\x12\x1c\n" +
+	"\tupdatedAt\x18\x10 \x01(\x03R\tupdatedAt\"[\n" +
 	"\tPostTopic\x12\x16\n" +
 	"\x06postId\x18\x01 \x01(\x04R\x06postId\x12\x18\n" +
 	"\atopicId\x18\x02 \x01(\x04R\atopicId\x12\x1c\n" +
-	"\ttopicName\x18\x03 \x01(\tR\ttopicName\"\x99\x01\n" +
+	"\ttopicName\x18\x03 \x01(\tR\ttopicName\"\xd5\x01\n" +
 	"\rCreatePostReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\x04R\x06userId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x14\n" +
-	"\x05cover\x18\x03 \x01(\tR\x05cover\x12\x12\n" +
-	"\x04type\x18\x04 \x01(\x05R\x04type\x12\x18\n" +
-	"\acontent\x18\x05 \x01(\tR\acontent\x12\x16\n" +
-	"\x06topics\x18\x06 \x03(\tR\x06topics\"(\n" +
+	"\x05cover\x18\x03 \x01(\tR\x05cover\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\x04 \x01(\x05R\n" +
+	"visibility\x124\n" +
+	"\bcontents\x18\x05 \x03(\v2\x18.content.PostContentItemR\bcontents\x12\x16\n" +
+	"\x06topics\x18\x06 \x03(\tR\x06topics\x12\x12\n" +
+	"\x04tags\x18\a \x01(\tR\x04tags\"(\n" +
 	"\x0eCreatePostResp\x12\x16\n" +
-	"\x06postId\x18\x01 \x01(\x04R\x06postId\"\xb1\x01\n" +
+	"\x06postId\x18\x01 \x01(\x04R\x06postId\"\xed\x01\n" +
 	"\rUpdatePostReq\x12\x16\n" +
 	"\x06postId\x18\x01 \x01(\x04R\x06postId\x12\x16\n" +
 	"\x06userId\x18\x02 \x01(\x04R\x06userId\x12\x14\n" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12\x14\n" +
-	"\x05cover\x18\x04 \x01(\tR\x05cover\x12\x12\n" +
-	"\x04type\x18\x05 \x01(\x05R\x04type\x12\x18\n" +
-	"\acontent\x18\x06 \x01(\tR\acontent\x12\x16\n" +
-	"\x06topics\x18\a \x03(\tR\x06topics\"*\n" +
+	"\x05cover\x18\x04 \x01(\tR\x05cover\x12\x1e\n" +
+	"\n" +
+	"visibility\x18\x05 \x01(\x05R\n" +
+	"visibility\x124\n" +
+	"\bcontents\x18\x06 \x03(\v2\x18.content.PostContentItemR\bcontents\x12\x16\n" +
+	"\x06topics\x18\a \x03(\tR\x06topics\x12\x12\n" +
+	"\x04tags\x18\b \x01(\tR\x04tags\"*\n" +
 	"\x0eUpdatePostResp\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"?\n" +
 	"\rDeletePostReq\x12\x16\n" +
@@ -1084,16 +1156,15 @@ const file_content_proto_rawDesc = "" +
 	"\x0eDeletePostResp\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"*\n" +
 	"\x10GetPostDetailReq\x12\x16\n" +
-	"\x06postId\x18\x01 \x01(\x04R\x06postId\"\x96\x01\n" +
+	"\x06postId\x18\x01 \x01(\x04R\x06postId\"\x9c\x01\n" +
 	"\x11GetPostDetailResp\x12%\n" +
-	"\x04post\x18\x01 \x01(\v2\x11.content.PostInfoR\x04post\x12.\n" +
-	"\acontent\x18\x02 \x01(\v2\x14.content.PostContentR\acontent\x12*\n" +
-	"\x06topics\x18\x03 \x03(\v2\x12.content.PostTopicR\x06topics\"l\n" +
+	"\x04post\x18\x01 \x01(\v2\x11.content.PostInfoR\x04post\x124\n" +
+	"\bcontents\x18\x02 \x03(\v2\x18.content.PostContentItemR\bcontents\x12*\n" +
+	"\x06topics\x18\x03 \x03(\v2\x12.content.PostTopicR\x06topics\"X\n" +
 	"\x0eGetPostListReq\x12\x16\n" +
 	"\x06userId\x18\x01 \x01(\x04R\x06userId\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\x05R\x04type\x12\x12\n" +
-	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1a\n" +
-	"\bpageSize\x18\x04 \x01(\x03R\bpageSize\"N\n" +
+	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1a\n" +
+	"\bpageSize\x18\x03 \x01(\x03R\bpageSize\"N\n" +
 	"\x0fGetPostListResp\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x03R\x05total\x12%\n" +
 	"\x04list\x18\x02 \x03(\v2\x11.content.PostInfoR\x04list\"+\n" +
@@ -1131,8 +1202,8 @@ func file_content_proto_rawDescGZIP() []byte {
 
 var file_content_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_content_proto_goTypes = []any{
-	(*PostInfo)(nil),          // 0: content.PostInfo
-	(*PostContent)(nil),       // 1: content.PostContent
+	(*PostContentItem)(nil),   // 0: content.PostContentItem
+	(*PostInfo)(nil),          // 1: content.PostInfo
 	(*PostTopic)(nil),         // 2: content.PostTopic
 	(*CreatePostReq)(nil),     // 3: content.CreatePostReq
 	(*CreatePostResp)(nil),    // 4: content.CreatePostResp
@@ -1150,30 +1221,32 @@ var file_content_proto_goTypes = []any{
 	(*IncViewCountResp)(nil),  // 16: content.IncViewCountResp
 }
 var file_content_proto_depIdxs = []int32{
-	0,  // 0: content.GetPostDetailResp.post:type_name -> content.PostInfo
-	1,  // 1: content.GetPostDetailResp.content:type_name -> content.PostContent
-	2,  // 2: content.GetPostDetailResp.topics:type_name -> content.PostTopic
-	0,  // 3: content.GetPostListResp.list:type_name -> content.PostInfo
-	0,  // 4: content.BatchGetPostResp.posts:type_name -> content.PostInfo
-	3,  // 5: content.ContentCenter.CreatePost:input_type -> content.CreatePostReq
-	5,  // 6: content.ContentCenter.UpdatePost:input_type -> content.UpdatePostReq
-	7,  // 7: content.ContentCenter.DeletePost:input_type -> content.DeletePostReq
-	9,  // 8: content.ContentCenter.GetPostDetail:input_type -> content.GetPostDetailReq
-	11, // 9: content.ContentCenter.GetPostList:input_type -> content.GetPostListReq
-	13, // 10: content.ContentCenter.BatchGetPost:input_type -> content.BatchGetPostReq
-	15, // 11: content.ContentCenter.IncViewCount:input_type -> content.IncViewCountReq
-	4,  // 12: content.ContentCenter.CreatePost:output_type -> content.CreatePostResp
-	6,  // 13: content.ContentCenter.UpdatePost:output_type -> content.UpdatePostResp
-	8,  // 14: content.ContentCenter.DeletePost:output_type -> content.DeletePostResp
-	10, // 15: content.ContentCenter.GetPostDetail:output_type -> content.GetPostDetailResp
-	12, // 16: content.ContentCenter.GetPostList:output_type -> content.GetPostListResp
-	14, // 17: content.ContentCenter.BatchGetPost:output_type -> content.BatchGetPostResp
-	16, // 18: content.ContentCenter.IncViewCount:output_type -> content.IncViewCountResp
-	12, // [12:19] is the sub-list for method output_type
-	5,  // [5:12] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 0: content.CreatePostReq.contents:type_name -> content.PostContentItem
+	0,  // 1: content.UpdatePostReq.contents:type_name -> content.PostContentItem
+	1,  // 2: content.GetPostDetailResp.post:type_name -> content.PostInfo
+	0,  // 3: content.GetPostDetailResp.contents:type_name -> content.PostContentItem
+	2,  // 4: content.GetPostDetailResp.topics:type_name -> content.PostTopic
+	1,  // 5: content.GetPostListResp.list:type_name -> content.PostInfo
+	1,  // 6: content.BatchGetPostResp.posts:type_name -> content.PostInfo
+	3,  // 7: content.ContentCenter.CreatePost:input_type -> content.CreatePostReq
+	5,  // 8: content.ContentCenter.UpdatePost:input_type -> content.UpdatePostReq
+	7,  // 9: content.ContentCenter.DeletePost:input_type -> content.DeletePostReq
+	9,  // 10: content.ContentCenter.GetPostDetail:input_type -> content.GetPostDetailReq
+	11, // 11: content.ContentCenter.GetPostList:input_type -> content.GetPostListReq
+	13, // 12: content.ContentCenter.BatchGetPost:input_type -> content.BatchGetPostReq
+	15, // 13: content.ContentCenter.IncViewCount:input_type -> content.IncViewCountReq
+	4,  // 14: content.ContentCenter.CreatePost:output_type -> content.CreatePostResp
+	6,  // 15: content.ContentCenter.UpdatePost:output_type -> content.UpdatePostResp
+	8,  // 16: content.ContentCenter.DeletePost:output_type -> content.DeletePostResp
+	10, // 17: content.ContentCenter.GetPostDetail:output_type -> content.GetPostDetailResp
+	12, // 18: content.ContentCenter.GetPostList:output_type -> content.GetPostListResp
+	14, // 19: content.ContentCenter.BatchGetPost:output_type -> content.BatchGetPostResp
+	16, // 20: content.ContentCenter.IncViewCount:output_type -> content.IncViewCountResp
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_content_proto_init() }

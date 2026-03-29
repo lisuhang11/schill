@@ -5,7 +5,7 @@
         <span>评论 ({{ total }})</span>
       </div>
     </template>
-    <CommentInput :groupId="postId" @commentCreated="onCommentCreated" />
+    <CommentInput :postId="postId" @commentCreated="onCommentCreated" />
     <div class="comments">
       <el-skeleton :loading="loading" animated>
         <div v-if="commentItems.length === 0 && !loading" class="empty">
@@ -16,7 +16,7 @@
             v-for="item in commentItems" 
             :key="item.root.id" 
             :commentItem="item"
-            :groupId="postId"
+            :postId="postId"
             @replyCreated="onCommentCreated"
           />
         </div>
@@ -43,7 +43,7 @@ const commentItems = ref<CommentItemType[]>([])
 
 const fetchComments = async () => {
   try {
-    const res = await getCommentList({ groupId: props.postId, pageSize: 50 })
+    const res = await getCommentList({ postId: props.postId, pageSize: 50 })
     total.value = res.total
     commentItems.value = res.list
   } catch (error) {

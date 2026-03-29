@@ -11,13 +11,6 @@
           <el-form-item label="标题" prop="title">
             <el-input v-model="postForm.title" placeholder="请输入帖子标题" maxlength="100" show-word-limit />
           </el-form-item>
-          <el-form-item label="类型" prop="type">
-            <el-select v-model="postForm.type" placeholder="请选择帖子类型">
-              <el-option label="普通" :value="1" />
-              <el-option label="图文" :value="2" />
-              <el-option label="视频" :value="3" />
-            </el-select>
-          </el-form-item>
           <el-form-item label="封面" prop="cover">
             <el-input v-model="postForm.cover" placeholder="请输入封面图片URL（可选）" />
           </el-form-item>
@@ -86,8 +79,8 @@ const newTopic = ref('')
 
 const postForm = reactive({
   title: '',
-  type: 1,
   cover: '',
+  visibility: 90,
   content: '',
   topics: [] as string[]
 })
@@ -95,9 +88,6 @@ const postForm = reactive({
 const rules: FormRules = {
   title: [
     { required: true, message: '请输入帖子标题', trigger: 'blur' }
-  ],
-  type: [
-    { required: true, message: '请选择帖子类型', trigger: 'change' }
   ],
   content: [
     { required: true, message: '请输入帖子内容', trigger: 'blur' }
@@ -138,7 +128,19 @@ const handleSubmit = async () => {
     if (valid) {
       loading.value = true
       try {
-        const res = await createPost(postForm)
+        const contents = [{
+          type: 2,
+          content: postForm.content,
+          sort: 10
+        }]
+        const res = await createPost({
+          title: postForm.title,
+          cover: postForm.cover,
+          visibility: postForm.visibility,
+          contents: contents,
+          topics: postForm.topics,
+          tags: ''
+        })
         ElMessage.success('发布成功')
         router.push(`/post/${res.postId}`)
       } catch (error) {

@@ -2,9 +2,9 @@ import request from '@/utils/request'
 import type { CommentInfo, CommentItem } from '@/types'
 
 export interface CreateCommentReq {
-  groupId: number
-  parentId?: number
-  replyToUserId?: number
+  postId: number
+  parentId: number
+  replyToUserId: number
   content: string
 }
 
@@ -26,21 +26,21 @@ export interface VoteCommentResp {
 }
 
 export interface GetCommentListReq {
-  groupId: number
+  postId: number
   cursor?: number
   pageSize?: number
   sortType?: string
-}
-
-export interface GetCommentListResp {
-  total: number
-  list: CommentItem[]
 }
 
 export interface GetReplyListReq {
   commentId: number
   cursor?: number
   pageSize?: number
+}
+
+export interface CommentListResp {
+  total: number
+  list: CommentItem[]
 }
 
 export const createComment = (data: CreateCommentReq) => {
@@ -56,9 +56,9 @@ export const voteComment = (commentId: number, data: VoteCommentReq) => {
 }
 
 export const getCommentList = (params: GetCommentListReq) => {
-  return request.get<GetCommentListResp>('/api/comment/list', { params })
+  return request.get<CommentListResp>('/api/comment/list', { params })
 }
 
 export const getReplyList = (params: GetReplyListReq) => {
-  return request.get<GetCommentListResp>('/api/comment/replies', { params })
+  return request.get<CommentListResp>('/api/comment/replies', { params })
 }

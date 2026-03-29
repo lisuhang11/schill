@@ -26,26 +26,19 @@ type (
 	GetPostListResp   = pb.GetPostListResp
 	IncViewCountReq   = pb.IncViewCountReq
 	IncViewCountResp  = pb.IncViewCountResp
-	PostContent       = pb.PostContent
+	PostContentItem   = pb.PostContentItem
 	PostInfo          = pb.PostInfo
 	PostTopic         = pb.PostTopic
 	UpdatePostReq     = pb.UpdatePostReq
 	UpdatePostResp    = pb.UpdatePostResp
 
 	ContentCenter interface {
-		// 创建帖子
 		CreatePost(ctx context.Context, in *CreatePostReq, opts ...grpc.CallOption) (*CreatePostResp, error)
-		// 更新帖子
 		UpdatePost(ctx context.Context, in *UpdatePostReq, opts ...grpc.CallOption) (*UpdatePostResp, error)
-		// 删除帖子
 		DeletePost(ctx context.Context, in *DeletePostReq, opts ...grpc.CallOption) (*DeletePostResp, error)
-		// 获取帖子详情
 		GetPostDetail(ctx context.Context, in *GetPostDetailReq, opts ...grpc.CallOption) (*GetPostDetailResp, error)
-		// 获取帖子列表（支持分页和筛选）
 		GetPostList(ctx context.Context, in *GetPostListReq, opts ...grpc.CallOption) (*GetPostListResp, error)
-		// 批量获取帖子基本信息
 		BatchGetPost(ctx context.Context, in *BatchGetPostReq, opts ...grpc.CallOption) (*BatchGetPostResp, error)
-		// 增加浏览量（原子操作）
 		IncViewCount(ctx context.Context, in *IncViewCountReq, opts ...grpc.CallOption) (*IncViewCountResp, error)
 	}
 
@@ -60,43 +53,36 @@ func NewContentCenter(cli zrpc.Client) ContentCenter {
 	}
 }
 
-// 创建帖子
 func (m *defaultContentCenter) CreatePost(ctx context.Context, in *CreatePostReq, opts ...grpc.CallOption) (*CreatePostResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.CreatePost(ctx, in, opts...)
 }
 
-// 更新帖子
 func (m *defaultContentCenter) UpdatePost(ctx context.Context, in *UpdatePostReq, opts ...grpc.CallOption) (*UpdatePostResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.UpdatePost(ctx, in, opts...)
 }
 
-// 删除帖子
 func (m *defaultContentCenter) DeletePost(ctx context.Context, in *DeletePostReq, opts ...grpc.CallOption) (*DeletePostResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.DeletePost(ctx, in, opts...)
 }
 
-// 获取帖子详情
 func (m *defaultContentCenter) GetPostDetail(ctx context.Context, in *GetPostDetailReq, opts ...grpc.CallOption) (*GetPostDetailResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.GetPostDetail(ctx, in, opts...)
 }
 
-// 获取帖子列表（支持分页和筛选）
 func (m *defaultContentCenter) GetPostList(ctx context.Context, in *GetPostListReq, opts ...grpc.CallOption) (*GetPostListResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.GetPostList(ctx, in, opts...)
 }
 
-// 批量获取帖子基本信息
 func (m *defaultContentCenter) BatchGetPost(ctx context.Context, in *BatchGetPostReq, opts ...grpc.CallOption) (*BatchGetPostResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.BatchGetPost(ctx, in, opts...)
 }
 
-// 增加浏览量（原子操作）
 func (m *defaultContentCenter) IncViewCount(ctx context.Context, in *IncViewCountReq, opts ...grpc.CallOption) (*IncViewCountResp, error) {
 	client := pb.NewContentCenterClient(m.cli.Conn())
 	return client.IncViewCount(ctx, in, opts...)

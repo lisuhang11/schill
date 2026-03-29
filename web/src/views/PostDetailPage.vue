@@ -13,11 +13,23 @@
             </div>
           </div>
           <h1 class="post-title">{{ postDetail.post.title }}</h1>
-          <div class="post-content" v-html="postDetail.content"></div>
+          <div v-if="postDetail.post.cover" class="post-cover">
+            <el-image :src="postDetail.post.cover" fit="cover" />
+          </div>
+          <div class="post-content">
+            <div v-for="(item, index) in postDetail.contents" :key="index" class="content-item">
+              {{ item.content }}
+            </div>
+          </div>
+          <div v-if="postDetail.topics.length > 0" class="post-topics">
+            <el-tag v-for="(topic, index) in postDetail.topics" :key="index" size="small" style="margin-right: 8px;">
+              #{{ topic.topicName }}
+            </el-tag>
+          </div>
           <div class="post-stats">
-            <span><el-icon><View /></el-icon> {{ postDetail.post.viewCount }} 浏览</span>
             <span><el-icon><ChatDotRound /></el-icon> {{ postDetail.post.commentCount }} 评论</span>
-            <span><el-icon><Star /></el-icon> {{ postDetail.post.likeCount }} 点赞</span>
+            <span><el-icon><Star /></el-icon> {{ postDetail.post.upvoteCount }} 点赞</span>
+            <span><el-icon><Share /></el-icon> {{ postDetail.post.shareCount }} 分享</span>
           </div>
         </el-card>
         <CommentList :postId="postId" />
@@ -29,7 +41,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { View, ChatDotRound, Star } from '@element-plus/icons-vue'
+import { ChatDotRound, Star, Share } from '@element-plus/icons-vue'
 import { getPostDetail, incViewCount } from '@/api/content'
 import type { PostDetail } from '@/types'
 import { formatTime } from '@/utils/date'
@@ -98,12 +110,29 @@ onMounted(() => {
   line-height: 1.4;
 }
 
+.post-cover {
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-cover :deep(.el-image) {
+  width: 100%;
+}
+
 .post-content {
   font-size: 16px;
   line-height: 1.8;
   color: #303133;
   margin-bottom: 20px;
-  white-space: pre-wrap;
+}
+
+.content-item {
+  margin-bottom: 12px;
+}
+
+.post-topics {
+  margin-bottom: 20px;
 }
 
 .post-stats {

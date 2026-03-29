@@ -9,4 +9,15 @@ Etcd:
 Mysql:
   DataSource: "root:root@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
 
+# Kafka Consumer配置
+KqConsumerConf:
+  Name: userPostCountConsumer
+  Brokers:
+    - 127.0.0.1:9092
+  Group: userPostCountConsumerGroup
+  TopicCreated: post-created
+  TopicDeleted: post-deleted
+  Offset: first
+  Consumers: 8
+  Processors: 8
 

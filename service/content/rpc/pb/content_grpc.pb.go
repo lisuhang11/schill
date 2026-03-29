@@ -34,19 +34,12 @@ const (
 //
 // gRPC服务定义
 type ContentCenterClient interface {
-	// 创建帖子
 	CreatePost(ctx context.Context, in *CreatePostReq, opts ...grpc.CallOption) (*CreatePostResp, error)
-	// 更新帖子
 	UpdatePost(ctx context.Context, in *UpdatePostReq, opts ...grpc.CallOption) (*UpdatePostResp, error)
-	// 删除帖子
 	DeletePost(ctx context.Context, in *DeletePostReq, opts ...grpc.CallOption) (*DeletePostResp, error)
-	// 获取帖子详情
 	GetPostDetail(ctx context.Context, in *GetPostDetailReq, opts ...grpc.CallOption) (*GetPostDetailResp, error)
-	// 获取帖子列表（支持分页和筛选）
 	GetPostList(ctx context.Context, in *GetPostListReq, opts ...grpc.CallOption) (*GetPostListResp, error)
-	// 批量获取帖子基本信息
 	BatchGetPost(ctx context.Context, in *BatchGetPostReq, opts ...grpc.CallOption) (*BatchGetPostResp, error)
-	// 增加浏览量（原子操作）
 	IncViewCount(ctx context.Context, in *IncViewCountReq, opts ...grpc.CallOption) (*IncViewCountResp, error)
 }
 
@@ -134,19 +127,12 @@ func (c *contentCenterClient) IncViewCount(ctx context.Context, in *IncViewCount
 //
 // gRPC服务定义
 type ContentCenterServer interface {
-	// 创建帖子
 	CreatePost(context.Context, *CreatePostReq) (*CreatePostResp, error)
-	// 更新帖子
 	UpdatePost(context.Context, *UpdatePostReq) (*UpdatePostResp, error)
-	// 删除帖子
 	DeletePost(context.Context, *DeletePostReq) (*DeletePostResp, error)
-	// 获取帖子详情
 	GetPostDetail(context.Context, *GetPostDetailReq) (*GetPostDetailResp, error)
-	// 获取帖子列表（支持分页和筛选）
 	GetPostList(context.Context, *GetPostListReq) (*GetPostListResp, error)
-	// 批量获取帖子基本信息
 	BatchGetPost(context.Context, *BatchGetPostReq) (*BatchGetPostResp, error)
-	// 增加浏览量（原子操作）
 	IncViewCount(context.Context, *IncViewCountReq) (*IncViewCountResp, error)
 	mustEmbedUnimplementedContentCenterServer()
 }

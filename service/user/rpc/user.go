@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
 	"SChill/service/user/rpc/internal/config"
+	"SChill/service/user/rpc/internal/mqs"
 	"SChill/service/user/rpc/internal/server"
 	"SChill/service/user/rpc/internal/svc"
 	"SChill/service/user/rpc/pb"
@@ -23,10 +25,11 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-	ctx := svc.NewServiceContext(c)
+	svcCtx := svc.NewServiceContext(c)
+	ctx := context.Background()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
-		pb.RegisterUserCenterServer(grpcServer, server.NewUserCenterServer(ctx))
+		pb.RegisterUserCenterServer(grpcServer, server.NewUserCenterServer(svcCtx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)
@@ -34,6 +37,14 @@ func main() {
 	})
 	defer s.Stop()
 
+	serviceGroup := service.NewServiceGroup()
+	defer serviceGroup.Stop()
+	serviceGroup.Add(s)
+
+	for _, mq := range mqs.Consumers(c, ctx, svcCtx) {
+		serviceGroup.Add(mq)
+	}
+
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
-	s.Start()
+	serviceGroup.Start()
 }

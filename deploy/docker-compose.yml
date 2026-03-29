@@ -1,3 +1,5 @@
+version: '3.8'
+
 networks:
   backend:
     driver: ${NETWORKS_DRIVER}
@@ -5,11 +7,12 @@ networks:
 services:
   etcd:
     image: quay.io/coreos/etcd:v3.5.0
+    container_name: etcd
     environment:
       - TZ=${TZ}
       - ALLOW_NONE_AUTHENTICATION=yes
-      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379   # 新增：监听所有网络接口
-      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://127.0.0.1:2379
     ports:
       - "${ETCD_PORT}:2379"
     networks:
@@ -18,6 +21,7 @@ services:
 
   mysql:
     image: mysql:8.0
+    container_name: mysql
     environment:
       MYSQL_ROOT_PASSWORD: 'root'
       MYSQL_DATABASE: 'schill'
@@ -31,6 +35,7 @@ services:
 
   redis:
     image: redis:7.0
+    container_name: redis
     environment:
       - TZ=${TZ}
     privileged: true
@@ -45,11 +50,11 @@ services:
 
   minio:
     image: minio/minio:latest
+    container_name: minio
     environment:
       - TZ=${TZ}
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      # - MINIO_ETCD_ENDPOINTS=http://etcd:2379   # 如需与 etcd 集成，取消注释
     command: server /data --console-address ":9001"
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -59,3 +64,40 @@ services:
     networks:
       - backend
     restart: always
+
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      - LANG=C.UTF-8
+      # KRaft 核心配置
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_KRAFT_CLUSTER_ID=4L6g3nShT-eMCtK--X86sw   # 使用有效集群ID，可自行生成
+      # 监听器配置
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      # 复制因子修正（单节点必需）
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=1
+    volumes:
+      - kafka-config:/mnt/shared/config
+      - kafka-data:/var/lib/kafka/data
+      - kafka-secret:/etc/kafka/secrets
+    networks:
+      - backend
+    restart: always
+
+volumes:
+  kafka-config:
+  kafka-data:
+  kafka-secret:

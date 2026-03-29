@@ -8,4 +8,17 @@ type Config struct {
 	Mysql struct {
 		DataSource string
 	}
+
+	KqPusherConf struct {
+		Brokers      []string
+		TopicCreated string
+		TopicDeleted string
+	}
+
+	KqConsumerConf struct {
+		Brokers             []string
+		Group               string
+		TopicCommentCreated string
+		TopicCommentDeleted string
+	}
 }

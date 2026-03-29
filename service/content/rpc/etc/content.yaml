@@ -8,3 +8,19 @@ Etcd:
 # mysql配置
 Mysql:
   DataSource: "root:root@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+
+# Kafka Pusher配置
+KqPusherConf:
+  Brokers:
+    - 127.0.0.1:9092
+  TopicCreated: post-created
+  TopicDeleted: post-deleted
+
+# Kafka Consumer配置
+KqConsumerConf:
+  Brokers:
+    - 127.0.0.1:9092
+  Group: postCommentCountConsumerGroup
+  TopicCommentCreated: comment-created
+  TopicCommentDeleted: comment-deleted
+  Offset: first
