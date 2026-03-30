@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package comment;
+option go_package = "/pb";
+
+// 评论信息
+message CommentInfo {
+  uint64 id = 1;
+  uint64 postId = 2;
+  uint64 userId = 3;
+  uint64 parentId = 4;
+  uint64 replyToUserId = 5;
+  string content = 6;
+  int32 level = 7;
+  int32 replyCount = 8;
+  int32 likeCount = 9;
+  int64 createdAt = 10;
+}
+
+// 创建评论请求
+message CreateCommentReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+  uint64 parentId = 3;
+  uint64 replyToUserId = 4;
+  string content = 5;
+}
+
+// 创建评论响应
+message CreateCommentResp {
+  CommentInfo comment = 1;
+}
+
+// 删除评论请求
+message DeleteCommentReq {
+  uint64 commentId = 1;
+  uint64 userId = 2;
+}
+
+// 删除评论响应
+message DeleteCommentResp {
+  bool success = 1;
+}
+
+/*
+作用：分页获取某个作品（groupId）下的根评论列表。
+分页方式：使用游标（cursor）分页，cursor 通常是上一页最后一条评论的 id 或时间戳，比 offset 分页性能更好。
+排序：sortType 可以支持 "hot"（按热度，如点赞数+回复数）或 "new"（按时间倒序）
+*/
+
+// 获取评论列表请求
+message GetCommentListReq {
+  uint64 postId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+  string sortType = 4;
+}
+
+/*
+作用：获取某条评论下的所有直接回复（parent_id = commentId）。
+同样采用游标分页，避免深度嵌套查询的性能问题。
+*/
+
+// 获取评论列表响应
+message GetCommentListResp {
+  int64 total = 1;
+  repeated CommentInfo list = 2;
+  bool hasMore = 3;
+  int64 nextCursor = 4;
+}
+
+// 获取回复列表请求
+message GetReplyListReq {
+  uint64 commentId = 1;
+  int64 cursor = 2;
+  int64 pageSize = 3;
+}
+
+// 获取回复列表响应
+message GetReplyListResp {
+  int64 total = 1;
+  repeated CommentInfo list = 2;
+  bool hasMore = 3;
+  int64 nextCursor = 4;
+}
+
+// 评论投票请求
+message VoteCommentReq {
+  uint64 commentId = 1;
+  uint64 userId = 2;
+  int32 voteType = 3; // 1 点赞，2 点踩
+}
+
+// 评论投票响应
+message VoteCommentResp {
+  bool success = 1;
+  int32 likeCount = 2;
+  int32 dislikeCount = 3;
+  bool isLiked = 4;
+  bool isDisliked = 5;
+}
+
+// gRPC服务定义
+service CommentCenter {
+  rpc CreateComment(CreateCommentReq) returns (CreateCommentResp);
+  rpc DeleteComment(DeleteCommentReq) returns (DeleteCommentResp);
+  rpc GetCommentList(GetCommentListReq) returns (GetCommentListResp);
+  rpc GetReplyList(GetReplyListReq) returns (GetReplyListResp);
+  rpc VoteComment(VoteCommentReq) returns (VoteCommentResp);
+}
+
+
+// goctl rpc protoc comment.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

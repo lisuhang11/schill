@@ -1,0 +1,16 @@
+Name: comment.rpc
+ListenOn: 0.0.0.0:8083
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: comment.rpc
+
+Mysql:
+  DataSource: "root:root@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+
+# Kafka Producer配置
+KqProducerConf:
+  Brokers:
+    - 127.0.0.1:9092
+  TopicCommentCreated: comment-created
+  TopicCommentDeleted: comment-deleted
