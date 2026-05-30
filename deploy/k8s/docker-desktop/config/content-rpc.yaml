@@ -1,0 +1,56 @@
+Name: content.rpc
+ListenOn: 0.0.0.0:8082
+Etcd:
+  Hosts:
+    - etcd:2379
+  Key: content.rpc
+
+Mysql:
+  DataSource: "root:123456@tcp(mysql:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+  AutoMigrate: true
+
+MysqlRead:
+  DataSource: ""
+  MaxOpenConns: 150
+  MaxIdleConns: 30
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+
+RelationRpcConf:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: relation.rpc
+  Timeout: 5000
+
+KqPusherConf:
+  Brokers:
+    - kafka:9092
+  TopicCreated: post-created
+  TopicDeleted: post-deleted
+  TopicChanged: content-changed
+
+KqConsumerConf:
+  Brokers:
+    - kafka:9092
+  Group: post-comment-count-consumer-group
+  TopicCommentCreated: comment-created
+  TopicCommentDeleted: comment-deleted
+  TopicPostStar: post-star
+  TopicPostUnstar: post-unstar
+  TopicPostCollect: post-collect
+  TopicPostUncollect: post-uncollect
+
+RedisConf:
+  Host: "redis"
+  Port: "6379"
+  Password: ""
+  DB: 0
+
+LocalCache:
+  ExpireSeconds: 60
+  Limit: 10000

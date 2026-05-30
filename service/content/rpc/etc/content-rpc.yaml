@@ -1,0 +1,64 @@
+Name: content.rpc
+ListenOn: 0.0.0.0:8082
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: content.rpc
+
+# mysql配置
+Mysql:
+  DataSource: "root:123456@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+
+MysqlRead:
+  DataSource: ""
+  MaxOpenConns: 150
+  MaxIdleConns: 30
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+
+# relationRpc服务调用
+RelationRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: relation.rpc
+  Timeout: 5000
+
+# Kafka Pusher配置
+KqPusherConf:
+  Brokers:
+    - 127.0.0.1:9092
+  TopicCreated: post-created
+  TopicDeleted: post-deleted
+  TopicChanged: content-changed
+
+# Kafka Consumer配置
+KqConsumerConf:
+  Brokers:
+    - 127.0.0.1:9092
+  Group: postCommentCountConsumerGroup
+  TopicCommentCreated: comment-created
+  TopicCommentDeleted: comment-deleted
+  TopicPostStar: post-star
+  TopicPostUnstar: post-unstar
+  TopicPostCollect: post-collect
+  TopicPostUncollect: post-uncollect
+  Offset: first
+
+RedisConf:
+  Host: "127.0.0.1"
+  Port: "6379"
+  Password: ""
+  DB: 0
+
+Cache:
+  - Host: "127.0.0.1:6379"
+    Pass: ""
+
+LocalCache:
+  ExpireSeconds: 60
+  Limit: 10000

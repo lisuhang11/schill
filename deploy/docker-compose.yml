@@ -1,0 +1,148 @@
+version: '3.8'
+
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER:-bridge}
+
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.0
+    container_name: etcd
+    environment:
+      - TZ=${TZ}
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
+      - ETCD_DATA_DIR=/etcd-data
+    ports:
+      - "${ETCD_PORT}:2379"
+    networks:
+      - backend
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-schill}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    networks:
+      - backend
+    restart: always
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0
+    container_name: redis
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    networks:
+      - backend
+    restart: always
+    command: redis-server --appendonly yes
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    environment:
+      - TZ=${TZ}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - ${DATA_PATH_HOST:-./data}/minio:/data
+    networks:
+      - backend
+    restart: always
+
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: kafka
+    environment:
+      - LANG=C.UTF-8
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_KRAFT_CLUSTER_ID=${KAFKA_CLUSTER_ID:-4L6g3nShT-eMCtK--X86sw}
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092,PLAINTEXT_INTERNAL://kafka:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT_INTERNAL
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=1
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - backend
+    restart: always
+
+  canal:
+    image: canal/canal-server:v1.1.7
+    container_name: canal
+    environment:
+      - TZ=${TZ}
+      - canal.instance.mysql.slaveId=1234
+    volumes:
+      - ./data/canal/config:/home/admin/canal-server/conf
+      - ./data/canal/logs:/home/admin/canal-server/logs
+    ports:
+      - "${CANAL_PORT:-11111}:11111"
+    networks:
+      - backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  elasticsearch:
+    image: elasticsearch:8.6.1
+    container_name: elasticsearch
+    environment:
+      - TZ=${TZ:-Asia/Shanghai}
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "${ES_PORT_9200:-9200}:9200"
+      - "9300:9300"
+    networks:
+      - backend
+    restart: always
+
+  kibana:
+    image: kibana:8.6.1
+    container_name: kibana
+    environment:
+      - TZ=${TZ:-Asia/Shanghai}
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - XPACK_SECURITY_ENABLED=false
+      - XPACK_ENCRYPTED_SAVED_OBJECTS_ENCRYPTION_KEY="a-random-string-at-least-32-characters-long-1234567890"
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+    networks:
+      - backend
+    restart: always
+    depends_on:
+     - elasticsearch
+
+volumes:
+  kafka-data:

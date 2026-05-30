@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: feed-rpc
+spec:
+  selector:
+    app: feed-rpc
+  ports:
+    - name: rpc
+      port: 8087
+      targetPort: 8087
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feed-rpc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: feed-rpc
+  template:
+    metadata:
+      labels:
+        app: feed-rpc
+    spec:
+      containers:
+        - name: feed-rpc
+          image: schill-feed-rpc:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: APP_ENV
+              value: dev
+          ports:
+            - containerPort: 8087
+          readinessProbe:
+            tcpSocket:
+              port: 8087
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8087
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: schill-app-config

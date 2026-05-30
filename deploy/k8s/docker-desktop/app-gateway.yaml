@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+spec:
+  type: NodePort
+  selector:
+    app: gateway
+  ports:
+    - name: http
+      port: 8086
+      targetPort: 8086
+      nodePort: 30086
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      containers:
+        - name: gateway
+          image: schill-gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8086
+          readinessProbe:
+            tcpSocket:
+              port: 8086
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8086
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              mountPath: /app/etc
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: schill-app-config

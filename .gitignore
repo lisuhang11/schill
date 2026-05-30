@@ -1,0 +1,78 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+*.prof
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+
+# Logs
+*.log
+logs/
+
+# Data
+deploy/data/
+
+# Build outputs
+dist/
+build/
+
+# Node modules
+web/node_modules/
+web/dist/
+web/.vite/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# MinIO data
+minio-data/
+
+# Kafka data
+kafka-data/
+
+# MySQL data
+mysql-data/
+
+# Redis data
+redis-data/
+
+# Elasticsearch data
+es-data/
+
+# etcd data
+etcd-data/
+
+# Canal data
+canal-data/
+
+.codex

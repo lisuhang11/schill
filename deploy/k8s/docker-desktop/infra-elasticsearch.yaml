@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+spec:
+  selector:
+    app: elasticsearch
+  ports:
+    - name: http
+      port: 9200
+      targetPort: 9200
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      initContainers:
+        - name: fix-permissions
+          image: schill-elasticsearch:8.6.1-plugins
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          command:
+            - /bin/sh
+            - -c
+            - chown -R 1000:0 /usr/share/elasticsearch/data
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+      containers:
+        - name: elasticsearch
+          image: schill-elasticsearch:8.6.1-plugins
+          imagePullPolicy: IfNotPresent
+          args:
+            - -Ediscovery.type=single-node
+            - -Expack.security.enabled=false
+          env:
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+          ports:
+            - containerPort: 9200
+          readinessProbe:
+            tcpSocket:
+              port: 9200
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9200
+            initialDelaySeconds: 45
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: data
+          hostPath:
+            path: /var/lib/schill/elasticsearch
+            type: DirectoryOrCreate

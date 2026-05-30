@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package interaction;
+option go_package = "/pb";
+
+// 互动类型枚举
+enum InteractionType {
+  INTERACTION_TYPE_UNSPECIFIED = 0;
+  INTERACTION_TYPE_POST_STAR = 1;      // 动态点赞
+  INTERACTION_TYPE_POST_COLLECTION = 2; // 动态收藏
+  INTERACTION_TYPE_POST_SHARE = 3;      // 动态分享
+  INTERACTION_TYPE_COMMENT_VOTE = 4;    // 评论点赞
+}
+
+// 点赞状态响应
+message StarStatus {
+  bool isStarred = 1;  // 是否已点赞
+  int64 starCount = 2; // 点赞数
+}
+
+// 收藏状态响应
+message CollectionStatus {
+  bool isCollected = 1; // 是否已收藏
+}
+
+// 动态点赞请求
+message StarPostReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 动态点赞响应
+message StarPostResp {
+  bool success = 1;
+  bool isStarred = 2;
+  int64 starCount = 3;
+}
+
+// 动态取消点赞请求
+message UnstarPostReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 动态取消点赞响应
+message UnstarPostResp {
+  bool success = 1;
+  bool isStarred = 2;
+  int64 starCount = 3;
+}
+
+// 检查动态点赞状态请求
+message CheckPostStarReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 检查动态点赞状态响应
+message CheckPostStarResp {
+  bool isStarred = 1;
+  int64 starCount = 2;
+}
+
+// 批量检查动态点赞状态请求
+message BatchCheckPostStarReq {
+  uint64 userId = 1;
+  repeated uint64 postIds = 2;
+}
+
+// 批量检查动态点赞状态响应
+message BatchCheckPostStarResp {
+  map<uint64, bool> starStatus = 1; // postId -> isStarred
+}
+
+// 动态收藏请求
+message CollectPostReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 动态收藏响应
+message CollectPostResp {
+  bool success = 1;
+  bool isCollected = 2;
+}
+
+// 动态取消收藏请求
+message UncollectPostReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 动态取消收藏响应
+message UncollectPostResp {
+  bool success = 1;
+  bool isCollected = 2;
+}
+
+// 检查动态收藏状态请求
+message CheckPostCollectionReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 检查动态收藏状态响应
+message CheckPostCollectionResp {
+  bool isCollected = 1;
+}
+
+// 批量检查动态收藏状态请求
+message BatchCheckPostCollectionReq {
+  uint64 userId = 1;
+  repeated uint64 postIds = 2;
+}
+
+// 批量检查动态收藏状态响应
+message BatchCheckPostCollectionResp {
+  map<uint64, bool> collectionStatus = 1; // postId -> isCollected
+}
+
+// 动态分享请求
+message SharePostReq {
+  uint64 userId = 1;
+  uint64 postId = 2;
+}
+
+// 动态分享响应
+message SharePostResp {
+  bool success = 1;
+  int64 shareCount = 2;
+}
+
+// gRPC服务定义
+service InteractionCenter {
+  // 动态点赞
+  rpc StarPost(StarPostReq) returns (StarPostResp);
+  // 动态取消点赞
+  rpc UnstarPost(UnstarPostReq) returns (UnstarPostResp);
+  // 检查动态点赞状态
+  rpc CheckPostStar(CheckPostStarReq) returns (CheckPostStarResp);
+  // 批量检查动态点赞状态
+  rpc BatchCheckPostStar(BatchCheckPostStarReq) returns (BatchCheckPostStarResp);
+
+  // 动态收藏
+  rpc CollectPost(CollectPostReq) returns (CollectPostResp);
+  // 动态取消收藏
+  rpc UncollectPost(UncollectPostReq) returns (UncollectPostResp);
+  // 检查动态收藏状态
+  rpc CheckPostCollection(CheckPostCollectionReq) returns (CheckPostCollectionResp);
+  // 批量检查动态收藏状态
+  rpc BatchCheckPostCollection(BatchCheckPostCollectionReq) returns (BatchCheckPostCollectionResp);
+
+  // 动态分享
+  rpc SharePost(SharePostReq) returns (SharePostResp);
+}
+
+// goctl rpc protoc interaction.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

@@ -1,0 +1,57 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "refresh_interval": "30s",
+    "analysis": {
+      "analyzer": {
+        "ik_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_max_word",
+          "filter": ["lowercase"]
+        },
+        "ik_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_smart",
+          "filter": ["lowercase"]
+        },
+        "ngram_analyzer": {
+          "type": "custom",
+          "tokenizer": "ngram_tokenizer",
+          "filter": ["lowercase"]
+        }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 20,
+          "token_chars": ["letter", "digit"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": { "type": "long" },
+      "username": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer",
+        "fields": {
+          "raw": { "type": "keyword", "ignore_above": 256 },
+          "ngram": { "type": "text", "analyzer": "ngram_analyzer" }
+        }
+      },
+      "status": { "type": "byte" },
+      "is_admin": { "type": "boolean" },
+      "created_at": { "type": "date" },
+      "post_count": { "type": "integer" },
+      "comment_count": { "type": "integer" },
+      "follower_count": { "type": "integer" },
+      "like_count": { "type": "integer" },
+      "collection_count": { "type": "integer" },
+      "last_active_time": { "type": "long" }
+    }
+  }
+}

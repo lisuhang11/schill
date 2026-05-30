@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: schill-es-init
+spec:
+  backoffLimit: 6
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init-indexes
+          image: curlimages/curl:8.7.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              until curl -fsS http://elasticsearch:9200 >/dev/null; do
+                echo "waiting for elasticsearch"
+                sleep 5
+              done
+
+              for idx in post user topic; do
+                curl -fsS -X DELETE "http://elasticsearch:9200/${idx}" >/dev/null || true
+              done
+
+              curl -fsS -X PUT "http://elasticsearch:9200/post" -H "Content-Type: application/json" --data-binary @/indexes/post_index.json
+              curl -fsS -X PUT "http://elasticsearch:9200/user" -H "Content-Type: application/json" --data-binary @/indexes/user_index.json
+              curl -fsS -X PUT "http://elasticsearch:9200/topic" -H "Content-Type: application/json" --data-binary @/indexes/topic_index.json
+          volumeMounts:
+            - name: indexes
+              mountPath: /indexes
+      volumes:
+        - name: indexes
+          configMap:
+            name: schill-es-indexes

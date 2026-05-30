@@ -1,0 +1,50 @@
+package authctx
+
+import (
+	"context"
+	"net/http"
+	"strings"
+
+	jwtx "SChill/common/jwt"
+
+	"github.com/zeromicro/go-zero/rest"
+)
+
+func OptionalJWTMiddleware(secret string) rest.Middleware {
+	return func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			if secret == "" {
+				next(w, r)
+				return
+			}
+
+			token := extractBearerToken(r.Header.Get("Authorization"))
+			if token == "" {
+				next(w, r)
+				return
+			}
+
+			userID, err := jwtx.ParseAccessToken(token, secret)
+			if err != nil || userID == 0 {
+				next(w, r)
+				return
+			}
+
+			next(w, r.WithContext(context.WithValue(r.Context(), userIDContextKey, userID)))
+		}
+	}
+}
+
+func extractBearerToken(authHeader string) string {
+	authHeader = strings.TrimSpace(authHeader)
+	if authHeader == "" {
+		return ""
+	}
+
+	parts := strings.SplitN(authHeader, " ", 2)
+	if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
+		return ""
+	}
+
+	return strings.TrimSpace(parts[1])
+}

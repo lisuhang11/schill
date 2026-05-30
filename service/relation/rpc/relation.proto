@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package relation;
+option go_package = "/pb";
+
+message FollowInfo {
+  uint64 userId = 1;
+  string username = 2;
+  string avatar = 3;
+  int64 followTime = 4;
+}
+
+message FollowReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+message FollowResp {
+  bool success = 1;
+  bool isMutual = 2;
+}
+
+message UnfollowReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+message UnfollowResp {
+  bool success = 1;
+}
+
+message CheckFollowStatusReq {
+  uint64 userId = 1;
+  uint64 targetUserId = 2;
+}
+
+message CheckFollowStatusResp {
+  bool isFollow = 1;
+  bool isMutual = 2;
+}
+
+message GetFollowingListReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+message GetFollowingListResp {
+  int64 total = 1;
+  repeated FollowInfo list = 2;
+}
+
+message GetFollowerListReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+message GetFollowerListResp {
+  int64 total = 1;
+  repeated FollowInfo list = 2;
+}
+
+message BatchCheckFollowStatusReq {
+  uint64 userId = 1;
+  repeated uint64 targetUserIds = 2;
+}
+
+message FollowStatusItem {
+  uint64 userId = 1;
+  bool isFollow = 2;
+  bool isMutual = 3;
+}
+
+message BatchCheckFollowStatusResp {
+  repeated FollowStatusItem status = 1;
+}
+
+service RelationCenter {
+  rpc Follow(FollowReq) returns (FollowResp);
+  rpc Unfollow(UnfollowReq) returns (UnfollowResp);
+  rpc CheckFollowStatus(CheckFollowStatusReq) returns (CheckFollowStatusResp);
+  rpc GetFollowingList(GetFollowingListReq) returns (GetFollowingListResp);
+  rpc GetFollowerList(GetFollowerListReq) returns (GetFollowerListResp);
+  rpc BatchCheckFollowStatus(BatchCheckFollowStatusReq) returns (BatchCheckFollowStatusResp);
+}

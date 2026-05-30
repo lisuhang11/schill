@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package feed;
+option go_package = "/pb";
+
+message GetFeedListReq {
+  string feedType = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+  uint64 currentUserId = 4;
+}
+
+message FeedAuthor {
+  uint64 id = 1;
+  string username = 2;
+  string nickname = 3;
+  string avatar = 4;
+}
+
+message FeedViewerState {
+  bool isStarred = 1;
+  bool isCollected = 2;
+  bool isFollowingAuthor = 3;
+}
+
+message FeedItem {
+  uint64 postId = 1;
+  uint64 authorId = 2;
+  string title = 3;
+  string summary = 4;
+  string cover = 5;
+  repeated string tags = 6;
+  int32 visibility = 7;
+  bool isTop = 8;
+  bool isEssence = 9;
+  bool isLock = 10;
+  uint64 commentCount = 11;
+  uint64 upvoteCount = 12;
+  uint64 collectionCount = 13;
+  uint64 shareCount = 14;
+  int64 createdAt = 15;
+  int64 updatedAt = 16;
+  int64 latestRepliedAt = 17;
+  string feedType = 18;
+  string source = 19;
+  FeedAuthor author = 20;
+  FeedViewerState viewerState = 21;
+}
+
+message GetFeedListResp {
+  int32 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated FeedItem list = 4;
+}
+
+service FeedCenter {
+  rpc GetFeedList(GetFeedListReq) returns (GetFeedListResp);
+}

@@ -1,0 +1,43 @@
+Name: comment.rpc
+ListenOn: 0.0.0.0:8083
+Etcd:
+  Hosts:
+    - etcd:2379
+  Key: comment.rpc
+
+ContentRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: content.rpc
+
+Mysql:
+  DataSource: "root:123456@tcp(mysql:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+  AutoMigrate: true
+
+KqProducerConf:
+  Brokers:
+    - kafka:9092
+  TopicCommentCreate: comment-create
+  TopicCommentCreated: comment-created
+  TopicCommentDeleted: comment-deleted
+  TopicCommentVote: comment-vote
+
+KqConsumerConf:
+  Brokers:
+    - kafka:9092
+  TopicCommentCreate: comment-create
+  TopicCommentDeleted: comment-deleted
+  TopicCommentVote: comment-vote
+  TopicCommentDLQ: comment-dlq
+  Group: comment-consumer-group
+
+RedisConf:
+  Host: "redis"
+  Port: "6379"
+  Password: ""
+  DB: 0

@@ -1,0 +1,47 @@
+Name: gateway
+Host: 0.0.0.0
+Port: 8086
+
+Jwt:
+  AccessSecret: "change-me-gateway-access-secret"
+
+SearchProxy:
+  Target: http://search-api:8895
+  DialTimeout: 2s
+  ResponseHeaderTimeout: 10s
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: user.rpc
+
+ContentRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: content.rpc
+
+FeedRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: feed.rpc
+
+CommentRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: comment.rpc
+
+RelationRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: relation.rpc
+
+InteractionRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: interaction.rpc

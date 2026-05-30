@@ -1,0 +1,202 @@
+// 用户中心服务协议定义
+// 包含用户基本信息、个人资料、统计数据以及认证相关接口
+
+syntax = "proto3";
+
+package user;                      // 包名：用户模块
+option go_package = "/pb";         // Go语言生成代码的路径
+
+// 用户基本信息
+message UserInfo {
+  uint64 id = 1;          // 用户ID
+  string username = 2;    // 用户名
+  string nickname = 3;    // 昵称
+  string phone = 4;       // 手机号
+  string email = 5;       // 电子邮箱
+  string avatar = 6;      // 头像URL
+  int32 status = 7;       // 用户状态（0:正常 1:封禁 2:删除等）
+  bool isAdmin = 8;       // 是否为管理员
+  int64 createdAt = 9;    // 创建时间（Unix时间戳，秒）
+}
+
+// 用户个人资料（可扩展信息，字段均为可选）
+message UserProfile {
+  uint64 userId = 1;                 // 关联的用户ID
+  optional int64 gender = 2;         // 性别（0:未知 1:男 2:女）
+  optional string birthday = 3;      // 生日（格式：YYYY-MM-DD）
+  optional string signature = 4;     // 个性签名
+  optional string location = 5;      // 所在地
+  optional string website = 6;       // 个人网站
+  optional string company = 7;       // 所在公司
+  optional string jobTitle = 8;      // 职位
+  optional string education = 9;     // 教育背景
+}
+
+// 用户统计信息
+message UserStat {
+  uint64 userId = 1;            // 用户ID
+  uint64 postCount = 2;         // 发帖数
+  uint64 commentCount = 3;      // 评论数
+  uint64 followerCount = 4;     // 粉丝数
+  uint64 followingCount = 5;    // 关注数
+  uint64 likeCount = 6;         // 获赞总数
+  uint64 collectionCount = 7;   // 收藏总数
+  int64 lastActiveTime = 8;     // 最后活跃时间（Unix时间戳，秒）
+}
+
+// 注册请求
+message RegisterReq {
+  string username = 1;   // 用户名
+  string password = 2;   // 密码（明文，实际传输应加密）
+}
+
+// 注册响应
+message RegisterResp {
+  uint64 userId = 1;     // 注册成功后的用户ID
+}
+
+// 登录请求
+message LoginReq {
+  string username = 1;   // 用户名
+  string password = 2;   // 密码
+}
+
+// 登录响应
+message LoginResp {
+  uint64 userId = 1;            // 用户ID
+  string accessToken = 2;       // 访问令牌
+  int64 accessExpireIn = 3;     // 访问令牌过期时间（Unix时间戳）
+  string refreshToken = 4;      // 刷新令牌
+  int64 refreshExpireIn = 5;    // 刷新令牌过期时间（Unix时间戳）
+}
+
+// 刷新令牌请求
+message RefreshTokenReq {
+  string refreshToken = 1;   // 刷新令牌
+}
+
+// 刷新令牌响应
+message RefreshTokenResp {
+  uint64 userId = 1;            // 用户ID
+  string accessToken = 2;       // 新的访问令牌
+  int64 accessExpireIn = 3;     // 访问令牌过期时间
+  string refreshToken = 4;      // 新的刷新令牌
+  int64 refreshExpireIn = 5;    // 刷新令牌过期时间
+}
+
+// 获取用户信息请求
+message GetUserInfoReq {
+  uint64 userId = 1;   // 用户ID
+}
+
+// 获取用户信息响应（包含基本信息、个人资料、统计数据）
+message GetUserInfoResp {
+  UserInfo userInfo = 1;    // 基本信息
+  UserProfile profile = 2;  // 个人资料
+  UserStat stat = 3;        // 统计数据
+}
+
+// 用户基础信息（用于列表展示等轻量场景）
+message UserBasicInfo {
+  uint64 id = 1;          // 用户ID
+  string username = 2;    // 用户名
+  string nickname = 3;    // 昵称
+  string avatar = 4;      // 头像URL
+  int32 status = 5;       // 用户状态
+}
+
+// 批量获取用户基础信息请求
+message BatchGetUserBasicInfoReq {
+  repeated uint64 userIds = 1;   // 用户ID列表
+}
+
+// 批量获取用户基础信息响应
+message BatchGetUserBasicInfoResp {
+  repeated UserBasicInfo users = 1;   // 用户基础信息列表
+}
+
+// 更新用户状态请求
+message UpdateUserStatusReq {
+  uint64 userId = 1;   // 用户ID
+  int32 status = 2;    // 新状态
+}
+
+// 更新用户状态响应
+message UpdateUserStatusResp {
+  bool success = 1;    // 是否成功
+}
+
+// 更新用户个人资料请求
+message UpdateUserProfileInfoReq {
+  UserProfile userProfile = 1;   // 要更新的个人资料
+  uint64 userId = 2;             // 用户ID
+}
+
+// 更新用户个人资料响应
+message UpdateUserProfileInfoResp {
+  UserProfile userProfile = 1;   // 更新后的个人资料
+}
+
+// 获取用户统计信息请求
+message GetUserStatReq {
+  uint64 userId = 1;   // 用户ID
+}
+
+// 获取用户统计信息响应
+message GetUserStatResp {
+  UserStat stat = 1;   // 统计信息
+}
+
+// 获取用户个人资料请求
+message GetUserProfileInfoReq {
+  uint64 userId = 1;   // 用户ID
+}
+
+// 获取用户个人资料响应
+message GetUserProfileInfoResp {
+  UserProfile profile = 1;   // 个人资料
+}
+
+// 更新用户头像请求
+message UpdateAvatarReq {
+  uint64 userId = 1;      // 用户ID
+  string avatarUrl = 2;   // 新的头像URL
+}
+
+// 更新用户头像响应
+message UpdateAvatarResp {
+  string avatarUrl = 1;   // 当前的头像URL
+}
+
+// 用户中心服务（定义所有RPC接口）
+service UserCenter {
+  // 用户注册
+  rpc Register(RegisterReq) returns (RegisterResp);
+
+  // 用户登录
+  rpc Login(LoginReq) returns (LoginResp);
+
+  // 刷新访问令牌
+  rpc RefreshToken(RefreshTokenReq) returns (RefreshTokenResp);
+
+  // 获取用户完整信息（基本信息+个人资料+统计）
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp);
+
+  // 批量获取用户基础信息（轻量级，用于列表页）
+  rpc BatchGetUserBasicInfo(BatchGetUserBasicInfoReq) returns (BatchGetUserBasicInfoResp);
+
+  // 更新用户状态（封禁/解封等）
+  rpc UpdateUserStatus(UpdateUserStatusReq) returns (UpdateUserStatusResp);
+
+  // 更新用户个人资料
+  rpc UpdateUserProfileInfo(UpdateUserProfileInfoReq) returns (UpdateUserProfileInfoResp);
+
+  // 获取用户统计信息
+  rpc GetUserStat(GetUserStatReq) returns (GetUserStatResp);
+
+  // 获取用户个人资料
+  rpc GetUserProfileInfo(GetUserProfileInfoReq) returns (GetUserProfileInfoResp);
+
+  // 更新用户头像
+  rpc UpdateAvatar(UpdateAvatarReq) returns (UpdateAvatarResp);
+}

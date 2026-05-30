@@ -1,0 +1,57 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: schill
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+resources:
+  - namespace.yaml
+  - infra-etcd.yaml
+  - infra-mysql.yaml
+  - infra-redis.yaml
+  - infra-minio.yaml
+  - infra-kafka.yaml
+  - infra-elasticsearch.yaml
+  - infra-canal-server.yaml
+  - app-user.yaml
+  - app-relation.yaml
+  - app-content.yaml
+  - app-feed.yaml
+  - app-comment.yaml
+  - app-interaction.yaml
+  - app-search.yaml
+  - app-canal.yaml
+  - app-web.yaml
+  - app-gateway.yaml
+
+secretGenerator:
+  - name: schill-app-config
+    files:
+      - config/gateway.yaml
+      - config/user-rpc.yaml
+      - config/content-rpc.yaml
+      - config/feed-rpc.yaml
+      - config/comment-rpc.yaml
+      - config/interaction-rpc.yaml
+      - config/relation-rpc.yaml
+      - config/search-api.yaml
+      - config/canal.yaml
+  - name: schill-canal-server-config
+    files:
+      - config/canal.properties
+      - config/instance.properties
+  - name: schill-runtime-secrets
+    literals:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=schill
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=admin123
+
+configMapGenerator:
+  - name: schill-es-indexes
+    files:
+      - config/post_index.json
+      - config/user_index.json
+      - config/topic_index.json

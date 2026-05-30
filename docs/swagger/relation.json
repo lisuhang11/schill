@@ -1,0 +1,463 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "提供用户关注、粉丝等关系管理接口",
+    "title": "关系服务API",
+    "termsOfService": "https://github.com/schill",
+    "contact": {
+      "name": "系统",
+      "url": "https://github.com/schill",
+      "email": "support@schill.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/schill/blob/master/LICENSE"
+    },
+    "version": "v1"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "paths": {
+    "/relation/follow": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "Follow",
+        "operationId": "follow",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/FollowReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/FollowResp"
+            }
+          }
+        }
+      }
+    },
+    "/relation/follow/status": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "CheckFollowStatus",
+        "operationId": "checkFollowStatus",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "targetUserId",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/FollowStatusResp"
+            }
+          }
+        }
+      }
+    },
+    "/relation/follow/status/batch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "BatchCheckFollowStatus",
+        "operationId": "batchCheckFollowStatus",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BatchCheckFollowStatusReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BatchCheckFollowStatusResp"
+            }
+          }
+        }
+      }
+    },
+    "/relation/follow/{targetUserId}": {
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "Unfollow",
+        "operationId": "unfollow",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "targetUserId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UnfollowResp"
+            }
+          }
+        }
+      }
+    },
+    "/relation/follower": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "GetFollowerList",
+        "operationId": "getFollowerList",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "userId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/FollowListResp"
+            }
+          }
+        }
+      }
+    },
+    "/relation/following": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "关系管理"
+        ],
+        "summary": "GetFollowingList",
+        "operationId": "getFollowingList",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "userId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/FollowListResp"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BatchCheckFollowStatusReq": {
+      "type": "object",
+      "required": [
+        "targetUserIds"
+      ],
+      "properties": {
+        "targetUserIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "BatchCheckFollowStatusResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "status"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "status": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FollowStatusItem"
+          }
+        }
+      }
+    },
+    "CheckFollowStatusReq": {
+      "type": "object"
+    },
+    "FollowInfo": {
+      "type": "object",
+      "required": [
+        "userId",
+        "username",
+        "avatar",
+        "followTime"
+      ],
+      "properties": {
+        "avatar": {
+          "type": "string",
+          "example": "https://example.com/avatar.jpg"
+        },
+        "followTime": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "userId": {
+          "type": "integer",
+          "example": 1002
+        },
+        "username": {
+          "type": "string",
+          "example": "testuser"
+        }
+      }
+    },
+    "FollowListResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "total",
+        "list"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FollowInfo"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "total": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "FollowReq": {
+      "type": "object",
+      "required": [
+        "targetUserId"
+      ],
+      "properties": {
+        "targetUserId": {
+          "type": "integer"
+        }
+      }
+    },
+    "FollowResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "FollowStatusItem": {
+      "type": "object",
+      "required": [
+        "userId",
+        "isFollow"
+      ],
+      "properties": {
+        "isFollow": {
+          "type": "boolean",
+          "example": false
+        },
+        "userId": {
+          "type": "integer",
+          "example": 1002
+        }
+      }
+    },
+    "FollowStatusResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isFollow"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isFollow": {
+          "type": "boolean",
+          "example": false
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "GetFollowerListReq": {
+      "type": "object"
+    },
+    "GetFollowingListReq": {
+      "type": "object"
+    },
+    "PageReq": {
+      "type": "object"
+    },
+    "UnfollowReq": {
+      "type": "object"
+    },
+    "UnfollowResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    }
+  },
+  "x-date": "2026-04-25 17:19:39",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.1"
+}

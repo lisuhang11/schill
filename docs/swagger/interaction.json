@@ -1,0 +1,659 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "提供点赞、收藏、分享等互动接口",
+    "title": "互动服务API",
+    "termsOfService": "https://github.com/schill",
+    "contact": {
+      "name": "系统",
+      "url": "https://github.com/schill",
+      "email": "support@schill.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/schill/blob/master/LICENSE"
+    },
+    "version": "v1"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "paths": {
+    "/interaction/post/collect": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动管理"
+        ],
+        "summary": "CollectPost",
+        "operationId": "collectPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CollectPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CollectPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/collection/batch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动查询"
+        ],
+        "summary": "BatchCheckPostCollection",
+        "operationId": "batchCheckPostCollection",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BatchCheckPostCollectionReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BatchCheckPostCollectionResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/share": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动管理"
+        ],
+        "summary": "SharePost",
+        "operationId": "sharePost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SharePostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SharePostResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/star": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动管理"
+        ],
+        "summary": "StarPost",
+        "operationId": "starPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/StarPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/StarPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/star/batch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动查询"
+        ],
+        "summary": "BatchCheckPostStar",
+        "operationId": "batchCheckPostStar",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BatchCheckPostStarReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BatchCheckPostStarResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/uncollect": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动管理"
+        ],
+        "summary": "UncollectPost",
+        "operationId": "uncollectPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UncollectPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UncollectPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/unstar": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动管理"
+        ],
+        "summary": "UnstarPost",
+        "operationId": "unstarPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnstarPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UnstarPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/{postId}/collection": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动查询"
+        ],
+        "summary": "CheckPostCollection",
+        "operationId": "checkPostCollection",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CheckPostCollectionResp"
+            }
+          }
+        }
+      }
+    },
+    "/interaction/post/{postId}/star": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "互动查询"
+        ],
+        "summary": "CheckPostStar",
+        "operationId": "checkPostStar",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CheckPostStarResp"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BatchCheckPostCollectionReq": {
+      "type": "object",
+      "required": [
+        "postIds"
+      ],
+      "properties": {
+        "postIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "BatchCheckPostCollectionResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "collectionStatus"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "collectionStatus": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "BatchCheckPostStarReq": {
+      "type": "object",
+      "required": [
+        "postIds"
+      ],
+      "properties": {
+        "postIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "BatchCheckPostStarResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "starStatus"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "starStatus": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "CheckPostCollectionReq": {
+      "type": "object"
+    },
+    "CheckPostCollectionResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isCollected"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isCollected": {
+          "type": "boolean",
+          "example": false
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "CheckPostStarReq": {
+      "type": "object"
+    },
+    "CheckPostStarResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isStarred",
+        "starCount"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isStarred": {
+          "type": "boolean",
+          "example": false
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "starCount": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "CollectPostReq": {
+      "type": "object",
+      "required": [
+        "postId"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "CollectPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isCollected"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isCollected": {
+          "type": "boolean",
+          "example": true
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "SharePostReq": {
+      "type": "object",
+      "required": [
+        "postId"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "SharePostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "shareCount"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "shareCount": {
+          "type": "integer",
+          "example": 51
+        }
+      }
+    },
+    "StarPostReq": {
+      "type": "object",
+      "required": [
+        "postId"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "StarPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isStarred",
+        "starCount"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isStarred": {
+          "type": "boolean",
+          "example": true
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "starCount": {
+          "type": "integer",
+          "example": 101
+        }
+      }
+    },
+    "UncollectPostReq": {
+      "type": "object",
+      "required": [
+        "postId"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "UncollectPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isCollected"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isCollected": {
+          "type": "boolean",
+          "example": false
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "UnstarPostReq": {
+      "type": "object",
+      "required": [
+        "postId"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "UnstarPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "isStarred",
+        "starCount"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "isStarred": {
+          "type": "boolean",
+          "example": false
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "starCount": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    }
+  },
+  "x-date": "2026-04-25 17:19:32",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.1"
+}

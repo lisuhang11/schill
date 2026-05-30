@@ -1,0 +1,18 @@
+Name: search-api
+Host: 0.0.0.0
+Port: 8895
+
+Elasticsearch:
+  Hosts:
+    - http://elasticsearch:9200
+  Username: ""
+  Password: ""
+  PostIndex: "post"
+  UserIndex: "user"
+  TopicIndex: "topic"
+
+Redis:
+  Host: "redis"
+  Port: "6379"
+  Password: ""
+  DB: 0

@@ -1,0 +1,74 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "refresh_interval": "30s",
+    "analysis": {
+      "analyzer": {
+        "ik_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_max_word",
+          "filter": ["lowercase"]
+        },
+        "ik_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "ik_smart",
+          "filter": ["lowercase"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": { "type": "long", "index": false },
+      "user_id": { "type": "long" },
+      "title": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer",
+        "fields": {
+          "raw": { "type": "keyword" }
+        }
+      },
+      "cover": { "type": "keyword", "index": false, "doc_values": false },
+      "summary": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer"
+      },
+      "content": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer"
+      },
+      "topic_names": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer",
+        "fields": {
+          "raw": { "type": "keyword" }
+        }
+      },
+      "username": {
+        "type": "text",
+        "analyzer": "ik_analyzer",
+        "search_analyzer": "ik_search_analyzer",
+        "fields": {
+          "raw": { "type": "keyword" }
+        }
+      },
+      "avatar": { "type": "keyword", "index": false, "doc_values": false },
+      "comment_count": { "type": "long" },
+      "collection_count": { "type": "long" },
+      "upvote_count": { "type": "long" },
+      "share_count": { "type": "long" },
+      "visibility": { "type": "byte" },
+      "is_top": { "type": "boolean" },
+      "is_essence": { "type": "boolean" },
+      "is_lock": { "type": "boolean" },
+      "tags": { "type": "keyword" },
+      "created_at": { "type": "date" },
+      "updated_at": { "type": "date" }
+    }
+  }
+}

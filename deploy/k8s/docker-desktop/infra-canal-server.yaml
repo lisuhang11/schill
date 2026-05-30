@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: canal-server
+spec:
+  selector:
+    app: canal-server
+  ports:
+    - name: canal
+      port: 11111
+      targetPort: 11111
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canal-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: canal-server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: canal-server
+    spec:
+      containers:
+        - name: canal-server
+          image: canal/canal-server:v1.1.7
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TZ
+              value: Asia/Shanghai
+          ports:
+            - containerPort: 11111
+          readinessProbe:
+            tcpSocket:
+              port: 11111
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 11111
+            initialDelaySeconds: 40
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: canal-properties
+              mountPath: /home/admin/canal-server/conf/canal.properties
+              subPath: canal.properties
+            - name: canal-instance
+              mountPath: /home/admin/canal-server/conf/example/instance.properties
+              subPath: instance.properties
+            - name: canal-data
+              mountPath: /home/admin/canal-server/data
+            - name: canal-logs
+              mountPath: /home/admin/canal-server/logs
+      volumes:
+        - name: canal-properties
+          secret:
+            secretName: schill-canal-server-config
+            items:
+              - key: canal.properties
+                path: canal.properties
+        - name: canal-instance
+          secret:
+            secretName: schill-canal-server-config
+            items:
+              - key: instance.properties
+                path: instance.properties
+        - name: canal-data
+          hostPath:
+            path: /var/lib/schill/canal/data
+            type: DirectoryOrCreate
+        - name: canal-logs
+          hostPath:
+            path: /var/lib/schill/canal/logs
+            type: DirectoryOrCreate

@@ -1,0 +1,20 @@
+Name: search-api
+Host: 0.0.0.0
+Port: 8895
+
+# Elasticsearch 配置
+Elasticsearch:
+  Hosts:
+    - http://127.0.0.1:9200
+  Username: ""
+  Password: ""
+  PostIndex: "post"
+  UserIndex: "user"
+  TopicIndex: "topic"
+
+# Redis 配置
+Redis:
+  Host: "127.0.0.1"
+  Port: "6379"
+  Password: ""
+  DB: 0

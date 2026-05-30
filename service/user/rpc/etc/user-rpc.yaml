@@ -1,0 +1,39 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8080
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: user.rpc
+
+# mysql配置
+Mysql:
+  DataSource: "root:123456@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+
+Jwt:
+  AccessSecret: "your-256-bit-secret"
+  AccessExpire: 86400
+  RefreshSecret: "another-random-secret"
+  RefreshExpire: 604800
+
+# Kafka Consumer配置
+KqConsumerConf:
+  Name: userPostCountConsumer
+  Brokers:
+    - 127.0.0.1:9092
+  Group: userPostCountConsumerGroup
+  TopicCreated: post-created
+  TopicDeleted: post-deleted
+  TopicFollowed: user-followed
+  TopicUnfollowed: user-unfollowed
+  Offset: first
+  Consumers: 8
+  Processors: 8
+
+# Redis 配置
+Cache:
+  - Host: "127.0.0.1:6379"
+    Pass: ""

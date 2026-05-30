@@ -1,0 +1,40 @@
+Name: interaction.rpc
+ListenOn: 0.0.0.0:8084
+Etcd:
+  Hosts:
+    - etcd:2379
+  Key: interaction.rpc
+
+Mysql:
+  DataSource: "root:123456@tcp(mysql:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+  AutoMigrate: true
+
+KqProducerConf:
+  Brokers:
+    - kafka:9092
+  TopicPostStar: post-star
+  TopicPostUnstar: post-unstar
+  TopicPostCollect: post-collect
+  TopicPostUncollect: post-uncollect
+  TopicPostShare: post-share
+
+RedisConf:
+  Host: "redis"
+  Port: "6379"
+  Password: ""
+  DB: 0
+
+KafkaConsumerConf:
+  Brokers:
+    - kafka:9092
+  Group: interaction-consumer
+  Topics:
+    - post-star
+    - post-unstar
+    - post-collect
+    - post-uncollect
+  DLQTopic: interaction-dlq

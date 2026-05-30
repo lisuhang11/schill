@@ -1,0 +1,684 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "提供抖音风格的评论、回复、点赞等接口",
+    "title": "评论服务API",
+    "termsOfService": "https://github.com/schill",
+    "contact": {
+      "name": "系统",
+      "url": "https://github.com/schill",
+      "email": "support@schill.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/schill/blob/master/LICENSE"
+    },
+    "version": "v1"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "paths": {
+    "/comment": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论管理"
+        ],
+        "summary": "CreateComment",
+        "operationId": "createComment",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCommentReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CreateCommentResp"
+            }
+          }
+        }
+      }
+    },
+    "/comment/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论查询"
+        ],
+        "summary": "GetCommentList",
+        "operationId": "getCommentList",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "example": 0,
+            "name": "cursor",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "default": "time",
+            "example": "time",
+            "name": "sortType",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CommentListResp"
+            }
+          }
+        }
+      }
+    },
+    "/comment/replies": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论查询"
+        ],
+        "summary": "GetReplyList",
+        "operationId": "getReplyList",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "commentId",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 0,
+            "example": 0,
+            "name": "cursor",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CommentListResp"
+            }
+          }
+        }
+      }
+    },
+    "/comment/{commentId}": {
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论管理"
+        ],
+        "summary": "DeleteComment",
+        "operationId": "deleteComment",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "commentId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DeleteCommentResp"
+            }
+          }
+        }
+      }
+    },
+    "/comment/{commentId}/vote": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "评论管理"
+        ],
+        "summary": "VoteComment",
+        "operationId": "voteComment",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "commentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VoteCommentReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/VoteCommentResp"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CommentInfo": {
+      "type": "object",
+      "required": [
+        "id",
+        "postId",
+        "userId",
+        "parentId",
+        "replyToUserId",
+        "content",
+        "level",
+        "replyCount",
+        "likeCount",
+        "dislikeCount",
+        "createdAt",
+        "username",
+        "avatar",
+        "replyToUsername",
+        "isLiked",
+        "isDisliked"
+      ],
+      "properties": {
+        "avatar": {
+          "type": "string",
+          "example": "https://example.com/avatar.jpg"
+        },
+        "content": {
+          "type": "string",
+          "example": "这是一条精彩的评论"
+        },
+        "createdAt": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "dislikeCount": {
+          "type": "integer",
+          "example": 5
+        },
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "isDisliked": {
+          "type": "boolean",
+          "example": false
+        },
+        "isLiked": {
+          "type": "boolean",
+          "example": false
+        },
+        "level": {
+          "type": "integer",
+          "example": 1
+        },
+        "likeCount": {
+          "type": "integer",
+          "example": 100
+        },
+        "parentId": {
+          "type": "integer",
+          "example": 0
+        },
+        "postId": {
+          "type": "integer",
+          "example": 100
+        },
+        "replyCount": {
+          "type": "integer",
+          "example": 10
+        },
+        "replyToUserId": {
+          "type": "integer",
+          "example": 0
+        },
+        "replyToUsername": {
+          "type": "string",
+          "example": "otheruser"
+        },
+        "userId": {
+          "type": "integer",
+          "example": 1001
+        },
+        "username": {
+          "type": "string",
+          "example": "testuser"
+        }
+      }
+    },
+    "CommentItem": {
+      "type": "object",
+      "required": [
+        "root",
+        "replies",
+        "hasMoreReplies"
+      ],
+      "properties": {
+        "hasMoreReplies": {
+          "type": "boolean",
+          "example": false
+        },
+        "replies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommentInfo"
+          }
+        },
+        "root": {
+          "type": "object",
+          "required": [
+            "id",
+            "postId",
+            "userId",
+            "parentId",
+            "replyToUserId",
+            "content",
+            "level",
+            "replyCount",
+            "likeCount",
+            "dislikeCount",
+            "createdAt",
+            "username",
+            "avatar",
+            "replyToUsername",
+            "isLiked",
+            "isDisliked"
+          ],
+          "properties": {
+            "avatar": {
+              "type": "string",
+              "example": "https://example.com/avatar.jpg"
+            },
+            "content": {
+              "type": "string",
+              "example": "这是一条精彩的评论"
+            },
+            "createdAt": {
+              "type": "integer",
+              "example": 1700000000
+            },
+            "dislikeCount": {
+              "type": "integer",
+              "example": 5
+            },
+            "id": {
+              "type": "integer",
+              "example": 1
+            },
+            "isDisliked": {
+              "type": "boolean",
+              "example": false
+            },
+            "isLiked": {
+              "type": "boolean",
+              "example": false
+            },
+            "level": {
+              "type": "integer",
+              "example": 1
+            },
+            "likeCount": {
+              "type": "integer",
+              "example": 100
+            },
+            "parentId": {
+              "type": "integer",
+              "example": 0
+            },
+            "postId": {
+              "type": "integer",
+              "example": 100
+            },
+            "replyCount": {
+              "type": "integer",
+              "example": 10
+            },
+            "replyToUserId": {
+              "type": "integer",
+              "example": 0
+            },
+            "replyToUsername": {
+              "type": "string",
+              "example": "otheruser"
+            },
+            "userId": {
+              "type": "integer",
+              "example": 1001
+            },
+            "username": {
+              "type": "string",
+              "example": "testuser"
+            }
+          },
+          "$ref": "#/definitions/CommentInfo"
+        }
+      }
+    },
+    "CommentListResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "total",
+        "list"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CommentItem"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "total": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "CreateCommentReq": {
+      "type": "object",
+      "required": [
+        "postId",
+        "parentId",
+        "replyToUserId",
+        "content"
+      ],
+      "properties": {
+        "content": {
+          "type": "string"
+        },
+        "parentId": {
+          "type": "integer",
+          "default": 0,
+          "example": 0
+        },
+        "postId": {
+          "type": "integer"
+        },
+        "replyToUserId": {
+          "type": "integer",
+          "default": 0,
+          "example": 0
+        }
+      }
+    },
+    "CreateCommentResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "comment"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "comment": {
+          "type": "object",
+          "required": [
+            "id",
+            "postId",
+            "userId",
+            "parentId",
+            "replyToUserId",
+            "content",
+            "level",
+            "replyCount",
+            "likeCount",
+            "dislikeCount",
+            "createdAt",
+            "username",
+            "avatar",
+            "replyToUsername",
+            "isLiked",
+            "isDisliked"
+          ],
+          "properties": {
+            "avatar": {
+              "type": "string",
+              "example": "https://example.com/avatar.jpg"
+            },
+            "content": {
+              "type": "string",
+              "example": "这是一条精彩的评论"
+            },
+            "createdAt": {
+              "type": "integer",
+              "example": 1700000000
+            },
+            "dislikeCount": {
+              "type": "integer",
+              "example": 5
+            },
+            "id": {
+              "type": "integer",
+              "example": 1
+            },
+            "isDisliked": {
+              "type": "boolean",
+              "example": false
+            },
+            "isLiked": {
+              "type": "boolean",
+              "example": false
+            },
+            "level": {
+              "type": "integer",
+              "example": 1
+            },
+            "likeCount": {
+              "type": "integer",
+              "example": 100
+            },
+            "parentId": {
+              "type": "integer",
+              "example": 0
+            },
+            "postId": {
+              "type": "integer",
+              "example": 100
+            },
+            "replyCount": {
+              "type": "integer",
+              "example": 10
+            },
+            "replyToUserId": {
+              "type": "integer",
+              "example": 0
+            },
+            "replyToUsername": {
+              "type": "string",
+              "example": "otheruser"
+            },
+            "userId": {
+              "type": "integer",
+              "example": 1001
+            },
+            "username": {
+              "type": "string",
+              "example": "testuser"
+            }
+          },
+          "$ref": "#/definitions/CommentInfo"
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "DeleteCommentReq": {
+      "type": "object"
+    },
+    "DeleteCommentResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "GetCommentListReq": {
+      "type": "object"
+    },
+    "GetReplyListReq": {
+      "type": "object"
+    },
+    "VoteCommentReq": {
+      "type": "object",
+      "required": [
+        "voteType"
+      ],
+      "properties": {
+        "voteType": {
+          "type": "integer"
+        }
+      }
+    },
+    "VoteCommentResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "likeCount",
+        "dislikeCount",
+        "isLiked",
+        "isDisliked"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "dislikeCount": {
+          "type": "integer",
+          "example": 5
+        },
+        "isDisliked": {
+          "type": "boolean",
+          "example": false
+        },
+        "isLiked": {
+          "type": "boolean",
+          "example": true
+        },
+        "likeCount": {
+          "type": "integer",
+          "example": 101
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    }
+  },
+  "x-date": "2026-04-25 17:19:14",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.1"
+}

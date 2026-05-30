@@ -1,0 +1,1036 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "description": "提供帖子创建、编辑、删除、列表、详情等接口",
+    "title": "内容服务 API",
+    "termsOfService": "https://github.com/schill",
+    "contact": {
+      "name": "system",
+      "url": "https://github.com/schill",
+      "email": "support@schill.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/schill/blob/master/LICENSE"
+    },
+    "version": "v1"
+  },
+  "host": "localhost",
+  "basePath": "/",
+  "paths": {
+    "/content/post": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容管理"
+        ],
+        "summary": "UpdatePost",
+        "operationId": "updatePost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/UpdatePostResp"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容管理"
+        ],
+        "summary": "CreatePost",
+        "operationId": "createPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/CreatePostResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/batch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容查询"
+        ],
+        "summary": "BatchGetPost",
+        "operationId": "batchGetPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BatchGetPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/BatchGetPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容查询"
+        ],
+        "summary": "GetPostList",
+        "operationId": "getPostList",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "userId",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PostListResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/{postId}": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容查询"
+        ],
+        "summary": "GetPostDetail",
+        "operationId": "getPostDetail",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/PostDetailResp"
+            }
+          }
+        }
+      },
+      "delete": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容管理"
+        ],
+        "summary": "DeletePost",
+        "operationId": "deletePost",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/DeletePostResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/{postId}/essence": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容管理"
+        ],
+        "summary": "SetEssencePost",
+        "operationId": "setEssencePost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetEssencePostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SetEssencePostResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/{postId}/top": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容管理"
+        ],
+        "summary": "SetTopPost",
+        "operationId": "setTopPost",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetTopPostReq"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/SetTopPostResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/post/{postId}/view": {
+      "post": {
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容查询"
+        ],
+        "summary": "IncViewCount",
+        "operationId": "incViewCount",
+        "parameters": [
+          {
+            "type": "integer",
+            "name": "postId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/IncViewCountResp"
+            }
+          }
+        }
+      }
+    },
+    "/content/topic/list": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "tags": [
+          "内容查询"
+        ],
+        "summary": "GetTopicList",
+        "operationId": "getTopicList",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "pageSize",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "default": "hot",
+            "example": "hot",
+            "name": "sort",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/GetTopicListResp"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "BatchGetPostReq": {
+      "type": "object",
+      "required": [
+        "postIds"
+      ],
+      "properties": {
+        "postIds": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "BatchGetPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "posts"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "posts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostInfo"
+          }
+        }
+      }
+    },
+    "CreatePostReq": {
+      "type": "object",
+      "required": [
+        "title",
+        "cover",
+        "visibility",
+        "contents",
+        "topics",
+        "tags"
+      ],
+      "properties": {
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostContentItem"
+          }
+        },
+        "cover": {
+          "type": "string",
+          "example": "https://example.com/cover.jpg"
+        },
+        "tags": {
+          "type": "string",
+          "example": "生活"
+        },
+        "title": {
+          "type": "string"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visibility": {
+          "type": "integer",
+          "example": 0
+        }
+      }
+    },
+    "CreatePostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "postId"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "postId": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "DeletePostReq": {
+      "type": "object"
+    },
+    "DeletePostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "GetPostDetailReq": {
+      "type": "object"
+    },
+    "GetPostListReq": {
+      "type": "object"
+    },
+    "GetTopicListReq": {
+      "type": "object"
+    },
+    "GetTopicListResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "total",
+        "list"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TopicInfo"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "total": {
+          "type": "integer",
+          "example": 50
+        }
+      }
+    },
+    "IncViewCountReq": {
+      "type": "object"
+    },
+    "IncViewCountResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "PageReq": {
+      "type": "object"
+    },
+    "PostContentItem": {
+      "type": "object",
+      "required": [
+        "type",
+        "content",
+        "sort"
+      ],
+      "properties": {
+        "content": {
+          "type": "string",
+          "example": "这是内容文本"
+        },
+        "sort": {
+          "type": "integer",
+          "example": 1
+        },
+        "type": {
+          "type": "integer",
+          "example": 1
+        }
+      }
+    },
+    "PostDetailResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "post",
+        "contents",
+        "topics"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostContentItem"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "post": {
+          "type": "object",
+          "required": [
+            "id",
+            "userId",
+            "title",
+            "cover",
+            "commentCount",
+            "collectionCount",
+            "upvoteCount",
+            "shareCount",
+            "visibility",
+            "isTop",
+            "isEssence",
+            "isLock",
+            "latestRepliedAt",
+            "tags",
+            "createdAt",
+            "updatedAt"
+          ],
+          "properties": {
+            "collectionCount": {
+              "type": "integer",
+              "example": 100
+            },
+            "commentCount": {
+              "type": "integer",
+              "example": 50
+            },
+            "cover": {
+              "type": "string",
+              "example": "https://example.com/cover.jpg"
+            },
+            "createdAt": {
+              "type": "integer",
+              "example": 1700000000
+            },
+            "id": {
+              "type": "integer",
+              "example": 100
+            },
+            "isEssence": {
+              "type": "integer",
+              "example": 0
+            },
+            "isLock": {
+              "type": "integer",
+              "example": 0
+            },
+            "isTop": {
+              "type": "integer",
+              "example": 0
+            },
+            "latestRepliedAt": {
+              "type": "integer",
+              "example": 1700000000
+            },
+            "shareCount": {
+              "type": "integer",
+              "example": 50
+            },
+            "summary": {
+              "type": "string",
+              "example": "帖子摘要"
+            },
+            "tags": {
+              "type": "string",
+              "example": "生活"
+            },
+            "title": {
+              "type": "string",
+              "example": "精彩帖子标题"
+            },
+            "updatedAt": {
+              "type": "integer",
+              "example": 1700000000
+            },
+            "upvoteCount": {
+              "type": "integer",
+              "example": 200
+            },
+            "userId": {
+              "type": "integer",
+              "example": 1001
+            },
+            "visibility": {
+              "type": "integer",
+              "example": 0
+            }
+          },
+          "$ref": "#/definitions/PostInfo"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostTopic"
+          }
+        }
+      }
+    },
+    "PostInfo": {
+      "type": "object",
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "cover",
+        "commentCount",
+        "collectionCount",
+        "upvoteCount",
+        "shareCount",
+        "visibility",
+        "isTop",
+        "isEssence",
+        "isLock",
+        "latestRepliedAt",
+        "tags",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "collectionCount": {
+          "type": "integer",
+          "example": 100
+        },
+        "commentCount": {
+          "type": "integer",
+          "example": 50
+        },
+        "cover": {
+          "type": "string",
+          "example": "https://example.com/cover.jpg"
+        },
+        "createdAt": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "id": {
+          "type": "integer",
+          "example": 100
+        },
+        "isEssence": {
+          "type": "integer",
+          "example": 0
+        },
+        "isLock": {
+          "type": "integer",
+          "example": 0
+        },
+        "isTop": {
+          "type": "integer",
+          "example": 0
+        },
+        "latestRepliedAt": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "shareCount": {
+          "type": "integer",
+          "example": 50
+        },
+        "summary": {
+          "type": "string",
+          "example": "帖子摘要"
+        },
+        "tags": {
+          "type": "string",
+          "example": "生活"
+        },
+        "title": {
+          "type": "string",
+          "example": "精彩帖子标题"
+        },
+        "updatedAt": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "upvoteCount": {
+          "type": "integer",
+          "example": 200
+        },
+        "userId": {
+          "type": "integer",
+          "example": 1001
+        },
+        "visibility": {
+          "type": "integer",
+          "example": 0
+        }
+      }
+    },
+    "PostListResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg",
+        "total",
+        "list"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostInfo"
+          }
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        },
+        "total": {
+          "type": "integer",
+          "example": 100
+        }
+      }
+    },
+    "PostTopic": {
+      "type": "object",
+      "required": [
+        "postId",
+        "topicId",
+        "topicName"
+      ],
+      "properties": {
+        "postId": {
+          "type": "integer",
+          "example": 100
+        },
+        "topicId": {
+          "type": "integer",
+          "example": 1
+        },
+        "topicName": {
+          "type": "string",
+          "example": "热门话题"
+        }
+      }
+    },
+    "SetEssencePostReq": {
+      "type": "object",
+      "required": [
+        "postId",
+        "isEssence"
+      ],
+      "properties": {
+        "isEssence": {
+          "type": "integer"
+        },
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "SetEssencePostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "SetTopPostReq": {
+      "type": "object",
+      "required": [
+        "postId",
+        "isTop"
+      ],
+      "properties": {
+        "isTop": {
+          "type": "integer"
+        },
+        "postId": {
+          "type": "integer"
+        }
+      }
+    },
+    "SetTopPostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    },
+    "TopicInfo": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "quoteNum",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "createdAt": {
+          "type": "integer",
+          "example": 1700000000
+        },
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "name": {
+          "type": "string",
+          "example": "热门话题"
+        },
+        "quoteNum": {
+          "type": "integer",
+          "example": 1000
+        },
+        "updatedAt": {
+          "type": "integer",
+          "example": 1700000000
+        }
+      }
+    },
+    "UpdatePostReq": {
+      "type": "object",
+      "required": [
+        "postId",
+        "title",
+        "cover",
+        "visibility",
+        "contents",
+        "topics",
+        "tags"
+      ],
+      "properties": {
+        "contents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PostContentItem"
+          }
+        },
+        "cover": {
+          "type": "string",
+          "example": "https://example.com/new-cover.jpg"
+        },
+        "postId": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "string",
+          "example": "生活"
+        },
+        "title": {
+          "type": "string"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visibility": {
+          "type": "integer",
+          "example": 0
+        }
+      }
+    },
+    "UpdatePostResp": {
+      "type": "object",
+      "required": [
+        "code",
+        "msg"
+      ],
+      "properties": {
+        "code": {
+          "type": "integer",
+          "example": 0
+        },
+        "msg": {
+          "type": "string",
+          "example": "success"
+        }
+      }
+    }
+  },
+  "x-date": "2026-04-25 17:19:23",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.1"
+}

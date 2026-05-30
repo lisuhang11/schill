@@ -1,0 +1,45 @@
+Name: interaction.rpc
+ListenOn: 0.0.0.0:8084
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: interaction.rpc
+
+Mysql:
+  DataSource: "root:123456@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+  MaxOpenConns: 100
+  MaxIdleConns: 20
+  ConnMaxLifetime: 600
+  ConnMaxIdleTime: 300
+
+KqProducerConf:
+  Brokers:
+  - 127.0.0.1:9092
+  TopicPostStar: post-star
+  TopicPostUnstar: post-unstar
+  TopicPostCollect: post-collect
+  TopicPostUncollect: post-uncollect
+  TopicPostShare: post-share
+  MaxMessageBytes: 1048576
+  RequiredAcks: 1
+  Compression: snappy
+  Idempotent: true
+
+RedisConf:
+  Host: "127.0.0.1"
+  Port: "6379"
+  Password: ""
+  DB: 0
+
+KafkaConsumerConf:
+  Brokers:
+    - 127.0.0.1:9092
+  Group: interaction_consumer
+  Topics:
+    - post-star
+    - post-unstar
+    - post-collect
+    - post-uncollect
+  DLQTopic: interaction-dlq
+  FetchDefault: 1048576
+  MaxProcessingTime: 500

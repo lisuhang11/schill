@@ -1,0 +1,30 @@
+Name: feed.rpc
+ListenOn: 0.0.0.0:8087
+Etcd:
+  Hosts:
+    - etcd:2379
+  Key: feed.rpc
+
+ContentRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: content.rpc
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: user.rpc
+
+RelationRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: relation.rpc
+
+InteractionRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: interaction.rpc

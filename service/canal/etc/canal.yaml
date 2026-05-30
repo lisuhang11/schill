@@ -1,0 +1,26 @@
+Name: canal.rpc
+ListenOn: 0.0.0.0:8088
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: canal.rpc
+
+Mysql:
+  DataSource: "root:123456@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"
+
+Kafka:
+  Brokers:
+    - 127.0.0.1:9092
+  Topic: canal_topic
+  Group: canal_es_consumer
+
+Elasticsearch:
+  Hosts:
+    - http://127.0.0.1:9200
+  Username: ""
+  Password: ""
+
+Log:
+  Mode: file
+  Path: ./logs
+  Level: info

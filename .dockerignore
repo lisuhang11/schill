@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+
+# Data
+deploy/data/
+
+# Build outputs
+dist/
+build/
+
+# Node modules
+web/node_modules/
+web/dist/
+
+# Go
+vendor/
+.gocache/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+
+# Temporary files
+tmp/
+temp/
+*.tmp
