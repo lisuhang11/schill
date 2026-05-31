@@ -32,11 +32,13 @@ func (l *RefreshTokenLogic) RefreshToken(in *pb.RefreshTokenReq) (*pb.RefreshTok
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
 	}
 
-	userID, err := jwt.ParseRefreshToken(in.RefreshToken, l.svcCtx.Config.Jwt.RefreshSecret)
+	claims, err := jwt.ParseRefreshToken(in.RefreshToken, l.svcCtx.Config.Jwt.RefreshSecret)
 	if err != nil {
 		l.Infof("invalid refresh token: %v", err)
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidRefreshToken)
 	}
+
+	userID := claims.UserId
 
 	var user model.User
 	err = l.svcCtx.DB.WithContext(l.ctx).Where("id = ?", userID).First(&user).Error
@@ -51,20 +53,39 @@ func (l *RefreshTokenLogic) RefreshToken(in *pb.RefreshTokenReq) (*pb.RefreshTok
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidRefreshToken)
 	}
 
-	accessToken, err := jwt.GenerateAccessToken(
+	// Verify token version: if token has a version, it must match the current version in Redis.
+	// This provides a revocation mechanism — incrementing the version invalidates all existing tokens.
+	if claims.TokenVersion > 0 {
+		currentVersion, err := getUserTokenVersion(l.ctx, l.svcCtx, userID)
+		if err != nil {
+			logx.Errorf("get user token version failed: userId=%d err=%v", userID, err)
+		} else if claims.TokenVersion != currentVersion {
+			l.Infof("token version mismatch: userId=%d tokenVersion=%d currentVersion=%d", userID, claims.TokenVersion, currentVersion)
+			return nil, errutil.RpcBusinessError(errutil.ErrInvalidRefreshToken)
+		}
+	}
+
+	tokenVersion := claims.TokenVersion
+	if tokenVersion == 0 {
+		tokenVersion = user.CreatedAt.Unix()
+	}
+
+	accessToken, err := jwt.GenerateAccessTokenWithVersion(
 		l.svcCtx.Config.Jwt.AccessExpire,
 		l.svcCtx.Config.Jwt.AccessSecret,
 		userID,
+		tokenVersion,
 	)
 	if err != nil {
 		logx.Errorf("generate access token failed: %v", err)
 		return nil, errutil.RpcBusinessError(errutil.ErrInternalError)
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(
+	refreshToken, err := jwt.GenerateRefreshTokenWithVersion(
 		l.svcCtx.Config.Jwt.RefreshExpire,
 		l.svcCtx.Config.Jwt.RefreshSecret,
 		userID,
+		tokenVersion,
 	)
 	if err != nil {
 		logx.Errorf("generate refresh token failed: %v", err)

@@ -76,7 +76,11 @@ func (h *commentCreatedConsumerGroupHandler) ConsumeClaim(session sarama.Consume
 			logx.Errorf("increment post comment count failed: %v", err)
 		}
 
+		// Comment count change invalidates post detail and list caches.
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, payload.PostID))
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, payload.PostID))
 		_, _ = h.svcCtx.Redis.Incr(h.ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, payload.PostID))
+		invalidatePostListForPost(h.svcCtx, payload.PostID)
 		session.MarkMessage(msg, "")
 	}
 	return nil

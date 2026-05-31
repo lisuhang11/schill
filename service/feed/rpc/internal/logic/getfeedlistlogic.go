@@ -2,9 +2,13 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 
+	"SChill/common/cacheutil"
 	errutil "SChill/common/error"
+	"SChill/common/redis"
 	contentpb "SChill/service/content/rpc/pb"
 	"SChill/service/feed/rpc/internal/svc"
 	"SChill/service/feed/rpc/pb"
@@ -32,19 +36,22 @@ func NewGetFeedListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetFe
 
 func (l *GetFeedListLogic) GetFeedList(req *pb.GetFeedListReq) (*pb.GetFeedListResp, error) {
 	if req.Page <= 0 || req.PageSize <= 0 || req.PageSize > 100 {
-		return &pb.GetFeedListResp{
-			Code: int32(errutil.ErrInvalidParams),
-			Msg:  errutil.GetCodeMessage(errutil.ErrInvalidParams),
-		}, nil
+		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
 	}
 
 	feedType := normalizeFeedType(req.FeedType)
 	userID := req.CurrentUserId
 	if feedType == "following" && userID == 0 {
-		return &pb.GetFeedListResp{
-			Code: int32(errutil.ErrUnauthorized),
-			Msg:  errutil.GetCodeMessage(errutil.ErrUnauthorized),
-		}, nil
+		return nil, errutil.RpcBusinessError(errutil.ErrUnauthorized)
+	}
+
+	// Try Redis cache for feed aggregation (only for first few pages, with jitter TTL)
+	if l.svcCtx.Cache != nil && req.Page <= redis.FeedMaxCachedPages {
+		cacheKey := buildFeedCacheKey(userID, feedType, req.Page, req.PageSize)
+		var cachedResp pb.GetFeedListResp
+		if err := l.svcCtx.Cache.GetCtx(l.ctx, cacheKey, &cachedResp); err == nil {
+			return &cachedResp, nil
+		}
 	}
 
 	rpcCtx := metadata.AppendToOutgoingContext(l.ctx, "x-feed-type", feedType)
@@ -54,11 +61,7 @@ func (l *GetFeedListLogic) GetFeedList(req *pb.GetFeedListReq) (*pb.GetFeedListR
 		CurrentUserId: userID,
 	})
 	if err != nil {
-		code, msg := errutil.ParseRpcError(err)
-		return &pb.GetFeedListResp{
-			Code: int32(code),
-			Msg:  msg,
-		}, nil
+		return nil, err
 	}
 
 	postIDs := make([]uint64, 0, len(postResp.List))
@@ -118,12 +121,31 @@ func (l *GetFeedListLogic) GetFeedList(req *pb.GetFeedListReq) (*pb.GetFeedListR
 		})
 	}
 
-	return &pb.GetFeedListResp{
+	resp := &pb.GetFeedListResp{
 		Code:  int32(errutil.Success),
 		Msg:   errutil.GetCodeMessage(errutil.Success),
 		Total: postResp.Total,
 		List:  list,
-	}, nil
+	}
+
+	// Cache feed result with jitter TTL (only for first few pages)
+	if l.svcCtx.Cache != nil && req.Page <= redis.FeedMaxCachedPages {
+		cacheKey := buildFeedCacheKey(userID, feedType, req.Page, req.PageSize)
+		ttl := time.Duration(redis.FeedCacheExpire) * time.Second
+		if feedType == "following" {
+			ttl = time.Duration(redis.FeedFollowingCacheExpire) * time.Second
+		}
+		ttl = cacheutil.JitterDefault(ttl)
+		if err := l.svcCtx.Cache.SetWithExpireCtx(l.ctx, cacheKey, resp, ttl); err != nil {
+			logx.Errorf("cache feed list failed: %v", err)
+		}
+	}
+
+	return resp, nil
+}
+
+func buildFeedCacheKey(userID uint64, feedType string, page, pageSize int64) string {
+	return fmt.Sprintf("%sfeed:%s:user:%d:page:%d:size:%d", redis.KeyPrefix, feedType, userID, page, pageSize)
 }
 
 func normalizeFeedType(feedType string) string {

@@ -16,7 +16,7 @@ func StarPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.InteractionRpc.StarPost(r.Context(), &interactioncenter.StarPostReq{UserId: userID, PostId: postID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -32,7 +32,7 @@ func UnstarPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.InteractionRpc.UnstarPost(r.Context(), &interactioncenter.UnstarPostReq{UserId: userID, PostId: postID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -48,7 +48,7 @@ func CollectPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.InteractionRpc.CollectPost(r.Context(), &interactioncenter.CollectPostReq{UserId: userID, PostId: postID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -64,7 +64,7 @@ func UncollectPostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.InteractionRpc.UncollectPost(r.Context(), &interactioncenter.UncollectPostReq{UserId: userID, PostId: postID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -80,7 +80,7 @@ func SharePostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.InteractionRpc.SharePost(r.Context(), &interactioncenter.SharePostReq{UserId: userID, PostId: postID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

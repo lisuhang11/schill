@@ -33,21 +33,66 @@ func (l *CheckPostStarLogic) CheckPostStar(in *pb.CheckPostStarReq) (*pb.CheckPo
 
 	isStarred, err := l.svcCtx.RedisClient.SIsMember(l.ctx, relationKey, userIdStr)
 	if err != nil {
-		logx.Errorf("Redis SIsMember 查询失败: %v", err)
+		logx.Errorf("Redis SIsMember query failed: %v", err)
+		// Fall through to DB fallback
+	} else {
+		// Redis hit — return immediately
+		countStr, countErr := l.svcCtx.RedisClient.Get(l.ctx, countKey)
+		if countErr != nil {
+			logx.Errorf("Redis GET query failed: %v", countErr)
+		}
+
+		var starCount int64
+		if countStr != "" {
+			starCount, _ = strconv.ParseInt(countStr, 10, 64)
+		}
+
+		return &pb.CheckPostStarResp{
+			IsStarred: isStarred,
+			StarCount: starCount,
+		}, nil
 	}
 
-	countStr, err := l.svcCtx.RedisClient.Get(l.ctx, countKey)
-	if err != nil {
-		logx.Errorf("Redis GET 查询失败: %v", err)
+	// Redis miss (key expired) — fallback to DB and backfill Redis
+	exists, dbErr := l.svcCtx.PostStarDAO.Exists(l.ctx, in.PostId, in.UserId)
+	if dbErr != nil {
+		logx.Errorf("DB fallback for star check failed: postId=%d userId=%d err=%v", in.PostId, in.UserId, dbErr)
+		return &pb.CheckPostStarResp{
+			IsStarred: false,
+			StarCount: 0,
+		}, nil
 	}
 
-	var starCount int64
-	if countStr != "" {
-		starCount, _ = strconv.ParseInt(countStr, 10, 64)
+	if exists {
+		// Backfill Redis asynchronously
+		go func() {
+			bgCtx := context.Background()
+			ttl := redis.InteractionDefaultTTL
+			ttlStr := strconv.Itoa(int(ttl))
+			if _, evalErr := l.svcCtx.RedisClient.Eval(bgCtx, l.svcCtx.LuaScripts.PostLike,
+				[]string{relationKey, countKey},
+				userIdStr,
+				ttlStr,
+			); evalErr != nil {
+				logx.Errorf("backfill star to Redis failed: postId=%d userId=%d err=%v", in.PostId, in.UserId, evalErr)
+			}
+		}()
+
+		// Count from DB
+		var dbCount int64
+		if err := l.svcCtx.DB.WithContext(l.ctx).Model(&struct{ ID uint64 }{}).
+			Table("post_star").Where("post_id = ?", in.PostId).Count(&dbCount).Error; err != nil {
+			logx.Errorf("DB count for star failed: postId=%d err=%v", in.PostId, err)
+		}
+
+		return &pb.CheckPostStarResp{
+			IsStarred: true,
+			StarCount: dbCount,
+		}, nil
 	}
 
 	return &pb.CheckPostStarResp{
-		IsStarred: isStarred,
-		StarCount: starCount,
+		IsStarred: false,
+		StarCount: 0,
 	}, nil
 }

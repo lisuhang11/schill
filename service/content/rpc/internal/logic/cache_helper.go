@@ -31,6 +31,8 @@ func getPostListVersion(ctx context.Context, svcCtx *svc.ServiceContext, userID 
 	return version
 }
 
+// buildPostDetailCacheKey is the legacy combined key, kept for backward compatibility
+// during migration. New code should use buildPostBaseCacheKey (in getpostdetaillogic.go).
 func buildPostDetailCacheKey(ctx context.Context, svcCtx *svc.ServiceContext, postID uint64) string {
 	return fmt.Sprintf("%s%s:v%s", redis.PostInfoKey, strconv.FormatUint(postID, 10), getPostCacheVersion(ctx, svcCtx, postID))
 }
@@ -39,14 +41,21 @@ func buildPostContentCacheKey(ctx context.Context, svcCtx *svc.ServiceContext, p
 	return fmt.Sprintf("%s%s:v%s", redis.PostContentKey, strconv.FormatUint(postID, 10), getPostCacheVersion(ctx, svcCtx, postID))
 }
 
+// buildPostListCacheKey builds the versioned list cache key.
+// The version is incremented when a user creates/deletes a post, busting all their list caches.
 func buildPostListCacheKey(ctx context.Context, svcCtx *svc.ServiceContext, userID uint64, feedType string, page, pageSize int64) string {
 	return fmt.Sprintf("%suser:%d:feed:%s:page:%d:size:%d:v%s", redis.PostListKey, userID, feedType, page, pageSize, getPostListVersion(ctx, svcCtx, userID))
 }
 
+// invalidatePostCaches bumps the post cache version, causing the legacy PostInfoKey-based cache to miss.
+// Also deletes the new PostBaseKey.
 func invalidatePostCaches(ctx context.Context, svcCtx *svc.ServiceContext, postID uint64) {
 	_, _ = svcCtx.Redis.Incr(ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, postID))
+	_ = svcCtx.Redis.Del(ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, postID))
+	_ = svcCtx.Redis.Del(ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, postID))
 }
 
+// invalidatePostListCache bumps the list version, busting all list cache keys for a user.
 func invalidatePostListCache(ctx context.Context, svcCtx *svc.ServiceContext, userID uint64) {
 	_, _ = svcCtx.Redis.Incr(ctx, postListVersionKey(userID))
 }

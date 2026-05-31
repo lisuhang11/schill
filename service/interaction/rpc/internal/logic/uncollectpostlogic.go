@@ -41,6 +41,7 @@ func (l *UncollectPostLogic) UncollectPost(in *pb.UncollectPostReq) (*pb.Uncolle
 	result, err := l.svcCtx.RedisClient.Eval(l.ctx, l.svcCtx.LuaScripts.PostUncollect,
 		[]string{relationKey, countKey},
 		strconv.FormatUint(in.UserId, 10),
+		strconv.Itoa(int(redis.InteractionDefaultTTL)),
 	)
 	if err != nil {
 		logx.Errorf("Redis Lua script failed: %v", err)

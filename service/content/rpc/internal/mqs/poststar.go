@@ -73,7 +73,12 @@ func (h *postStarConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroup
 			logx.Errorf("increment post star count failed: %v", err)
 		}
 
+		// Invalidate post caches so the next detail request rebuilds from DB with latest stats.
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, payload.PostID))
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, payload.PostID))
 		_, _ = h.svcCtx.Redis.Incr(h.ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, payload.PostID))
+		// Also bump the post author's list cache version.
+		invalidatePostListForPost(h.svcCtx, payload.PostID)
 		session.MarkMessage(msg, "")
 	}
 	return nil

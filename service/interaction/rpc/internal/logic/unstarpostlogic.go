@@ -38,9 +38,11 @@ func (l *UnstarPostLogic) UnstarPost(in *pb.UnstarPostReq) (*pb.UnstarPostResp, 
 	countKey := fmt.Sprintf("%s%d", redis.PostLikeCountKey, in.PostId)
 	timestamp := time.Now().Unix()
 
+	ttl := strconv.Itoa(int(redis.InteractionDefaultTTL))
 	result, err := l.svcCtx.RedisClient.Eval(l.ctx, l.svcCtx.LuaScripts.PostUnlike,
 		[]string{relationKey, countKey},
 		strconv.FormatUint(in.UserId, 10),
+		ttl,
 	)
 	if err != nil {
 		logx.Errorf("Redis Lua script failed: %v", err)

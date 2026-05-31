@@ -19,7 +19,7 @@ func GetUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		resp, err := svcCtx.UserRpc.GetUserInfo(r.Context(), &usercenter.GetUserInfoReq{UserId: userID})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -55,7 +55,7 @@ func UpdateProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			},
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -80,7 +80,7 @@ func UpdateAvatarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			AvatarUrl: req.AvatarUrl,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

@@ -22,7 +22,7 @@ func RegisterHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Password: req.Password,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -41,7 +41,7 @@ func LoginHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Password: req.Password,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -59,7 +59,7 @@ func RefreshTokenHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			RefreshToken: req.RefreshToken,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

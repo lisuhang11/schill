@@ -40,6 +40,7 @@ func (l *BatchCheckPostCollectionLogic) BatchCheckPostCollection(in *pb.BatchChe
 
 	userIDStr := strconv.FormatUint(in.UserId, 10)
 	collectionMap := make(map[uint64]bool, len(postIDs))
+	redisMiss := false
 
 	for start := 0; start < len(postIDs); start += batchStatusChunkSize {
 		end := start + batchStatusChunkSize
@@ -59,6 +60,7 @@ func (l *BatchCheckPostCollectionLogic) BatchCheckPostCollection(in *pb.BatchChe
 		statuses, err := l.svcCtx.RedisClient.PipelineSIsMember(l.ctx, checks)
 		if err != nil {
 			logx.Errorf("Redis pipeline collection status query failed: chunk=%v err=%v", chunk, err)
+			redisMiss = true
 			for _, postID := range chunk {
 				collectionMap[postID] = false
 			}
@@ -68,6 +70,20 @@ func (l *BatchCheckPostCollectionLogic) BatchCheckPostCollection(in *pb.BatchChe
 		for relationKey, isCollected := range statuses {
 			collectionMap[keyToPostID[relationKey]] = isCollected
 		}
+	}
+
+	// If any Redis chunk failed, fall back to DB for ALL post IDs
+	if redisMiss {
+		dbMap, dbErr := l.svcCtx.PostCollectionDAO.BatchCheckStatus(l.ctx, in.UserId, postIDs)
+		if dbErr != nil {
+			logx.Errorf("DB batch collection status fallback failed: userId=%d err=%v", in.UserId, dbErr)
+			return &pb.BatchCheckPostCollectionResp{
+				CollectionStatus: collectionMap,
+			}, nil
+		}
+		return &pb.BatchCheckPostCollectionResp{
+			CollectionStatus: dbMap,
+		}, nil
 	}
 
 	return &pb.BatchCheckPostCollectionResp{

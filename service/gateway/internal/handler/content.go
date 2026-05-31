@@ -20,7 +20,7 @@ func GetPostListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			CurrentUserId: currentUserID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -49,7 +49,7 @@ func CreatePostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Tags:       req.Tags,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -69,7 +69,7 @@ func GetPostDetailHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			CurrentUserId: currentUserID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -104,7 +104,7 @@ func UpdatePostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Tags:       req.Tags,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -128,7 +128,7 @@ func DeletePostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			UserId: userID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -143,7 +143,7 @@ func GetTopicListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Sort:     r.URL.Query().Get("sort"),
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

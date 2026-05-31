@@ -162,6 +162,7 @@ func (c *InteractionConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, 
 
 	for msg := range claim.Messages() {
 		var envelope *mq.EventEnvelope
+		var decoded bool
 		switch msg.Topic {
 		case "post-star":
 			var starMsg mq.PostStarMessage
@@ -169,6 +170,7 @@ func (c *InteractionConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, 
 				logx.Errorf("failed to decode post-star message: %v", err)
 			} else {
 				envelope = env
+				decoded = true
 				key := starKey{PostID: starMsg.PostID, UserID: starMsg.UserID}
 				if _, exists := starMap[key]; !exists {
 					starMap[key] = &model.PostStar{
@@ -184,6 +186,7 @@ func (c *InteractionConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, 
 				logx.Errorf("failed to decode post-unstar message: %v", err)
 			} else {
 				envelope = env
+				decoded = true
 				unstarUserPostIds = append(unstarUserPostIds, [2]uint64{unstarMsg.PostID, unstarMsg.UserID})
 			}
 		case "post-collect":
@@ -192,6 +195,7 @@ func (c *InteractionConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, 
 				logx.Errorf("failed to decode post-collect message: %v", err)
 			} else {
 				envelope = env
+				decoded = true
 				key := collectionKey{PostID: collectMsg.PostID, UserID: collectMsg.UserID}
 				if _, exists := collectionMap[key]; !exists {
 					collectedAt := time.Now()
@@ -211,16 +215,26 @@ func (c *InteractionConsumer) ConsumeClaim(session sarama.ConsumerGroupSession, 
 				logx.Errorf("failed to decode post-uncollect message: %v", err)
 			} else {
 				envelope = env
+				decoded = true
 				uncollectUserPostIds = append(uncollectUserPostIds, [2]uint64{uncollectMsg.PostID, uncollectMsg.UserID})
 			}
 		}
 
+		// Idempotency check BEFORE adding to pending batch.
+		// If we've already processed this event, skip immediately.
 		if key := mq.BuildIdempotencyKey(c.svcCtx.Config.KafkaConsumerConf.Group, envelope); key != "" {
 			ok, err := c.svcCtx.RedisClient.SetNX(ctx, key, "1", mq.DefaultEventTTL)
-			if err == nil && !ok {
+			if err != nil {
+				logx.Errorf("idempotency check failed: key=%s err=%v", key, err)
+			} else if !ok {
 				session.MarkMessage(msg, "")
 				continue
 			}
+		}
+
+		if !decoded {
+			session.MarkMessage(msg, "")
+			continue
 		}
 
 		pendingMsgs = append(pendingMsgs, msg)

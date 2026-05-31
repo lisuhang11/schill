@@ -17,7 +17,7 @@ func GetFeedHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			CurrentUserId: currentUserID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

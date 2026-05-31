@@ -84,20 +84,30 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 
 	invalidateUserCaches(l.ctx, l.svcCtx, user.ID)
 
-	accessToken, err := jwt.GenerateAccessToken(
+	tokenVersion, err := getUserTokenVersion(l.ctx, l.svcCtx, user.ID)
+	if err != nil {
+		logx.Errorf("get user token version failed: %v", err)
+	}
+	if tokenVersion == 0 {
+		tokenVersion = user.CreatedAt.Unix()
+	}
+
+	accessToken, err := jwt.GenerateAccessTokenWithVersion(
 		l.svcCtx.Config.Jwt.AccessExpire,
 		l.svcCtx.Config.Jwt.AccessSecret,
 		user.ID,
+		tokenVersion,
 	)
 	if err != nil {
 		logx.Errorf("generate access token failed: %v", err)
 		return nil, errutil.RpcBusinessError(errutil.ErrInternalError)
 	}
 
-	refreshToken, err := jwt.GenerateRefreshToken(
+	refreshToken, err := jwt.GenerateRefreshTokenWithVersion(
 		l.svcCtx.Config.Jwt.RefreshExpire,
 		l.svcCtx.Config.Jwt.RefreshSecret,
 		user.ID,
+		tokenVersion,
 	)
 	if err != nil {
 		logx.Errorf("generate refresh token failed: %v", err)

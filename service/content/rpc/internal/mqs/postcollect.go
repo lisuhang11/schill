@@ -73,7 +73,10 @@ func (h *postCollectConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGr
 			logx.Errorf("increment post collection count failed: %v", err)
 		}
 
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, payload.PostID))
+		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, payload.PostID))
 		_, _ = h.svcCtx.Redis.Incr(h.ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, payload.PostID))
+		invalidatePostListForPost(h.svcCtx, payload.PostID)
 		session.MarkMessage(msg, "")
 	}
 	return nil

@@ -24,7 +24,7 @@ func FollowHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			TargetUserId: targetUserID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -48,7 +48,7 @@ func UnfollowHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			TargetUserId: targetUserID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

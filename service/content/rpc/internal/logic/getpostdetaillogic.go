@@ -3,9 +3,11 @@ package logic
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"SChill/common/cacheprotect"
+	"SChill/common/cacheutil"
 	errutil "SChill/common/error"
 	"SChill/common/redis"
 	"SChill/service/content/rpc/internal/model"
@@ -19,12 +21,21 @@ import (
 var postDetailGroup cacheprotect.Group
 
 const (
-	postDetailLogicalTTL   = time.Duration(redis.PostExpire) * time.Second
-	postDetailPhysicalTTL  = postDetailLogicalTTL * 2
-	postDetailEmptyTTL     = time.Duration(redis.CacheNullExpire) * time.Second
+	// PostBaseTTL: immutable fields — title, cover, content, topics, created_at, user_id, visibility.
+	// Long TTL with jitter. Invalidated only on post edit/delete.
+	postBaseLogicalTTL  = 600 * time.Second // 10 min
+	postBasePhysicalTTL = 1200 * time.Second // 20 min
+
+	// PostDetail empty/null markers use a short TTL.
+	postDetailEmptyTTL = time.Duration(redis.CacheNullExpire) * time.Second
+
+	// Lock/wait for cache rebuild.
 	postDetailLockTTL      = 10 * time.Second
 	postDetailWaitInterval = 50 * time.Millisecond
 	postDetailWaitAttempts = 20
+
+	// Local cache TTL for post detail.
+	localCacheTTL = time.Minute
 )
 
 type GetPostDetailLogic struct {
@@ -46,27 +57,30 @@ func (l *GetPostDetailLogic) GetPostDetail(in *pb.GetPostDetailReq) (*pb.GetPost
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
 	}
 
-	cacheKey := buildPostDetailCacheKey(l.ctx, l.svcCtx, in.PostId)
-	if cached, ok := loadLocalCache[*pb.GetPostDetailResp](l.svcCtx.LocalCache, cacheKey); ok && cached != nil {
+	// 1. Try local cache first (hottest path)
+	baseCacheKey := buildPostBaseCacheKey(in.PostId)
+	if cached, ok := loadLocalCache[*pb.GetPostDetailResp](l.svcCtx.LocalCache, baseCacheKey); ok && cached != nil {
 		return cached, nil
 	}
 
-	cached, entry, err := l.loadCachedPostDetail(cacheKey)
+	// 2. Try Redis base cache (cacheprotect with two-TTL strategy)
+	cached, entry, err := l.loadCachedPostDetail(baseCacheKey)
 	if err == nil && entry != nil {
 		switch {
 		case entry.Empty && entry.IsFresh(time.Now()):
 			return nil, errutil.RpcBusinessError(errutil.ErrPostNotExist)
 		case cached != nil && entry.IsFresh(time.Now()):
-			storeLocalCache(l.svcCtx, cacheKey, cached, time.Minute)
+			storeLocalCache(l.svcCtx, baseCacheKey, cached, localCacheTTL)
 			return cached, nil
 		case cached != nil:
-			storeLocalCache(l.svcCtx, cacheKey, cached, 30*time.Second)
+			storeLocalCache(l.svcCtx, baseCacheKey, cached, 30*time.Second)
 			l.refreshPostDetailAsync(in)
 			return cached, nil
 		}
 	}
 
-	return l.loadPostDetailProtected(in, cacheKey)
+	// 3. Cache miss → protected rebuild
+	return l.loadPostDetailProtected(in, baseCacheKey)
 }
 
 func (l *GetPostDetailLogic) loadCachedPostDetail(cacheKey string) (*pb.GetPostDetailResp, *cacheprotect.Entry, error) {
@@ -117,7 +131,7 @@ func (l *GetPostDetailLogic) loadPostDetailProtected(in *pb.GetPostDetailReq, ca
 func (l *GetPostDetailLogic) refreshPostDetailAsync(in *pb.GetPostDetailReq) {
 	go func(postID uint64) {
 		bgLogic := NewGetPostDetailLogic(context.Background(), l.svcCtx)
-		cacheKey := buildPostDetailCacheKey(context.Background(), l.svcCtx, postID)
+		cacheKey := buildPostBaseCacheKey(postID)
 		if _, err := bgLogic.loadPostDetailProtected(&pb.GetPostDetailReq{PostId: postID}, cacheKey); err != nil {
 			logx.Errorf("async refresh post detail failed: postId=%d err=%v", postID, err)
 		}
@@ -248,13 +262,27 @@ func (l *GetPostDetailLogic) queryPostDetailAndCache(in *pb.GetPostDetailReq, ca
 		})
 	}
 
-	if err := cacheprotect.StoreValue(l.ctx, l.svcCtx.Redis, cacheKey, resp, postDetailLogicalTTL, postDetailPhysicalTTL); err != nil {
+	// Store base cache with jitter TTL
+	logicalTTL := cacheutil.JitterDefault(postBaseLogicalTTL)
+	physicalTTL := cacheutil.JitterDefault(postBasePhysicalTTL)
+	if err := cacheprotect.StoreValue(l.ctx, l.svcCtx.Redis, cacheKey, resp, logicalTTL, physicalTTL); err != nil {
 		logx.Errorf("cache post detail failed: postId=%d err=%v", in.PostId, err)
 	}
 	if len(resp.Contents) > 0 {
-		_ = l.svcCtx.Redis.SetJSON(l.ctx, buildPostContentCacheKey(l.ctx, l.svcCtx, in.PostId), resp.Contents, postDetailPhysicalTTL)
+		_ = l.svcCtx.Redis.SetJSON(l.ctx, buildPostContentCacheKey(l.ctx, l.svcCtx, in.PostId), resp.Contents, physicalTTL)
 	}
-	storeLocalCache(l.svcCtx, cacheKey, resp, time.Minute)
+	storeLocalCache(l.svcCtx, cacheKey, resp, localCacheTTL)
 
 	return resp, nil
+}
+
+// buildPostBaseCacheKey constructs the base cache key (immutable fields).
+// The version is embedded for cache busting on post edit/delete.
+func buildPostBaseCacheKey(postID uint64) string {
+	return fmt.Sprintf("%s%d", redis.PostBaseKey, postID)
+}
+
+// buildPostStatsCacheKey constructs the stats cache key (counters, short TTL).
+func buildPostStatsCacheKey(postID uint64) string {
+	return fmt.Sprintf("%s%s", redis.PostStatsKey, strconv.FormatUint(postID, 10))
 }

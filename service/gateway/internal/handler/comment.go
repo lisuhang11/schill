@@ -24,7 +24,7 @@ func GetCommentListHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			SortType: r.URL.Query().Get("sortType"),
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -51,7 +51,7 @@ func CreateCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			Content:       req.Content,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -75,7 +75,7 @@ func DeleteCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			UserId:    userID,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)
@@ -105,7 +105,7 @@ func VoteCommentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			VoteType:  req.VoteType,
 		})
 		if err != nil {
-			fail(w, http.StatusBadGateway, err.Error())
+			rpcFail(w, err)
 			return
 		}
 		ok(w, resp)

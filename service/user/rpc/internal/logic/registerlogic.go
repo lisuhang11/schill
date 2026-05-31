@@ -4,6 +4,8 @@ import (
 	errutil "SChill/common/error"
 	"context"
 	"errors"
+	"unicode"
+
 	"gorm.io/gorm/clause"
 	"time"
 
@@ -33,6 +35,10 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 	username := in.Username
 	password := in.Password
+
+	if err := validatePassword(password); err != nil {
+		return nil, err
+	}
 
 	hashedPwd := cryptx.PasswordEncrypt(password)
 	user := &model.User{
@@ -99,4 +105,33 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 	}
 
 	return &pb.RegisterResp{UserId: userId}, nil
+}
+
+// validatePassword checks password strength:
+// - minimum 8 characters
+// - at least one uppercase letter
+// - at least one lowercase letter
+// - at least one digit
+func validatePassword(password string) error {
+	if len(password) < 8 {
+		return errutil.RpcBusinessError(errutil.ErrPasswordTooWeak)
+	}
+
+	var hasUpper, hasLower, hasDigit bool
+	for _, ch := range password {
+		switch {
+		case unicode.IsUpper(ch):
+			hasUpper = true
+		case unicode.IsLower(ch):
+			hasLower = true
+		case unicode.IsDigit(ch):
+			hasDigit = true
+		}
+	}
+
+	if !hasUpper || !hasLower || !hasDigit {
+		return errutil.RpcBusinessError(errutil.ErrPasswordTooWeak)
+	}
+
+	return nil
 }

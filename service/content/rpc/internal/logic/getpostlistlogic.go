@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"SChill/common/cacheutil"
 	"SChill/common/redis"
 	"SChill/service/content/rpc/internal/model"
 	"SChill/service/content/rpc/internal/svc"
@@ -117,7 +118,8 @@ func (l *GetPostListLogic) GetPostList(in *pb.GetPostListReq) (*pb.GetPostListRe
 	}
 
 	if useCache {
-		if err := l.svcCtx.Cache.SetWithExpireCtx(l.ctx, cacheKey, resp, time.Duration(redis.PostExpire)*time.Second); err != nil {
+		ttl := cacheutil.JitterDefault(time.Duration(redis.PostExpire) * time.Second)
+		if err := l.svcCtx.Cache.SetWithExpireCtx(l.ctx, cacheKey, resp, ttl); err != nil {
 			logx.Errorf("cache post list failed: %v", err)
 		}
 		storeLocalCache(l.svcCtx, cacheKey, resp, time.Minute)

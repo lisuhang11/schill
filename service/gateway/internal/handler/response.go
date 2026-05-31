@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	errutil "SChill/common/error"
 	"SChill/service/gateway/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -19,6 +20,42 @@ func ok(w http.ResponseWriter, data interface{}) {
 
 func fail(w http.ResponseWriter, status int, msg string) {
 	httpx.WriteJson(w, status, types.Response{Code: int64(status), Msg: msg})
+}
+
+// rpcFail handles gRPC errors by parsing the status code and mapping to HTTP status codes.
+func rpcFail(w http.ResponseWriter, err error) {
+	code, msg := errutil.ParseRpcError(err)
+	httpStatus := gRPCCodeToHTTP(code)
+	fail(w, httpStatus, msg)
+}
+
+// gRPCCodeToHTTP maps business error codes to HTTP status codes.
+func gRPCCodeToHTTP(code int) int {
+	switch code {
+	case errutil.ErrUnauthorized, errutil.ErrInvalidRefreshToken:
+		return http.StatusUnauthorized
+	case errutil.ErrInvalidCredentials:
+		return http.StatusUnauthorized
+	case errutil.ErrInvalidParams, errutil.ErrUsernameOrPasswordEmpty, errutil.ErrPasswordTooWeak,
+		errutil.ErrPostTitleEmpty, errutil.ErrPostContentEmpty, errutil.ErrCommentContentEmpty:
+		return http.StatusBadRequest
+	case errutil.ErrUsernameExists, errutil.ErrAlreadyFollowed, errutil.ErrAlreadyLiked:
+		return http.StatusConflict
+	case errutil.ErrNoPermission:
+		return http.StatusForbidden
+	case errutil.ErrUserNotExist, errutil.ErrPostNotExist, errutil.ErrCommentNotExist:
+		return http.StatusNotFound
+	case errutil.ErrNotFollowing, errutil.ErrNotLiked:
+		return http.StatusBadRequest
+	case errutil.ErrAccountAbnormal:
+		return http.StatusForbidden
+	case errutil.ErrTooManyRequests:
+		return http.StatusTooManyRequests
+	case errutil.ErrCannotFollowSelf:
+		return http.StatusBadRequest
+	default:
+		return http.StatusBadGateway
+	}
 }
 
 func parseUintParam(r *http.Request, name string) (uint64, bool) {
@@ -59,3 +96,5 @@ func uintQueryParam(r *http.Request, name string, fallback uint64) uint64 {
 	}
 	return num
 }
+
+

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"SChill/common/cacheutil"
 	"SChill/common/redis"
 	"SChill/service/comment/rpc/internal/svc"
 )
@@ -55,5 +56,6 @@ func invalidateReplyCache(ctx context.Context, svcCtx *svc.ServiceContext, comme
 }
 
 func cacheReplyCount(ctx context.Context, svcCtx *svc.ServiceContext, commentID uint64, total int64) {
-	_ = svcCtx.Cache.SetWithExpireCtx(ctx, fmt.Sprintf("%s%d", redis.CommentReplyCountKey, commentID), total, time.Duration(redis.CommentExpire)*time.Second)
+	ttl := cacheutil.JitterDefault(time.Duration(redis.CommentExpire) * time.Second)
+	_ = svcCtx.Cache.SetWithExpireCtx(ctx, fmt.Sprintf("%s%d", redis.CommentReplyCountKey, commentID), total, ttl)
 }

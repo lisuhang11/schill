@@ -40,6 +40,7 @@ func (l *BatchCheckPostStarLogic) BatchCheckPostStar(in *pb.BatchCheckPostStarRe
 
 	userIDStr := strconv.FormatUint(in.UserId, 10)
 	starMap := make(map[uint64]bool, len(postIDs))
+	redisMiss := false
 
 	for start := 0; start < len(postIDs); start += batchStatusChunkSize {
 		end := start + batchStatusChunkSize
@@ -59,6 +60,7 @@ func (l *BatchCheckPostStarLogic) BatchCheckPostStar(in *pb.BatchCheckPostStarRe
 		statuses, err := l.svcCtx.RedisClient.PipelineSIsMember(l.ctx, checks)
 		if err != nil {
 			logx.Errorf("Redis pipeline star status query failed: chunk=%v err=%v", chunk, err)
+			redisMiss = true
 			for _, postID := range chunk {
 				starMap[postID] = false
 			}
@@ -68,6 +70,21 @@ func (l *BatchCheckPostStarLogic) BatchCheckPostStar(in *pb.BatchCheckPostStarRe
 		for relationKey, isStarred := range statuses {
 			starMap[keyToPostID[relationKey]] = isStarred
 		}
+	}
+
+	// If any Redis chunk failed, fall back to DB for ALL post IDs
+	// (partial fallback is unsafe — we need consistent results)
+	if redisMiss {
+		dbMap, dbErr := l.svcCtx.PostStarDAO.BatchCheckStatus(l.ctx, in.UserId, postIDs)
+		if dbErr != nil {
+			logx.Errorf("DB batch star status fallback failed: userId=%d err=%v", in.UserId, dbErr)
+			return &pb.BatchCheckPostStarResp{
+				StarStatus: starMap,
+			}, nil
+		}
+		return &pb.BatchCheckPostStarResp{
+			StarStatus: dbMap,
+		}, nil
 	}
 
 	return &pb.BatchCheckPostStarResp{
