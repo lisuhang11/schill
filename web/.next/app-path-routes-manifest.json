@@ -1,0 +1,10 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/posts/[postId]/page": "/posts/[postId]",
+  "/page": "/",
+  "/posts/new/page": "/posts/new",
+  "/login/page": "/login",
+  "/search/page": "/search",
+  "/register/page": "/register",
+  "/topics/page": "/topics"
+}

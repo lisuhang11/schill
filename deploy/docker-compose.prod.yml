@@ -154,6 +154,9 @@ services:
      - elasticsearch
 
   user-rpc:
+    build:
+      context: ..
+      dockerfile: service/user/rpc/Dockerfile
     image: schill-user-rpc:latest
     container_name: user-rpc
     volumes:
@@ -167,6 +170,9 @@ services:
     restart: always
 
   content-rpc:
+    build:
+      context: ..
+      dockerfile: service/content/rpc/Dockerfile
     image: schill-content-rpc:latest
     container_name: content-rpc
     volumes:
@@ -181,6 +187,9 @@ services:
     restart: always
 
   feed-rpc:
+    build:
+      context: ..
+      dockerfile: service/feed/rpc/Dockerfile
     image: schill-feed-rpc:latest
     container_name: feed-rpc
     volumes:
@@ -196,6 +205,9 @@ services:
     restart: always
 
   comment-rpc:
+    build:
+      context: ..
+      dockerfile: service/comment/rpc/Dockerfile
     image: schill-comment-rpc:latest
     container_name: comment-rpc
     volumes:
@@ -209,6 +221,9 @@ services:
     restart: always
 
   interaction-rpc:
+    build:
+      context: ..
+      dockerfile: service/interaction/rpc/Dockerfile
     image: schill-interaction-rpc:latest
     container_name: interaction-rpc
     volumes:
@@ -223,6 +238,9 @@ services:
     restart: always
 
   relation-rpc:
+    build:
+      context: ..
+      dockerfile: service/relation/rpc/Dockerfile
     image: schill-relation-rpc:latest
     container_name: relation-rpc
     volumes:
@@ -236,6 +254,9 @@ services:
     restart: always
 
   search-api:
+    build:
+      context: ..
+      dockerfile: service/search/api/Dockerfile
     image: schill-search-api:latest
     container_name: search-api
     ports:
@@ -250,6 +271,9 @@ services:
     restart: always
 
   canal-sync:
+    build:
+      context: ..
+      dockerfile: service/canal/Dockerfile
     image: schill-canal:latest
     container_name: canal-sync
     volumes:
@@ -263,6 +287,9 @@ services:
     restart: always
 
   gateway:
+    build:
+      context: ..
+      dockerfile: service/gateway/Dockerfile
     image: schill-gateway:latest
     container_name: gateway
     ports:
