@@ -2,6 +2,7 @@ package mqs
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"SChill/common/mq"
@@ -14,70 +15,38 @@ import (
 	"gorm.io/gorm"
 )
 
-type PostUncollectConsumer struct {
-	ctx    context.Context
+type PostUncollectHandler struct {
 	svcCtx *svc.ServiceContext
 }
 
-func NewPostUncollectConsumer(ctx context.Context, svcCtx *svc.ServiceContext) *PostUncollectConsumer {
-	return &PostUncollectConsumer{ctx: ctx, svcCtx: svcCtx}
+func NewPostUncollectHandler(svcCtx *svc.ServiceContext) *PostUncollectHandler {
+	return &PostUncollectHandler{svcCtx: svcCtx}
 }
 
-func (c *PostUncollectConsumer) StartConsume(brokers []string, topic string, group string) error {
-	config := sarama.NewConfig()
-	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	config.Consumer.Offsets.Initial = sarama.OffsetOldest
-	consumerGroup, err := sarama.NewConsumerGroup(brokers, group, config)
-	if err != nil {
-		return err
-	}
-	defer consumerGroup.Close()
-
-	handler := &postUncollectConsumerGroupHandler{ctx: c.ctx, svcCtx: c.svcCtx}
-	for {
-		if err := consumerGroup.Consume(c.ctx, []string{topic}, handler); err != nil {
+func (h *PostUncollectHandler) Handle(ctx context.Context, msg *sarama.ConsumerMessage, envelope *mq.EventEnvelope) error {
+	var payload mq.PostUncollectMessage
+	if envelope != nil && len(envelope.Data) > 0 {
+		if err := json.Unmarshal(envelope.Data, &payload); err != nil {
+			logx.Errorf("decode post uncollect data failed: %v", err)
 			return err
 		}
-		if c.ctx.Err() != nil {
-			return c.ctx.Err()
-		}
+	} else {
+		return fmt.Errorf("no envelope data in post uncollect message")
 	}
-}
 
-type postUncollectConsumerGroupHandler struct {
-	ctx    context.Context
-	svcCtx *svc.ServiceContext
-}
-
-func (h *postUncollectConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (h *postUncollectConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
-func (h *postUncollectConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	for msg := range claim.Messages() {
-		var payload mq.PostUncollectMessage
-		envelope, err := mq.DecodeEnvelopePayload(msg.Value, &payload)
-		if err != nil {
-			session.MarkMessage(msg, "")
-			continue
-		}
-		if skipContentEvent(h.svcCtx, h.svcCtx.Config.KqConsumerConf.Group, envelope) {
-			session.MarkMessage(msg, "")
-			continue
-		}
-
-		err = h.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
-			return tx.WithContext(h.ctx).Model(&model.Post{}).
-				Where("id = ? AND collection_count > 0", payload.PostID).
-				Update("collection_count", gorm.Expr("collection_count - ?", 1)).Error
-		})
-		if err != nil {
-			logx.Errorf("decrement post collection count failed: %v", err)
-		}
-
-		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, payload.PostID))
-		_ = h.svcCtx.Redis.Del(h.ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, payload.PostID))
-		_, _ = h.svcCtx.Redis.Incr(h.ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, payload.PostID))
-		invalidatePostListForPost(h.svcCtx, payload.PostID)
-		session.MarkMessage(msg, "")
+	err := h.svcCtx.DB.Transaction(func(tx *gorm.DB) error {
+		return tx.WithContext(ctx).Model(&model.Post{}).
+			Where("id = ? AND collection_count > 0", payload.PostID).
+			Update("collection_count", gorm.Expr("collection_count - ?", 1)).Error
+	})
+	if err != nil {
+		logx.Errorf("decrement post collection count failed: %v", err)
+		return err
 	}
+
+	_ = h.svcCtx.Redis.Del(ctx, fmt.Sprintf("%s%d", redis.PostStatsKey, payload.PostID))
+	_ = h.svcCtx.Redis.Del(ctx, fmt.Sprintf("%s%d", redis.PostBaseKey, payload.PostID))
+	_, _ = h.svcCtx.Redis.Incr(ctx, fmt.Sprintf("%s%d", redis.PostCacheVersionKey, payload.PostID))
+	invalidatePostListForPost(h.svcCtx, payload.PostID)
 	return nil
 }

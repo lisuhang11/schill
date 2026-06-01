@@ -19,7 +19,6 @@ KqProducerConf:
   TopicPostUnstar: post-unstar
   TopicPostCollect: post-collect
   TopicPostUncollect: post-uncollect
-  TopicPostShare: post-share
   MaxMessageBytes: 1048576
   RequiredAcks: 1
   Compression: snappy

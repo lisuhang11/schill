@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthProvider } from "@/lib/auth-context";
 import { AppHeader } from "@/components/AppHeader";
 import "./globals.css";
 
@@ -13,8 +14,10 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body>
-        <AppHeader />
-        {children}
+        <AuthProvider>
+          <AppHeader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -2,15 +2,15 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"strings"
 
 	errutil "SChill/common/error"
+	"SChill/common/mq"
 	"SChill/service/content/rpc/internal/model"
 	"SChill/service/content/rpc/internal/svc"
 	"SChill/service/content/rpc/pb"
 
-	"github.com/IBM/sarama"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -60,13 +60,6 @@ func (l *CreatePostLogic) CreatePost(in *pb.CreatePostReq) (*pb.CreatePostResp, 
 	}
 
 	topicNames := normalizeTopicNames(in.Topics)
-	summaryItems := make([]contentSummaryItem, 0, len(contents))
-	for _, item := range contents {
-		summaryItems = append(summaryItems, contentSummaryItem{
-			Type:    item.Type,
-			Content: item.Content,
-		})
-	}
 
 	if err := l.svcCtx.DBWrite.WithContext(l.ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(post).Error; err != nil {
@@ -119,26 +112,18 @@ func (l *CreatePostLogic) CreatePost(in *pb.CreatePostReq) (*pb.CreatePostResp, 
 
 	invalidatePostCachesByModel(l.ctx, l.svcCtx, post)
 	go func(userID, postID uint64) {
-		payload, err := json.Marshal(struct {
-			UserID uint64 `json:"user_id"`
-			PostID uint64 `json:"post_id"`
-		}{
-			UserID: userID,
-			PostID: postID,
-		})
-		if err != nil {
-			logx.Errorf("marshal post created event failed: %v", err)
-			return
-		}
-
-		if _, _, err := l.svcCtx.KafkaProducer.SendMessage(&sarama.ProducerMessage{
-			Topic: l.svcCtx.Config.KqPusherConf.TopicCreated,
-			Value: sarama.ByteEncoder(payload),
-		}); err != nil {
+		if err := l.svcCtx.KafkaProducer.SendEvent(
+			l.svcCtx.Config.KqPusherConf.TopicCreated,
+			fmt.Sprintf("%d", postID),
+			"post.created",
+			"content-rpc",
+			"post",
+			fmt.Sprintf("%d", postID),
+			mq.PostCreatedMessage{UserID: userID, PostID: postID},
+		); err != nil {
 			logx.Errorf("send post created event failed: %v", err)
 		}
 	}(in.UserId, post.ID)
-	publishContentChangedEvent(l.ctx, l.svcCtx, post, "created", buildContentSummaryFromItems(summaryItems), topicNames)
 
 	return &pb.CreatePostResp{PostId: post.ID}, nil
 }

@@ -2,7 +2,7 @@ package svc
 
 import (
 	commondb "SChill/common/db"
-	"SChill/common/mq"
+	"SChill/common/kafka"
 	"SChill/common/redis"
 	"SChill/service/comment/rpc/internal/config"
 	"SChill/service/comment/rpc/internal/consumers"
@@ -22,7 +22,7 @@ type ServiceContext struct {
 	DB              *gorm.DB
 	Redis           *redis.Client
 	Cache           cache.Cache
-	KafkaProducer   *mq.Producer
+	KafkaProducer   *kafka.Producer
 	CommentConsumer *consumers.CommentConsumer
 	ContentRpc      contentcenter.ContentCenter
 }
@@ -65,7 +65,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		}
 	}
 
-	kafkaProducer, err := mq.NewProducer(c.KqProducerConf.Brokers)
+	kafkaProducer, err := kafka.NewAsyncProducer(c.KqProducerConf.Brokers)
 	if err != nil {
 		panic("kafka producer init failed: " + err.Error())
 	}

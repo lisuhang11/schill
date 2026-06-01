@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { createPost } from "@/lib/api";
-import { POST_VISIBILITY_OPTIONS, type CreatePostRequest, type PostVisibility } from "@/lib/types";
+import { POST_VISIBILITY_OPTIONS, type CreatePostRequest, type PostVisibility, type PostContentItem } from "@/lib/types";
 
 const postSchema = z.object({
   title: z.string().trim().min(2, "标题至少 2 个字符").max(80, "标题不能超过 80 个字符"),
@@ -33,39 +33,77 @@ function splitInput(value: string): string[] {
     .filter(Boolean);
 }
 
-export function PostEditor() {
+type SubmitPayload = {
+  title: string;
+  cover: string;
+  visibility: number;
+  contents: { type: number; content: string; sort: number }[];
+  topics: string[];
+  tags: string;
+};
+
+type PostEditorProps = {
+  initialTitle?: string;
+  initialCover?: string;
+  initialVisibility?: number;
+  initialContents?: PostContentItem[];
+  initialTopics?: string[];
+  initialTags?: string;
+  onSubmit?: (data: SubmitPayload) => Promise<void>;
+  submitLabel?: string;
+};
+
+export function PostEditor({
+  initialTitle,
+  initialCover,
+  initialVisibility,
+  initialContents,
+  initialTopics,
+  initialTags,
+  onSubmit: customOnSubmit,
+  submitLabel
+}: PostEditorProps) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const defaultContent = initialContents?.find((c) => c.type === 2)?.content ?? "";
+
   const {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm<PostFormValues>({
+  } = useForm<PostFormValues, undefined, PostFormValues>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      title: "",
-      cover: "",
-      visibility: 90,
-      content: "",
-      topicsText: "",
-      tagsText: ""
+      title: initialTitle ?? "",
+      cover: initialCover ?? "",
+      visibility: 90 as PostVisibility,
+      content: defaultContent,
+      topicsText: (initialTopics ?? []).join(","),
+      tagsText: initialTags ?? ""
     }
   });
 
   function onSubmit(values: PostFormValues) {
     setMessage("");
-    const payload: CreatePostRequest = {
+    const vis = Number(values.visibility) as PostVisibility;
+    const payload: SubmitPayload = {
       title: values.title,
       cover: values.cover,
-      visibility: values.visibility as PostVisibility,
+      visibility: vis,
       contents: [{ type: 2, content: values.content, sort: 100 }],
       topics: splitInput(values.topicsText),
       tags: splitInput(values.tagsText).join(",")
     };
 
     startTransition(async () => {
-      const result = await createPost(payload);
+      if (customOnSubmit) {
+        await customOnSubmit(payload);
+        return;
+      }
+
+      const result = await createPost(payload as CreatePostRequest);
       if (result.ok) {
         router.push(`/posts/${result.data.postId}`);
       } else {
@@ -155,7 +193,7 @@ export function PostEditor() {
           disabled={isPending}
           className="focus-ring inline-flex items-center gap-2 rounded-lg bg-marine-deep px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
         >
-          <Save size={18} /> 发布
+          <Save size={18} /> {submitLabel ?? "发布"}
         </button>
       </div>
       {message ? <p className="text-sm text-red-600">{message}</p> : null}

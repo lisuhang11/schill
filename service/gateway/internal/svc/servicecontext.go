@@ -1,16 +1,13 @@
 package svc
 
 import (
-	"net/http/httputil"
-	"net/url"
-	"time"
-
 	"SChill/service/comment/rpc/commentcenter"
 	"SChill/service/content/rpc/contentcenter"
 	"SChill/service/feed/rpc/feedcenter"
 	"SChill/service/gateway/internal/config"
 	"SChill/service/interaction/rpc/interactioncenter"
 	"SChill/service/relation/rpc/relationcenter"
+	"SChill/service/search/rpc/searchcenter"
 	"SChill/service/user/rpc/usercenter"
 
 	"github.com/zeromicro/go-zero/zrpc"
@@ -24,7 +21,7 @@ type ServiceContext struct {
 	CommentRpc     commentcenter.CommentCenter
 	RelationRpc    relationcenter.RelationCenter
 	InteractionRpc interactioncenter.InteractionCenter
-	SearchProxy    *httputil.ReverseProxy
+	SearchRpc      searchcenter.SearchCenter
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -36,25 +33,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		CommentRpc:     commentcenter.NewCommentCenter(zrpc.MustNewClient(c.CommentRpc)),
 		RelationRpc:    relationcenter.NewRelationCenter(zrpc.MustNewClient(c.RelationRpc)),
 		InteractionRpc: interactioncenter.NewInteractionCenter(zrpc.MustNewClient(c.InteractionRpc)),
-		SearchProxy:    newSearchProxy(c),
+		SearchRpc:      searchcenter.NewSearchCenter(zrpc.MustNewClient(c.SearchRpc)),
 	}
-}
-
-func newSearchProxy(c config.Config) *httputil.ReverseProxy {
-	target, err := url.Parse(c.SearchProxy.Target)
-	if err != nil {
-		panic(err)
-	}
-
-	proxy := httputil.NewSingleHostReverseProxy(target)
-	proxy.Transport = &httpTransport{
-		dialTimeout:           c.SearchProxy.DialTimeout,
-		responseHeaderTimeout: c.SearchProxy.ResponseHeaderTimeout,
-	}
-	return proxy
-}
-
-type httpTransport struct {
-	dialTimeout           time.Duration
-	responseHeaderTimeout time.Duration
 }

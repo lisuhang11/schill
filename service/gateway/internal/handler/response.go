@@ -5,14 +5,13 @@ import (
 	"strconv"
 	"strings"
 
+	"SChill/common/authctx"
 	errutil "SChill/common/error"
 	"SChill/service/gateway/internal/types"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"github.com/zeromicro/go-zero/rest/pathvar"
 )
-
-const currentUserHeader = "X-User-Id"
 
 func ok(w http.ResponseWriter, data interface{}) {
 	httpx.OkJson(w, types.Response{Code: 0, Msg: "ok", Data: data})
@@ -64,13 +63,14 @@ func parseUintParam(r *http.Request, name string) (uint64, bool) {
 	return id, err == nil && id > 0
 }
 
+// currentUserID reads the authenticated user ID from the request context,
+// populated by the JWT middleware. Returns 0 if no valid JWT token was provided.
 func currentUserID(r *http.Request) (uint64, bool) {
-	value := strings.TrimSpace(r.Header.Get(currentUserHeader))
-	if value == "" {
+	userID := authctx.OptionalUserID(r.Context())
+	if userID == 0 {
 		return 0, false
 	}
-	id, err := strconv.ParseUint(value, 10, 64)
-	return id, err == nil && id > 0
+	return userID, true
 }
 
 func pageParam(r *http.Request, name string, fallback int64) int64 {

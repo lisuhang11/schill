@@ -14,7 +14,7 @@ Mysql:
   ConnMaxIdleTime: 300
 
 Jwt:
-  AccessSecret: "your-256-bit-secret"
+  AccessSecret: "change-me-gateway-access-secret"
   AccessExpire: 86400
   RefreshSecret: "another-random-secret"
   RefreshExpire: 604800
@@ -32,6 +32,12 @@ KqConsumerConf:
   Offset: first
   Consumers: 8
   Processors: 8
+
+RedisConf:
+  Host: "127.0.0.1"
+  Port: "6379"
+  Password: ""
+  DB: 0
 
 # Redis 配置
 Cache:

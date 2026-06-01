@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { loginUser, registerUser } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 const authSchema = z.object({
   username: z.string().trim().min(3, "用户名至少 3 个字符").max(32, "用户名不能超过 32 个字符"),
@@ -17,6 +18,7 @@ type AuthValues = z.infer<typeof authSchema>;
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
+  const { login } = useAuth();
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const {
@@ -40,6 +42,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         window.localStorage.setItem("schill:userId", String(result.data.userId));
         window.localStorage.setItem("schill:accessToken", result.data.accessToken);
         window.localStorage.setItem("schill:refreshToken", result.data.refreshToken);
+        login(result.data.userId, values.username);
         router.push("/");
         return;
       }

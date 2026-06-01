@@ -15,6 +15,7 @@ const (
 	ErrInvalidParams           = 1007 // 参数错误
 	ErrUserNotExist            = 1008 // 用户不存在
 	ErrInvalidRefreshToken     = 1009 // 无效的refresh token
+	ErrPasswordTooWeak         = 1010 // 密码强度不足
 
 	// 关系模块错误码 (2000-2999)
 	ErrCannotFollowSelf = 2001 // 不能关注自己
@@ -49,6 +50,7 @@ var messageMap = map[int]string{
 	ErrInvalidParams:           "参数错误",
 	ErrUserNotExist:            "用户不存在",
 	ErrInvalidRefreshToken:     "无效的刷新令牌",
+	ErrPasswordTooWeak:         "密码强度不足，密码长度至少8位，需包含大小写字母和数字",
 	ErrCannotFollowSelf:        "不能关注自己",
 	ErrAlreadyFollowed:         "已经关注了",
 	ErrNotFollowing:            "未关注",

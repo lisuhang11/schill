@@ -1,60 +1,51 @@
 package mqs
 
 import (
-	"context"
-	"errors"
-
+	"SChill/common/kafka"
 	"SChill/service/user/rpc/internal/config"
 	"SChill/service/user/rpc/internal/svc"
 
-	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 )
 
-type managedConsumerService struct {
-	name   string
-	cancel context.CancelFunc
-	run    func() error
-}
+func Consumers(c config.Config, svcContext *svc.ServiceContext) []service.Service {
+	store := kafka.NewIdempotencyStore(svcContext.RedisClient)
 
-func newManagedConsumerService(name string, parent context.Context, run func(ctx context.Context) error) service.Service {
-	ctx, cancel := context.WithCancel(parent)
-	return &managedConsumerService{
-		name:   name,
-		cancel: cancel,
-		run: func() error {
-			return run(ctx)
-		},
+	createdConsumer, err := kafka.NewConsumer(kafka.ConsumerConfig{
+		Brokers: c.KqConsumerConf.Brokers,
+		Group:   c.KqConsumerConf.Group + "-created",
+		Topics:  []string{c.KqConsumerConf.TopicCreated},
+	}, NewPostCreatedHandler(svcContext), store)
+	if err != nil {
+		panic("create post-created consumer failed: " + err.Error())
 	}
-}
 
-func (s *managedConsumerService) Start() {
-	go func() {
-		if err := s.run(); err != nil && !errors.Is(err, context.Canceled) {
-			logx.Errorf("%s exited with error: %v", s.name, err)
-		}
-	}()
-}
-
-func (s *managedConsumerService) Stop() {
-	if s.cancel != nil {
-		s.cancel()
+	deletedConsumer, err := kafka.NewConsumer(kafka.ConsumerConfig{
+		Brokers: c.KqConsumerConf.Brokers,
+		Group:   c.KqConsumerConf.Group + "-deleted",
+		Topics:  []string{c.KqConsumerConf.TopicDeleted},
+	}, NewPostDeletedHandler(svcContext), store)
+	if err != nil {
+		panic("create post-deleted consumer failed: " + err.Error())
 	}
-}
 
-func Consumers(c config.Config, ctx context.Context, svcContext *svc.ServiceContext) []service.Service {
-	return []service.Service{
-		newManagedConsumerService("user-post-created-consumer", ctx, func(runCtx context.Context) error {
-			return NewPostCreatedConsumer(runCtx, svcContext).StartConsume(c.KqConsumerConf.Brokers, c.KqConsumerConf.TopicCreated, c.KqConsumerConf.Group)
-		}),
-		newManagedConsumerService("user-post-deleted-consumer", ctx, func(runCtx context.Context) error {
-			return NewPostDeletedConsumer(runCtx, svcContext).StartConsume(c.KqConsumerConf.Brokers, c.KqConsumerConf.TopicDeleted, c.KqConsumerConf.Group)
-		}),
-		newManagedConsumerService("user-followed-consumer", ctx, func(runCtx context.Context) error {
-			return NewUserFollowedConsumer(runCtx, svcContext).StartConsume(c.KqConsumerConf.Brokers, c.KqConsumerConf.TopicFollowed, c.KqConsumerConf.Group)
-		}),
-		newManagedConsumerService("user-unfollowed-consumer", ctx, func(runCtx context.Context) error {
-			return NewUserUnfollowedConsumer(runCtx, svcContext).StartConsume(c.KqConsumerConf.Brokers, c.KqConsumerConf.TopicUnfollowed, c.KqConsumerConf.Group)
-		}),
+	followedConsumer, err := kafka.NewConsumer(kafka.ConsumerConfig{
+		Brokers: c.KqConsumerConf.Brokers,
+		Group:   c.KqConsumerConf.Group + "-followed",
+		Topics:  []string{c.KqConsumerConf.TopicFollowed},
+	}, NewUserFollowedHandler(svcContext), store)
+	if err != nil {
+		panic("create user-followed consumer failed: " + err.Error())
 	}
+
+	unfollowedConsumer, err := kafka.NewConsumer(kafka.ConsumerConfig{
+		Brokers: c.KqConsumerConf.Brokers,
+		Group:   c.KqConsumerConf.Group + "-unfollowed",
+		Topics:  []string{c.KqConsumerConf.TopicUnfollowed},
+	}, NewUserUnfollowedHandler(svcContext), store)
+	if err != nil {
+		panic("create user-unfollowed consumer failed: " + err.Error())
+	}
+
+	return []service.Service{createdConsumer, deletedConsumer, followedConsumer, unfollowedConsumer}
 }

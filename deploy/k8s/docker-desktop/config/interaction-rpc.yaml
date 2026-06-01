@@ -20,7 +20,6 @@ KqProducerConf:
   TopicPostUnstar: post-unstar
   TopicPostCollect: post-collect
   TopicPostUncollect: post-uncollect
-  TopicPostShare: post-share
 
 RedisConf:
   Host: "redis"

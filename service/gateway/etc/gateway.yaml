@@ -5,11 +5,6 @@ Port: 8086
 Jwt:
   AccessSecret: "change-me-gateway-access-secret"
 
-SearchProxy:
-  Target: http://127.0.0.1:8895
-  DialTimeout: 2s
-  ResponseHeaderTimeout: 10s
-
 UserRpc:
   Etcd:
     Hosts:
@@ -45,3 +40,9 @@ InteractionRpc:
     Hosts:
       - 127.0.0.1:2379
     Key: interaction.rpc
+
+SearchRpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: search.rpc

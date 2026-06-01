@@ -79,7 +79,7 @@ func (c *InteractionConsumer) sendToDLQ(msg *sarama.ConsumerMessage, reason stri
 	if c.svcCtx.Config.KafkaConsumerConf.DLQTopic == "" {
 		return
 	}
-	if err := c.svcCtx.KafkaProducer.SendRawMessage(&sarama.ProducerMessage{
+	if err := c.svcCtx.KafkaProducer.SendRaw(&sarama.ProducerMessage{
 		Topic: c.svcCtx.Config.KafkaConsumerConf.DLQTopic,
 		Key:   sarama.ByteEncoder(msg.Key),
 		Value: sarama.ByteEncoder(msg.Value),

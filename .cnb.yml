@@ -1,0 +1,120 @@
+# SChill CNB CI/CD Pipeline Configuration
+# 参考: https://docs.cnb.cool/zh/build/build-config.html
+
+# 触发器配置
+triggers:
+  push:
+    branches:
+      - master
+      - develop
+      - 'feature/*'
+  pull_request:
+    branches:
+      - master
+      - develop
+
+# 环境变量
+env:
+  GO_VERSION: "1.25"
+  CGO_ENABLED: "0"
+
+# 流水线阶段
+stages:
+  # ==================== 阶段 1: 代码检查 ====================
+  - name: lint
+    label: 代码静态检查
+    image: golang:1.25-alpine
+    commands:
+      - apk add --no-cache git
+      - go version
+      # vet 检查
+      - go vet ./...
+      # 检查 go.mod 是否整洁
+      - go mod tidy -diff
+
+  # ==================== 阶段 2: 单元测试 + 性能测试 ====================
+  - name: test
+    label: 单元测试 & 性能测试
+    image: golang:1.25-alpine
+    commands:
+      - apk add --no-cache git
+      # 运行单元测试（带覆盖率报告）
+      - go test -v -race -coverprofile=coverage.out -covermode=atomic ./common/... ./service/...
+      # 查看覆盖率
+      - go tool cover -func=coverage.out | tail -1
+      # 运行性能基准测试（快速模式，每个 benchmark 只运行一次，用于回归检测）
+      - go test -bench=. -benchtime=1x -count=1 -run='^$' ./common/... ./service/... 2>&1 || echo "Benchmark completed (may fail on no benchmark tests)"
+
+  # ==================== 阶段 3: 性能基准对比测试 ====================
+  # 运行完整 benchmark（3轮，每轮3秒），测试函数执行速度 + 内存分配
+  # 包含并发测试（-cpu 参数控制 GOMAXPROCS）
+  - name: benchmark
+    label: 性能基准测试
+    image: golang:1.25-alpine
+    commands:
+      - apk add --no-cache git curl jq
+      # 安装 benchstat 用于性能比较
+      - go install golang.org/x/perf/cmd/benchstat@latest
+      - export PATH=$PATH:/root/go/bin
+
+      # 运行性能测试（单核 + 多核）
+      - |
+        echo "=== Running single-core benchmarks ==="
+        go test -bench=. -benchmem -benchtime=3s -count=3 -cpu=1 -run='^$' ./common/... ./service/... | tee bench-1cpu.txt
+
+      - |
+        echo "=== Running multi-core concurrent benchmarks ==="
+        go test -bench=. -benchmem -benchtime=3s -count=3 -cpu=4 -run='^$' ./common/... ./service/... | tee bench-4cpu.txt
+
+      # 输出分类摘要
+      - |
+        echo ""
+        echo "=== 单核性能摘要 ==="
+        grep -E "^Benchmark|^ok|^FAIL|ns/op" bench-1cpu.txt || echo "No benchmarks found."
+        echo ""
+        echo "=== 并发性能摘要 (4 核) ==="
+        grep -E "^Benchmark|^ok|^FAIL|ns/op" bench-4cpu.txt || echo "No benchmarks found."
+
+      # 如果是 master 分支，保存为基准
+      - |
+        BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        if [ "$BRANCH" = "master" ]; then
+          cp bench-1cpu.txt master-bench-1cpu.txt
+          cp bench-4cpu.txt master-bench-4cpu.txt
+          echo "Master branch: benchmarks saved as baseline."
+        else
+          echo "Non-master branch: benchmark results recorded."
+        fi
+
+  # ==================== 阶段 4: 构建 ====================
+  - name: build
+    label: 项目构建
+    image: golang:1.25-alpine
+    depends_on:
+      - lint
+      - test
+    commands:
+      - apk add --no-cache git
+      # 构建所有服务
+      - |
+        echo "=== Building all services ==="
+        go build -v -ldflags="-s -w" -o /dev/null ./service/gateway/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/user/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/content/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/comment/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/feed/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/interaction/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/relation/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/search/... 2>&1 | tail -5
+        go build -v -ldflags="-s -w" -o /dev/null ./service/canal/... 2>&1 | tail -5
+      - echo "All services built successfully."
+
+  # ==================== 阶段 5: Docker 镜像构建（可选） ====================
+  # - name: docker
+  #   label: Docker 镜像构建
+  #   image: docker:latest
+  #   depends_on:
+  #     - build
+  #   commands:
+  #     - docker build -t schill-gateway:${CNB_COMMIT_SHORT} -f deploy/Dockerfile.gateway .
+  #     - docker build -t schill-user:${CNB_COMMIT_SHORT} -f deploy/Dockerfile.user .

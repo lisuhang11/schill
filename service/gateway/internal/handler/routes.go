@@ -35,8 +35,9 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{Method: http.MethodPost, Path: "/api/posts/:id/collect", Handler: CollectPostHandler(serverCtx)},
 		{Method: http.MethodDelete, Path: "/api/posts/:id/collect", Handler: UncollectPostHandler(serverCtx)},
 		{Method: http.MethodPost, Path: "/api/posts/:id/share", Handler: SharePostHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/api/search/post", Handler: SearchProxyHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/api/search/user", Handler: SearchProxyHandler(serverCtx)},
-		{Method: http.MethodGet, Path: "/api/search/topic", Handler: SearchProxyHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/api/users/me/collections", Handler: GetMyCollectionsHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/api/search/post", Handler: SearchPostHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/api/search/user", Handler: SearchUserHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/api/search/topic", Handler: SearchTopicHandler(serverCtx)},
 	})
 }

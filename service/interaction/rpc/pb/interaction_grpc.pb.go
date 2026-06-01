@@ -28,6 +28,7 @@ const (
 	InteractionCenter_CheckPostCollection_FullMethodName      = "/interaction.InteractionCenter/CheckPostCollection"
 	InteractionCenter_BatchCheckPostCollection_FullMethodName = "/interaction.InteractionCenter/BatchCheckPostCollection"
 	InteractionCenter_SharePost_FullMethodName                = "/interaction.InteractionCenter/SharePost"
+	InteractionCenter_ListUserCollections_FullMethodName       = "/interaction.InteractionCenter/ListUserCollections"
 )
 
 // InteractionCenterClient is the client API for InteractionCenter service.
@@ -54,6 +55,8 @@ type InteractionCenterClient interface {
 	BatchCheckPostCollection(ctx context.Context, in *BatchCheckPostCollectionReq, opts ...grpc.CallOption) (*BatchCheckPostCollectionResp, error)
 	// 动态分享
 	SharePost(ctx context.Context, in *SharePostReq, opts ...grpc.CallOption) (*SharePostResp, error)
+	// 获取用户收藏列表
+	ListUserCollections(ctx context.Context, in *ListUserCollectionsReq, opts ...grpc.CallOption) (*ListUserCollectionsResp, error)
 }
 
 type interactionCenterClient struct {
@@ -154,6 +157,16 @@ func (c *interactionCenterClient) SharePost(ctx context.Context, in *SharePostRe
 	return out, nil
 }
 
+func (c *interactionCenterClient) ListUserCollections(ctx context.Context, in *ListUserCollectionsReq, opts ...grpc.CallOption) (*ListUserCollectionsResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListUserCollectionsResp)
+	err := c.cc.Invoke(ctx, InteractionCenter_ListUserCollections_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // InteractionCenterServer is the server API for InteractionCenter service.
 // All implementations must embed UnimplementedInteractionCenterServer
 // for forward compatibility.
@@ -178,6 +191,8 @@ type InteractionCenterServer interface {
 	BatchCheckPostCollection(context.Context, *BatchCheckPostCollectionReq) (*BatchCheckPostCollectionResp, error)
 	// 动态分享
 	SharePost(context.Context, *SharePostReq) (*SharePostResp, error)
+	// 获取用户收藏列表
+	ListUserCollections(context.Context, *ListUserCollectionsReq) (*ListUserCollectionsResp, error)
 	mustEmbedUnimplementedInteractionCenterServer()
 }
 
@@ -214,6 +229,9 @@ func (UnimplementedInteractionCenterServer) BatchCheckPostCollection(context.Con
 }
 func (UnimplementedInteractionCenterServer) SharePost(context.Context, *SharePostReq) (*SharePostResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SharePost not implemented")
+}
+func (UnimplementedInteractionCenterServer) ListUserCollections(context.Context, *ListUserCollectionsReq) (*ListUserCollectionsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserCollections not implemented")
 }
 func (UnimplementedInteractionCenterServer) mustEmbedUnimplementedInteractionCenterServer() {}
 func (UnimplementedInteractionCenterServer) testEmbeddedByValue()                           {}
@@ -398,6 +416,24 @@ func _InteractionCenter_SharePost_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InteractionCenter_ListUserCollections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserCollectionsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InteractionCenterServer).ListUserCollections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: InteractionCenter_ListUserCollections_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InteractionCenterServer).ListUserCollections(ctx, req.(*ListUserCollectionsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // InteractionCenter_ServiceDesc is the grpc.ServiceDesc for InteractionCenter service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -440,6 +476,10 @@ var InteractionCenter_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SharePost",
 			Handler:    _InteractionCenter_SharePost_Handler,
+		},
+		{
+			MethodName: "ListUserCollections",
+			Handler:    _InteractionCenter_ListUserCollections_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

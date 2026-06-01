@@ -1,0 +1,21 @@
+Name: search.rpc
+ListenOn: 0.0.0.0:8088
+Etcd:
+  Hosts:
+    - 127.0.0.1:2379
+  Key: search.rpc
+
+Elasticsearch:
+  Hosts:
+    - http://127.0.0.1:9200
+  Username: ""
+  Password: ""
+  PostIndex: "post"
+  UserIndex: "user"
+  TopicIndex: "topic"
+
+Redis:
+  Host: "127.0.0.1"
+  Port: "6379"
+  Password: ""
+  DB: 0

@@ -1,6 +1,8 @@
 {
-  "/posts/new/page": "app/posts/new/page.js",
   "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/users/[userId]/page": "app/users/[userId]/page.js",
   "/search/page": "app/search/page.js",
-  "/register/page": "app/register/page.js"
+  "/topics/page": "app/topics/page.js",
+  "/feed/page": "app/feed/page.js"
 }

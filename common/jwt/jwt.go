@@ -9,7 +9,8 @@ import (
 
 // Claims 自定义Claims结构，与go-zero兼容
 type Claims struct {
-	UserId uint64 `json:"userId"`
+	UserId       uint64 `json:"userId"`
+	TokenVersion int64  `json:"tokenVersion,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -43,28 +44,69 @@ func GenerateRefreshToken(refreshExpire int64, refreshSecret string, userId uint
 	return token.SignedString([]byte(refreshSecret))
 }
 
-// ParseToken 解析 token 获取用户 ID
-func ParseToken(tokenString string, secret string) (uint64, error) {
+// GenerateRefreshTokenWithVersion 生成带版本号的 Refresh Token（用于版本校验/撤销）
+func GenerateRefreshTokenWithVersion(refreshExpire int64, refreshSecret string, userId uint64, version int64) (string, error) {
+	now := time.Now()
+	expire := now.Add(time.Duration(refreshExpire) * time.Second)
+	claims := Claims{
+		UserId:       userId,
+		TokenVersion: version,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expire),
+			IssuedAt:  jwt.NewNumericDate(now),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(refreshSecret))
+}
+
+// GenerateAccessTokenWithVersion 生成带版本号的 Access Token
+func GenerateAccessTokenWithVersion(accessExpire int64, accessSecret string, userId uint64, version int64) (string, error) {
+	now := time.Now()
+	expire := now.Add(time.Duration(accessExpire) * time.Second)
+	claims := Claims{
+		UserId:       userId,
+		TokenVersion: version,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expire),
+			IssuedAt:  jwt.NewNumericDate(now),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(accessSecret))
+}
+
+// ParseToken 解析 token 获取 Claims
+func ParseToken(tokenString string, secret string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims.UserId, nil
+		return claims, nil
 	}
 
-	return 0, errors.New("invalid token")
+	return nil, errors.New("invalid token")
 }
 
-// ParseRefreshToken 解析 refresh token
-func ParseRefreshToken(tokenString string, secret string) (uint64, error) {
+// ParseTokenUserID 解析 token 获取用户 ID（保持向后兼容）
+func ParseTokenUserID(tokenString string, secret string) (uint64, error) {
+	claims, err := ParseToken(tokenString, secret)
+	if err != nil {
+		return 0, err
+	}
+	return claims.UserId, nil
+}
+
+// ParseRefreshToken 解析 refresh token 获取 Claims（含版本号）
+func ParseRefreshToken(tokenString string, secret string) (*Claims, error) {
 	return ParseToken(tokenString, secret)
 }
 
-// ParseAccessToken 解析 access token
-func ParseAccessToken(tokenString string, secret string) (uint64, error) {
+// ParseAccessToken 解析 access token 获取 Claims（含版本号）
+func ParseAccessToken(tokenString string, secret string) (*Claims, error) {
 	return ParseToken(tokenString, secret)
 }

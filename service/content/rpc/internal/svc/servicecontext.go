@@ -2,13 +2,13 @@ package svc
 
 import (
 	commondb "SChill/common/db"
+	"SChill/common/kafka"
 	"SChill/common/redis"
 	"SChill/service/content/rpc/internal/config"
 	"SChill/service/content/rpc/internal/model"
 	"SChill/service/relation/rpc/relationcenter"
 	"errors"
 
-	"github.com/IBM/sarama"
 	"github.com/zeromicro/go-zero/core/collection"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	gzredis "github.com/zeromicro/go-zero/core/stores/redis"
@@ -25,7 +25,7 @@ type ServiceContext struct {
 	Redis         *redis.Client
 	Cache         cache.Cache
 	LocalCache    *collection.Cache
-	KafkaProducer sarama.SyncProducer
+	KafkaProducer *kafka.Producer
 	RelationRpc   relationcenter.RelationCenter
 }
 
@@ -81,12 +81,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		}
 	}
 
-	kafkaCfg := sarama.NewConfig()
-	kafkaCfg.Producer.RequiredAcks = sarama.WaitForAll
-	kafkaCfg.Producer.Retry.Max = 5
-	kafkaCfg.Producer.Return.Successes = true
-
-	producer, err := sarama.NewSyncProducer(c.KqPusherConf.Brokers, kafkaCfg)
+	producer, err := kafka.NewSyncProducer(c.KqPusherConf.Brokers)
 	if err != nil {
 		panic("kafka producer init failed: " + err.Error())
 	}

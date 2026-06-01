@@ -73,6 +73,28 @@ func (dao *PostCollectionDAO) BatchCreate(ctx context.Context, collections []*Po
 	return dao.db.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(collections, 100).Error
 }
 
+// ListByUser returns the user's collections ordered by collected_at DESC, paginated.
+func (dao *PostCollectionDAO) ListByUser(ctx context.Context, userId uint64, offset, limit int) ([]PostCollection, error) {
+	var collections []PostCollection
+	err := dao.db.WithContext(ctx).
+		Where("user_id = ?", userId).
+		Order("collected_at DESC").
+		Offset(offset).
+		Limit(limit).
+		Find(&collections).Error
+	return collections, err
+}
+
+// CountByUser returns the total number of collections for a user.
+func (dao *PostCollectionDAO) CountByUser(ctx context.Context, userId uint64) (int64, error) {
+	var count int64
+	err := dao.db.WithContext(ctx).
+		Model(&PostCollection{}).
+		Where("user_id = ?", userId).
+		Count(&count).Error
+	return count, err
+}
+
 func (dao *PostCollectionDAO) GetDB() *gorm.DB {
 	return dao.db
 }

@@ -1,23 +1,37 @@
 import Link from "next/link";
 import { Bookmark, Eye, Heart, MessageCircle, Share2 } from "lucide-react";
 import { formatCount, formatDate, splitTags, toBoolean, visibilityLabel } from "@/lib/format";
-import type { PostInfo, SearchPostItem } from "@/lib/types";
+import type { FeedItem, PostInfo, SearchPostItem } from "@/lib/types";
 
 type PostCardProps = {
-  post: PostInfo | SearchPostItem;
+  post: PostInfo | SearchPostItem | FeedItem;
   compact?: boolean;
 };
 
-function isSearchPost(post: PostInfo | SearchPostItem): post is SearchPostItem {
+function isSearchPost(post: PostCardProps["post"]): post is SearchPostItem {
   return "content" in post;
 }
 
+function isFeedItem(post: PostCardProps["post"]): post is FeedItem {
+  return "author" in post && typeof (post as FeedItem).author === "object";
+}
+
 export function PostCard({ post, compact = false }: PostCardProps) {
-  const id = isSearchPost(post) ? post.id : post.id;
-  const title = isSearchPost(post) ? post.content.slice(0, 48) || "未命名内容" : post.title;
+  const id = isFeedItem(post) ? post.postId : isSearchPost(post) ? post.id : post.id;
+  const title = isSearchPost(post)
+    ? post.content.slice(0, 48) || "未命名内容"
+    : post.title;
   const summary = isSearchPost(post) ? post.content : post.summary;
-  const tags = isSearchPost(post) ? post.tags : splitTags(post.tags);
-  const author = isSearchPost(post) ? post.username : `用户 ${post.userId}`;
+  const tags = isFeedItem(post)
+    ? post.tags
+    : isSearchPost(post)
+    ? post.tags
+    : splitTags(post.tags as string);
+  const author = isFeedItem(post)
+    ? post.author.username
+    : isSearchPost(post)
+    ? post.username
+    : `用户 ${post.userId}`;
   const isTop = toBoolean(post.isTop);
   const isEssence = toBoolean(post.isEssence);
 

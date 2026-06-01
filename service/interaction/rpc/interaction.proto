@@ -130,6 +130,19 @@ message SharePostResp {
   int64 shareCount = 2;
 }
 
+// 获取用户收藏列表请求
+message ListUserCollectionsReq {
+  uint64 userId = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+// 获取用户收藏列表响应
+message ListUserCollectionsResp {
+  repeated uint64 postIds = 1;
+  int64 total = 2;
+}
+
 // gRPC服务定义
 service InteractionCenter {
   // 动态点赞
@@ -152,6 +165,9 @@ service InteractionCenter {
 
   // 动态分享
   rpc SharePost(SharePostReq) returns (SharePostResp);
+
+  // 获取用户收藏列表
+  rpc ListUserCollections(ListUserCollectionsReq) returns (ListUserCollectionsResp);
 }
 
 // goctl rpc protoc interaction.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

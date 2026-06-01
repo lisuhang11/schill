@@ -86,7 +86,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
             <StateBlock tone="empty" title="暂无评论" description="可以发布第一条评论。" />
           </div>
         ) : (
-          <CommentList comments={commentsResult.data.list} />
+          <CommentList comments={commentsResult.data.list} postId={post.id} />
         )}
       </section>
     </main>

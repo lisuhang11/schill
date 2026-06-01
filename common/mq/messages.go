@@ -72,6 +72,18 @@ type UserUnfollowedMessage struct {
 	FollowingID uint64 `json:"following_id"`
 }
 
+// PostCreatedMessage 帖子创建消息
+type PostCreatedMessage struct {
+	UserID uint64 `json:"user_id"`
+	PostID uint64 `json:"post_id"`
+}
+
+// PostDeletedMessage 帖子删除消息
+type PostDeletedMessage struct {
+	UserID uint64 `json:"user_id"`
+	PostID uint64 `json:"post_id"`
+}
+
 // UserMutualFollowMessage 用户双向关注消息
 type UserMutualFollowMessage struct {
 	UserID1 uint64 `json:"user_id_1"`

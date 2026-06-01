@@ -170,7 +170,15 @@ func (l *VoteCommentLogic) VoteComment(in *pb.VoteCommentReq) (*pb.VoteCommentRe
 	}
 
 	go func() {
-		if err := l.svcCtx.KafkaProducer.SendMessage(l.svcCtx.Config.KqProducerConf.TopicCommentVote, voteEvent); err != nil {
+		if err := l.svcCtx.KafkaProducer.SendEvent(
+			l.svcCtx.Config.KqProducerConf.TopicCommentVote,
+			fmt.Sprintf("%d:%d", in.CommentId, in.UserId),
+			"comment.voted",
+			"comment-rpc",
+			"comment_vote",
+			strconv.FormatUint(in.CommentId, 10),
+			voteEvent,
+		); err != nil {
 			logx.Errorf("发送投票事件消息失败: %v", err)
 		}
 	}()
@@ -325,7 +333,7 @@ func (l *VoteCommentLogic) updateCommentScoreInLists(postID, commentID uint64, l
 	// Only update if the key exists (not a full rebuild)
 	exists, err := l.svcCtx.Redis.Exists(ctx, hotListKey)
 	if err == nil && exists > 0 {
-		if zaddErr := l.svcCtx.Redis.ZAdd(ctx, hotListKey, hotScore, commentIDStr); zaddErr != nil {
+		if zaddErr := l.svcCtx.Redis.ZAdd(ctx, hotListKey, redis.Z{Score: hotScore, Member: commentIDStr}); zaddErr != nil {
 			logx.Errorf("update hot score failed: commentId=%d err=%v", commentID, zaddErr)
 		}
 	}

@@ -34,6 +34,8 @@ type (
 	UncollectPostResp            = pb.UncollectPostResp
 	UnstarPostReq                = pb.UnstarPostReq
 	UnstarPostResp               = pb.UnstarPostResp
+	ListUserCollectionsReq       = pb.ListUserCollectionsReq
+	ListUserCollectionsResp      = pb.ListUserCollectionsResp
 
 	InteractionCenter interface {
 		// 动态点赞
@@ -54,6 +56,8 @@ type (
 		BatchCheckPostCollection(ctx context.Context, in *BatchCheckPostCollectionReq, opts ...grpc.CallOption) (*BatchCheckPostCollectionResp, error)
 		// 动态分享
 		SharePost(ctx context.Context, in *SharePostReq, opts ...grpc.CallOption) (*SharePostResp, error)
+		// 获取用户收藏列表
+		ListUserCollections(ctx context.Context, in *ListUserCollectionsReq, opts ...grpc.CallOption) (*ListUserCollectionsResp, error)
 	}
 
 	defaultInteractionCenter struct {
@@ -119,4 +123,10 @@ func (m *defaultInteractionCenter) BatchCheckPostCollection(ctx context.Context,
 func (m *defaultInteractionCenter) SharePost(ctx context.Context, in *SharePostReq, opts ...grpc.CallOption) (*SharePostResp, error) {
 	client := pb.NewInteractionCenterClient(m.cli.Conn())
 	return client.SharePost(ctx, in, opts...)
+}
+
+// 获取用户收藏列表
+func (m *defaultInteractionCenter) ListUserCollections(ctx context.Context, in *ListUserCollectionsReq, opts ...grpc.CallOption) (*ListUserCollectionsResp, error) {
+	client := pb.NewInteractionCenterClient(m.cli.Conn())
+	return client.ListUserCollections(ctx, in, opts...)
 }

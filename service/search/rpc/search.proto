@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package search;
+option go_package = "/pb";
+
+message SearchReq {
+  string keyword = 1;
+  int64 page = 2;
+  int64 pageSize = 3;
+}
+
+message SearchPostItem {
+  int64 id = 1;
+  int64 userId = 2;
+  string title = 3;
+  string cover = 4;
+  string summary = 5;
+  string username = 6;
+  string avatar = 7;
+  string content = 8;
+  repeated string topicNames = 9;
+  int64 commentCount = 10;
+  int64 collectionCount = 11;
+  int64 upvoteCount = 12;
+  int64 shareCount = 13;
+  int32 visibility = 14;
+  bool isTop = 15;
+  bool isEssence = 16;
+  bool isLock = 17;
+  repeated string tags = 18;
+  int64 createdAt = 19;
+}
+
+message SearchPostResp {
+  int64 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated SearchPostItem list = 4;
+}
+
+message SearchUserItem {
+  int64 id = 1;
+  string username = 2;
+  int32 status = 3;
+  bool isAdmin = 4;
+  int32 postCount = 5;
+  int32 commentCount = 6;
+  int32 followerCount = 7;
+  int32 likeCount = 8;
+  int32 collectionCount = 9;
+  int64 lastActiveTime = 10;
+  int64 createdAt = 11;
+}
+
+message SearchUserResp {
+  int64 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated SearchUserItem list = 4;
+}
+
+message SearchTopicItem {
+  int64 id = 1;
+  string name = 2;
+  int64 quoteNum = 3;
+  int64 createdAt = 4;
+}
+
+message SearchTopicResp {
+  int64 code = 1;
+  string msg = 2;
+  int64 total = 3;
+  repeated SearchTopicItem list = 4;
+}
+
+service SearchCenter {
+  rpc SearchPost(SearchReq) returns (SearchPostResp);
+  rpc SearchUser(SearchReq) returns (SearchUserResp);
+  rpc SearchTopic(SearchReq) returns (SearchTopicResp);
+}
+
+// goctl rpc protoc search.proto --go_out=./ --go-grpc_out=./ --zrpc_out=./

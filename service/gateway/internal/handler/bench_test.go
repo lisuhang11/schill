@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -57,10 +58,10 @@ func BenchmarkParseUintParam(b *testing.B) {
 	}
 }
 
-// BenchmarkCurrentUserID 测试用户 ID header 解析
+// BenchmarkCurrentUserID 测试从 JWT context 读取用户 ID
 func BenchmarkCurrentUserID(b *testing.B) {
-	r := httptest.NewRequest("GET", "/api/test", nil)
-	r.Header.Set(currentUserHeader, "12345")
+	ctx := context.WithValue(context.Background(), "userId", uint64(12345))
+	r := httptest.NewRequest("GET", "/api/test", nil).WithContext(ctx)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
@@ -389,9 +390,9 @@ func BenchmarkBuildAuthenticatedRequest(b *testing.B) {
 	b.ReportAllocs()
 	for b.Loop() {
 		r := buildRequest("POST", "/api/posts", body, map[string]string{
-			"X-User-Id": "12345",
+			"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test",
 		})
-		if r.Header.Get("X-User-Id") != "12345" {
+		if r.Header.Get("Authorization") == "" {
 			b.Fatal("header not set")
 		}
 		_ = r
@@ -416,14 +417,12 @@ func BenchmarkQueryStringParsing(b *testing.B) {
 // BenchmarkHeaderParsing 测试 Header 解析
 func BenchmarkHeaderParsing(b *testing.B) {
 	r := httptest.NewRequest("GET", "/api/test", nil)
-	r.Header.Set("X-User-Id", "12345")
 	r.Header.Set("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test")
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
-		uid := r.Header.Get("X-User-Id")
 		auth := r.Header.Get("Authorization")
-		if uid != "12345" || !strings.HasPrefix(auth, "Bearer ") {
+		if !strings.HasPrefix(auth, "Bearer ") {
 			b.Fatal("header parse failed")
 		}
 	}

@@ -33,7 +33,6 @@ type Config struct {
 		Brokers      []string
 		TopicCreated string
 		TopicDeleted string
-		TopicChanged string `json:",optional"`
 	}
 
 	KqConsumerConf struct {

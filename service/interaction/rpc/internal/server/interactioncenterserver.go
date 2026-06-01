@@ -76,3 +76,9 @@ func (s *InteractionCenterServer) SharePost(ctx context.Context, in *pb.SharePos
 	l := logic.NewSharePostLogic(ctx, s.svcCtx)
 	return l.SharePost(in)
 }
+
+// 获取用户收藏列表
+func (s *InteractionCenterServer) ListUserCollections(ctx context.Context, in *pb.ListUserCollectionsReq) (*pb.ListUserCollectionsResp, error) {
+	l := logic.NewListUserCollectionsLogic(ctx, s.svcCtx)
+	return l.ListUserCollections(in)
+}

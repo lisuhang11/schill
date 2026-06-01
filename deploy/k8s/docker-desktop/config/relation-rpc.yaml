@@ -20,7 +20,6 @@ KqPusherConf:
     - kafka:9092
   TopicFollowed: user-followed
   TopicUnfollowed: user-unfollowed
-  TopicMutualFollow: user-mutual-follow
 
 Cache:
   - Host: redis:6379

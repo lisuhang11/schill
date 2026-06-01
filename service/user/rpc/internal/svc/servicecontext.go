@@ -17,11 +17,12 @@ import (
 )
 
 type ServiceContext struct {
-	Config config.Config
-	DB     *gorm.DB
-	MinIO  *minio.Client
-	Cache  cache.Cache
-	Redis  *gzredis.Redis
+	Config      config.Config
+	DB          *gorm.DB
+	MinIO       *minio.Client
+	Cache       cache.Cache
+	Redis       *gzredis.Redis
+	RedisClient *commonredis.Client
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -54,10 +55,24 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		cache.WithNotFoundExpiry(time.Duration(commonredis.CacheNullExpire)*time.Second),
 	)
 
+	var redisClient *commonredis.Client
+	if c.RedisConf.Host != "" {
+		redisClient, err = commonredis.NewClient(commonredis.Config{
+			Host:     c.RedisConf.Host,
+			Port:     c.RedisConf.Port,
+			Password: c.RedisConf.Password,
+			DB:       c.RedisConf.DB,
+		})
+		if err != nil {
+			panic("common redis client init failed: " + err.Error())
+		}
+	}
+
 	return &ServiceContext{
-		Config: c,
-		DB:     db,
-		Cache:  cacheNode,
-		Redis:  redisNode,
+		Config:      c,
+		DB:          db,
+		Cache:       cacheNode,
+		Redis:       redisNode,
+		RedisClient: redisClient,
 	}
 }

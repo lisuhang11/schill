@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"SChill/common/kafka"
 	"SChill/common/mq"
 	"SChill/common/redis"
 	"SChill/service/comment/rpc/internal/config"
@@ -25,10 +26,10 @@ type CommentConsumer struct {
 	db       *gorm.DB
 	redis    *redis.Client
 	config   config.Config
-	producer *mq.Producer
+	producer *kafka.Producer
 }
 
-func NewCommentConsumer(cfg config.Config, db *gorm.DB, redisClient *redis.Client, producer *mq.Producer) (*CommentConsumer, error) {
+func NewCommentConsumer(cfg config.Config, db *gorm.DB, redisClient *redis.Client, producer *kafka.Producer) (*CommentConsumer, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	saramaConfig := sarama.NewConfig()
@@ -169,7 +170,7 @@ func (c *CommentConsumer) retryOrDLQ(message *sarama.ConsumerMessage) {
 			Key:   []byte("x-retry-count"),
 			Value: []byte(strconv.Itoa(retryCount + 1)),
 		})
-		_ = c.producer.SendRawMessage(&sarama.ProducerMessage{
+		_ = c.producer.SendRaw(&sarama.ProducerMessage{
 			Topic:   message.Topic,
 			Key:     sarama.ByteEncoder(message.Key),
 			Value:   sarama.ByteEncoder(message.Value),
@@ -181,7 +182,7 @@ func (c *CommentConsumer) retryOrDLQ(message *sarama.ConsumerMessage) {
 	if c.config.KqConsumerConf.TopicCommentDLQ == "" {
 		return
 	}
-	_ = c.producer.SendRawMessage(&sarama.ProducerMessage{
+	_ = c.producer.SendRaw(&sarama.ProducerMessage{
 		Topic: c.config.KqConsumerConf.TopicCommentDLQ,
 		Key:   sarama.ByteEncoder(message.Key),
 		Value: sarama.ByteEncoder(message.Value),

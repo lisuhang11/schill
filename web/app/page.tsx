@@ -18,7 +18,11 @@ export default async function Home({ searchParams }: HomeProps) {
     getTopicList({ page: 1, pageSize: 8, sort: "hot" })
   ]);
 
-  const topics = topicsResult.ok ? topicsResult.data.list : [];
+  const topics = topicsResult.ok ? (topicsResult.data.list ?? []) : [];
+
+  // Backend may return data as empty object {} when no records exist
+  const postList = postsResult.ok ? (postsResult.data.list ?? []) : null;
+  const postTotal = postsResult.ok ? (postsResult.data.total ?? 0) : 0;
 
   return (
     <main className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -55,7 +59,7 @@ export default async function Home({ searchParams }: HomeProps) {
             title="内容加载失败"
             description={`无法读取文章列表：${postsResult.message}`}
           />
-        ) : postsResult.data.list.length === 0 ? (
+        ) : postList.length === 0 ? (
           <StateBlock
             tone="empty"
             title="还没有内容"
@@ -64,13 +68,13 @@ export default async function Home({ searchParams }: HomeProps) {
         ) : (
           <>
             <div className="space-y-4">
-              {postsResult.data.list.map((post) => (
+              {postList.map((post) => (
                 <PostCard key={post.id} post={post} />
               ))}
             </div>
             <Pagination
               page={page}
-              total={postsResult.data.total}
+              total={postTotal}
               pageSize={10}
               basePath="/"
             />

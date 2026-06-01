@@ -12,6 +12,8 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
   const page = Number(params.page ?? "1") || 1;
   const sort = params.sort === "new" ? "new" : "hot";
   const result = await getTopicList({ page, pageSize: 24, sort });
+  const topicList = result.ok ? (result.data.list ?? []) : null;
+  const topicTotal = result.ok ? (result.data.total ?? 0) : 0;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8">
@@ -33,12 +35,12 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
       <section className="mt-6">
         {!result.ok ? (
           <StateBlock tone="error" title="话题加载失败" description={result.message} />
-        ) : result.data.list.length === 0 ? (
+        ) : topicList.length === 0 ? (
           <StateBlock tone="empty" title="暂无话题" description="还没有可展示的话题。" />
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {result.data.list.map((topic) => (
+              {topicList.map((topic) => (
                 <Link
                   key={topic.id}
                   href={`/search?keyword=${encodeURIComponent(topic.name)}&type=post`}
@@ -50,7 +52,7 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
               ))}
             </div>
             <div className="mt-5">
-              <Pagination page={page} total={result.data.total} pageSize={24} basePath="/topics" query={{ sort }} />
+              <Pagination page={page} total={topicTotal} pageSize={24} basePath="/topics" query={{ sort }} />
             </div>
           </>
         )}

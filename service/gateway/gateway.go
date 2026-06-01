@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
 
+	"SChill/common/authctx"
 	"SChill/service/gateway/internal/config"
 	"SChill/service/gateway/internal/handler"
 	"SChill/service/gateway/internal/svc"
@@ -20,8 +22,12 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	server := rest.MustNewServer(c.RestConf)
+	server := rest.MustNewServer(c.RestConf, rest.WithCustomCors(func(header http.Header) {
+		header.Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+	}, nil, "http://localhost:3000"))
 	defer server.Stop()
+
+	server.Use(authctx.OptionalJWTMiddleware(c.Jwt.AccessSecret))
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)

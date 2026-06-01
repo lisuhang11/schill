@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ import (
 	"SChill/service/relation/rpc/internal/svc"
 	"SChill/service/relation/rpc/pb"
 
-	"github.com/IBM/sarama"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -114,38 +112,16 @@ func (l *FollowLogic) Follow(in *pb.FollowReq) (*pb.FollowResp, error) {
 			FollowerID:  in.UserId,
 			FollowingID: in.TargetUserId,
 		}
-		msgBytes, err := json.Marshal(followMsg)
-		if err != nil {
-			logx.Errorf("marshal follow message failed: %v", err)
-		} else {
-			_, _, err := l.svcCtx.KafkaProducer.SendMessage(&sarama.ProducerMessage{
-				Topic: l.svcCtx.Config.KqPusherConf.TopicFollowed,
-				Key:   sarama.StringEncoder(fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId)),
-				Value: sarama.StringEncoder(string(msgBytes)),
-			})
-			if err != nil {
-				logx.Errorf("send follow kafka message failed: %v", err)
-			}
-		}
-	}
-
-	if shouldSend && isMutual && l.svcCtx.Config.KqPusherConf.TopicMutualFollow != "" {
-		mutualMsg := mq.UserMutualFollowMessage{
-			UserID1: in.UserId,
-			UserID2: in.TargetUserId,
-		}
-		msgBytes, err := json.Marshal(mutualMsg)
-		if err != nil {
-			logx.Errorf("marshal mutual follow message failed: %v", err)
-		} else {
-			_, _, err := l.svcCtx.KafkaProducer.SendMessage(&sarama.ProducerMessage{
-				Topic: l.svcCtx.Config.KqPusherConf.TopicMutualFollow,
-				Key:   sarama.StringEncoder(fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId)),
-				Value: sarama.StringEncoder(string(msgBytes)),
-			})
-			if err != nil {
-				logx.Errorf("send mutual follow kafka message failed: %v", err)
-			}
+		if err := l.svcCtx.KafkaProducer.SendEvent(
+			l.svcCtx.Config.KqPusherConf.TopicFollowed,
+			fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId),
+			"user.followed",
+			"relation-rpc",
+			"relation",
+			fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId),
+			followMsg,
+		); err != nil {
+			logx.Errorf("send follow kafka message failed: %v", err)
 		}
 	}
 

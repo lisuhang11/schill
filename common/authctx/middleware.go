@@ -24,13 +24,13 @@ func OptionalJWTMiddleware(secret string) rest.Middleware {
 				return
 			}
 
-			userID, err := jwtx.ParseAccessToken(token, secret)
-			if err != nil || userID == 0 {
-				next(w, r)
-				return
-			}
+		claims, err := jwtx.ParseAccessToken(token, secret)
+		if err != nil || claims == nil || claims.UserId == 0 {
+			next(w, r)
+			return
+		}
 
-			next(w, r.WithContext(context.WithValue(r.Context(), userIDContextKey, userID)))
+		next(w, r.WithContext(context.WithValue(r.Context(), userIDContextKey, claims.UserId)))
 		}
 	}
 }

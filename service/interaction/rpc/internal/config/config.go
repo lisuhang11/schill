@@ -24,7 +24,6 @@ type Config struct {
 		TopicPostUnstar    string
 		TopicPostCollect   string
 		TopicPostUncollect string
-		TopicPostShare     string
 	}
 
 	KafkaConsumerConf struct {

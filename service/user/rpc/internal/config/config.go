@@ -35,6 +35,13 @@ type Config struct {
 		TopicUnfollowed string
 	}
 
+	RedisConf struct {
+		Host     string
+		Port     string
+		Password string
+		DB       int
+	}
+
 	Cache cache.CacheConf
 }
 

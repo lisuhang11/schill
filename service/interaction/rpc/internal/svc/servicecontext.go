@@ -2,7 +2,7 @@ package svc
 
 import (
 	commondb "SChill/common/db"
-	"SChill/common/mq"
+	"SChill/common/kafka"
 	"SChill/common/redis"
 	"SChill/service/interaction/rpc/internal/config"
 	"SChill/service/interaction/rpc/internal/model"
@@ -15,7 +15,7 @@ import (
 type ServiceContext struct {
 	Config            config.Config
 	DB                *gorm.DB
-	KafkaProducer     *mq.Producer
+	KafkaProducer     *kafka.Producer
 	KafkaClient       sarama.Client
 	PostStarDAO       *model.PostStarDAO
 	PostCollectionDAO *model.PostCollectionDAO
@@ -40,7 +40,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic("database migrate failed: " + err.Error())
 	}
 
-	kafkaProducer, err := mq.NewProducer(c.KqProducerConf.Brokers)
+	kafkaProducer, err := kafka.NewAsyncProducer(c.KqProducerConf.Brokers)
 	if err != nil {
 		panic("kafka producer init failed: " + err.Error())
 	}

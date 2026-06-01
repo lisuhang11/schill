@@ -32,7 +32,6 @@ KqPusherConf:
     - kafka:9092
   TopicCreated: post-created
   TopicDeleted: post-deleted
-  TopicChanged: content-changed
 
 KqConsumerConf:
   Brokers:

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 
@@ -26,7 +25,6 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 	svcCtx := svc.NewServiceContext(c)
-	ctx := context.Background()
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		pb.RegisterUserCenterServer(grpcServer, server.NewUserCenterServer(svcCtx))
@@ -41,7 +39,7 @@ func main() {
 	defer serviceGroup.Stop()
 	serviceGroup.Add(s)
 
-	for _, mq := range mqs.Consumers(c, ctx, svcCtx) {
+	for _, mq := range mqs.Consumers(c, svcCtx) {
 		serviceGroup.Add(mq)
 	}
 

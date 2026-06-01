@@ -34,7 +34,6 @@ KqPusherConf:
     - 127.0.0.1:9092
   TopicCreated: post-created
   TopicDeleted: post-deleted
-  TopicChanged: content-changed
 
 # Kafka Consumer配置
 KqConsumerConf:

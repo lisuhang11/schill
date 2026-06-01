@@ -16,10 +16,9 @@ type Config struct {
 	}
 
 	KqPusherConf struct {
-		Brokers           []string
-		TopicFollowed     string
-		TopicUnfollowed   string
-		TopicMutualFollow string
+		Brokers         []string
+		TopicFollowed   string
+		TopicUnfollowed string
 	}
 
 	Cache cache.CacheConf

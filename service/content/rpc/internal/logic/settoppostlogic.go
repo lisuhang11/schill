@@ -48,7 +48,6 @@ func (l *SetTopPostLogic) SetTopPost(in *pb.SetTopPostReq) (*pb.SetTopPostResp, 
 	post.IsTop = in.IsTop
 	post.UpdatedAt = time.Now()
 	invalidatePostCachesByModel(l.ctx, l.svcCtx, post)
-	publishContentChangedEvent(l.ctx, l.svcCtx, post, "updated", "", nil)
 
 	return &pb.SetTopPostResp{Success: true}, nil
 }

@@ -48,7 +48,6 @@ func (l *SetEssencePostLogic) SetEssencePost(in *pb.SetEssencePostReq) (*pb.SetE
 	post.IsEssence = in.IsEssence
 	post.UpdatedAt = time.Now()
 	invalidatePostCachesByModel(l.ctx, l.svcCtx, post)
-	publishContentChangedEvent(l.ctx, l.svcCtx, post, "updated", "", nil)
 
 	return &pb.SetEssencePostResp{Success: true}, nil
 }

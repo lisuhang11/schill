@@ -5,12 +5,12 @@ import (
 	"time"
 
 	commondb "SChill/common/db"
+	"SChill/common/kafka"
 	commonredis "SChill/common/redis"
 	"SChill/service/relation/rpc/internal/config"
 	"SChill/service/relation/rpc/internal/model"
 	"SChill/service/user/rpc/usercenter"
 
-	"github.com/IBM/sarama"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	gzredis "github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/syncx"
@@ -22,7 +22,7 @@ import (
 type ServiceContext struct {
 	Config        config.Config
 	DB            *gorm.DB
-	KafkaProducer sarama.SyncProducer
+	KafkaProducer *kafka.Producer
 	UserRpc       usercenter.UserCenter
 	Cache         cache.Cache
 	Redis         *gzredis.Redis
@@ -39,12 +39,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic("database migrate failed: " + err.Error())
 	}
 
-	kafkaConfig := sarama.NewConfig()
-	kafkaConfig.Producer.RequiredAcks = sarama.WaitForAll
-	kafkaConfig.Producer.Retry.Max = 5
-	kafkaConfig.Producer.Return.Successes = true
-
-	producer, err := sarama.NewSyncProducer(c.KqPusherConf.Brokers, kafkaConfig)
+	producer, err := kafka.NewSyncProducer(c.KqPusherConf.Brokers)
 	if err != nil {
 		panic("kafka producer init failed: " + err.Error())
 	}

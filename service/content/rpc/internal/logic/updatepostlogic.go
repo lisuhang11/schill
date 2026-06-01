@@ -58,7 +58,6 @@ func (l *UpdatePostLogic) UpdatePost(in *pb.UpdatePostReq) (*pb.UpdatePostResp, 
 
 	topicNames := normalizeTopicNames(in.Topics)
 	postContents := make([]*model.PostContent, 0, len(contents))
-	summaryItems := make([]contentSummaryItem, 0, len(contents))
 	for idx, item := range contents {
 		sort := item.Sort
 		if sort <= 0 {
@@ -68,10 +67,6 @@ func (l *UpdatePostLogic) UpdatePost(in *pb.UpdatePostReq) (*pb.UpdatePostResp, 
 			Content: item.Content,
 			Type:    item.Type,
 			Sort:    sort,
-		})
-		summaryItems = append(summaryItems, contentSummaryItem{
-			Type:    item.Type,
-			Content: item.Content,
 		})
 	}
 
@@ -111,7 +106,6 @@ func (l *UpdatePostLogic) UpdatePost(in *pb.UpdatePostReq) (*pb.UpdatePostResp, 
 	}
 
 	invalidatePostCachesByModel(l.ctx, l.svcCtx, post)
-	publishContentChangedEvent(l.ctx, l.svcCtx, post, "updated", buildContentSummaryFromItems(summaryItems), topicNames)
 
 	return &pb.UpdatePostResp{Success: true}, nil
 }

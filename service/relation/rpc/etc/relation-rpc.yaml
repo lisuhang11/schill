@@ -19,7 +19,6 @@ KqPusherConf:
     - 127.0.0.1:9092
   TopicFollowed: user-followed
   TopicUnfollowed: user-unfollowed
-  TopicMutualFollow: user-mutual-follow
 
 Cache:
   - Host: 127.0.0.1:6379

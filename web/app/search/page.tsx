@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SearchForm } from "@/components/SearchForm";
 import { Pagination } from "@/components/Pagination";
 import { PostCard } from "@/components/PostCard";
@@ -88,7 +89,12 @@ function UserSearchResults({
     <>
       <div className="grid gap-4 md:grid-cols-2">
         {result.data.list.map((item: SearchUserItem) => (
-          <SearchEntityCard key={item.id} title={item.username} description={`粉丝 ${item.followerCount} · 文章 ${item.postCount} · 获赞 ${item.likeCount}`} />
+          <SearchEntityCard
+            key={item.id}
+            href={`/users/${item.id}`}
+            title={item.username}
+            description={`粉丝 ${item.followerCount} · 文章 ${item.postCount} · 获赞 ${item.likeCount}`}
+          />
         ))}
       </div>
       <Pagination page={page} total={result.data.total} pageSize={10} basePath="/search" query={{ keyword, type: "user" }} />
@@ -123,11 +129,16 @@ function TopicSearchResults({
   );
 }
 
-function SearchEntityCard({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="rounded-lg border border-[rgba(77,100,124,0.16)] bg-white p-5 shadow-soft">
+function SearchEntityCard({ title, description, href }: { title: string; description: string; href?: string }) {
+  const content = (
+    <div className="rounded-lg border border-[rgba(77,100,124,0.16)] bg-white p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-float">
       <p className="text-lg font-semibold text-marine-text">{title}</p>
       <p className="mt-2 text-sm text-marine-muted">{description}</p>
     </div>
   );
+
+  if (href) {
+    return <Link href={href}>{content}</Link>;
+  }
+  return content;
 }

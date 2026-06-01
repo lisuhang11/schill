@@ -14,6 +14,7 @@ import type {
   LoginResponse,
   PageRequest,
   PostDetailResponse,
+  PostInfo,
   PostListResponse,
   RegisterRequest,
   RegisterResponse,
@@ -50,8 +51,8 @@ function authHeaders(): Record<string, string> {
   if (typeof window === "undefined") {
     return {};
   }
-  const userId = window.localStorage.getItem("schill:userId");
-  return userId ? { "X-User-Id": userId } : {};
+  const accessToken = window.localStorage.getItem("schill:accessToken");
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 }
 
 async function request<T>(
@@ -263,4 +264,53 @@ export function searchTopics(params: PageRequest & { keyword: string }) {
       pageSize: params.pageSize ?? 10
     }
   });
+}
+
+export function getUserInfo(userId: number) {
+  return request<{
+    userInfo: {
+      id: number;
+      username: string;
+      avatar: string;
+      status: number;
+      createdAt: number;
+    };
+    profile: {
+      userId: number;
+      gender: number;
+      signature: string;
+      location: string;
+      website: string;
+      company: string;
+      jobTitle: string;
+      education: string;
+    };
+    stat: {
+      userId: number;
+      postCount?: number;
+      commentCount?: number;
+      followerCount?: number;
+      followingCount?: number;
+      likeCount?: number;
+      collectionCount?: number;
+      lastActiveTime?: number;
+    };
+  }>(`/api/users/${userId}`);
+}
+
+export function getUserProfile(userId: number) {
+  return getUserInfo(userId);
+}
+
+export function getMyCollections(params: PageRequest) {
+  return request<{ total: number; list: PostInfo[] }>("/api/users/me/collections", {
+    query: {
+      page: params.page ?? 1,
+      pageSize: params.pageSize ?? 10
+    }
+  });
+}
+
+export function getUserStat(userId: number) {
+  return getUserInfo(userId);
 }

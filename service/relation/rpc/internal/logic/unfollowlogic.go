@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -13,7 +12,6 @@ import (
 	"SChill/service/relation/rpc/internal/svc"
 	"SChill/service/relation/rpc/pb"
 
-	"github.com/IBM/sarama"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
 )
@@ -95,18 +93,16 @@ func (l *UnfollowLogic) Unfollow(in *pb.UnfollowReq) (*pb.UnfollowResp, error) {
 			FollowerID:  in.UserId,
 			FollowingID: in.TargetUserId,
 		}
-		msgBytes, err := json.Marshal(unfollowMsg)
-		if err != nil {
-			logx.Errorf("marshal unfollow message failed: %v", err)
-		} else {
-			_, _, err := l.svcCtx.KafkaProducer.SendMessage(&sarama.ProducerMessage{
-				Topic: l.svcCtx.Config.KqPusherConf.TopicUnfollowed,
-				Key:   sarama.StringEncoder(fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId)),
-				Value: sarama.StringEncoder(string(msgBytes)),
-			})
-			if err != nil {
-				logx.Errorf("send unfollow kafka message failed: %v", err)
-			}
+		if err := l.svcCtx.KafkaProducer.SendEvent(
+			l.svcCtx.Config.KqPusherConf.TopicUnfollowed,
+			fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId),
+			"user.unfollowed",
+			"relation-rpc",
+			"relation",
+			fmt.Sprintf("%d:%d", in.UserId, in.TargetUserId),
+			unfollowMsg,
+		); err != nil {
+			logx.Errorf("send unfollow kafka message failed: %v", err)
 		}
 	}
 

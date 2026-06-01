@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Send } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -13,7 +13,25 @@ const commentSchema = z.object({
 
 type CommentValues = z.infer<typeof commentSchema>;
 
-export function CommentComposer({ postId }: { postId: number }) {
+type CommentComposerProps = {
+  postId: number;
+  parentId?: number;
+  replyToUserId?: number;
+  replyToUsername?: string;
+  placeholder?: string;
+  onCancel?: () => void;
+  onSuccess?: () => void;
+};
+
+export function CommentComposer({
+  postId,
+  parentId = 0,
+  replyToUserId = 0,
+  replyToUsername,
+  placeholder,
+  onCancel,
+  onSuccess
+}: CommentComposerProps) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const {
@@ -31,25 +49,38 @@ export function CommentComposer({ postId }: { postId: number }) {
     startTransition(async () => {
       const result = await createComment({
         postId,
-        parentId: 0,
-        replyToUserId: 0,
+        parentId,
+        replyToUserId,
         content: values.content
       });
       if (result.ok) {
         setMessage("评论已提交，刷新后可查看最新列表。");
         reset();
+        onSuccess?.();
       } else {
         setMessage(result.message);
       }
     });
   }
 
+  const isReply = parentId !== 0;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-5">
+    <form onSubmit={handleSubmit(onSubmit)} className={isReply ? "mt-2" : "mt-5"}>
+      {isReply && replyToUsername ? (
+        <div className="mb-2 flex items-center justify-between text-xs text-marine-muted">
+          <span>回复 <span className="font-medium text-marine-deep">{replyToUsername}</span></span>
+          {onCancel ? (
+            <button type="button" onClick={onCancel} className="inline-flex items-center gap-1 text-marine-muted hover:text-red-600">
+              <X size={14} /> 取消
+            </button>
+          ) : null}
+        </div>
+      ) : null}
       <textarea
         {...register("content")}
-        rows={4}
-        placeholder="写下你的评论"
+        rows={isReply ? 3 : 4}
+        placeholder={placeholder ?? "写下你的评论"}
         className="focus-ring w-full resize-y rounded-lg border border-[rgba(77,100,124,0.18)] bg-white p-3 text-sm leading-6"
       />
       {errors.content ? <p className="mt-1 text-xs text-red-600">{errors.content.message}</p> : null}
@@ -60,7 +91,7 @@ export function CommentComposer({ postId }: { postId: number }) {
           disabled={isPending}
           className="focus-ring inline-flex items-center gap-2 rounded-lg bg-marine-deep px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
         >
-          <Send size={18} /> 发布评论
+          <Send size={18} /> {isReply ? "回复" : "发布评论"}
         </button>
       </div>
       {message ? <p className="mt-3 text-sm text-marine-deep">{message}</p> : null}
