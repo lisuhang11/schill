@@ -1,0 +1,19 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "refresh_interval": "30s"
+  },
+  "mappings": {
+    "properties": {
+      "id": { "type": "long", "index": false },
+      "name": {
+        "type": "text",
+        "fields": { "raw": { "type": "keyword" } }
+      },
+      "quote_num": { "type": "long" },
+      "created_at": { "type": "date" },
+      "deleted_at": { "type": "date", "index": false }
+    }
+  }
+}

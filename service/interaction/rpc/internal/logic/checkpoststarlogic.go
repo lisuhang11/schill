@@ -36,24 +36,34 @@ func (l *CheckPostStarLogic) CheckPostStar(in *pb.CheckPostStarReq) (*pb.CheckPo
 		logx.Errorf("Redis SIsMember query failed: %v", err)
 		// Fall through to DB fallback
 	} else {
-		// Redis hit — return immediately
-		countStr, countErr := l.svcCtx.RedisClient.Get(l.ctx, countKey)
-		if countErr != nil {
-			logx.Errorf("Redis GET query failed: %v", countErr)
-		}
+		// Check whether the Redis key still exists.
+		// SISMEMBER returns (false, nil) for non-existent keys, so we can't
+		// distinguish "key expired" from "member not in set" without Exists.
+		keyExists, existsErr := l.svcCtx.RedisClient.Exists(l.ctx, relationKey)
+		if existsErr != nil {
+			logx.Errorf("Redis Exists check failed: %v", existsErr)
+			// Fall through to DB fallback on uncertainty
+		} else if keyExists > 0 {
+			// Redis key is alive — trust the cached result
+			countStr, countErr := l.svcCtx.RedisClient.Get(l.ctx, countKey)
+			if countErr != nil {
+				logx.Errorf("Redis GET query failed: %v", countErr)
+			}
 
-		var starCount int64
-		if countStr != "" {
-			starCount, _ = strconv.ParseInt(countStr, 10, 64)
-		}
+			var starCount int64
+			if countStr != "" {
+				starCount, _ = strconv.ParseInt(countStr, 10, 64)
+			}
 
-		return &pb.CheckPostStarResp{
-			IsStarred: isStarred,
-			StarCount: starCount,
-		}, nil
+			return &pb.CheckPostStarResp{
+				IsStarred: isStarred,
+				StarCount: starCount,
+			}, nil
+		}
+		// Key does not exist (TTL expired) — fall through to DB fallback
 	}
 
-	// Redis miss (key expired) — fallback to DB and backfill Redis
+	// Redis miss (key expired or unavailable) — fallback to DB and backfill Redis
 	exists, dbErr := l.svcCtx.PostStarDAO.Exists(l.ctx, in.PostId, in.UserId)
 	if dbErr != nil {
 		logx.Errorf("DB fallback for star check failed: postId=%d userId=%d err=%v", in.PostId, in.UserId, dbErr)

@@ -5,7 +5,6 @@ go 1.25.0
 require (
 	github.com/IBM/sarama v1.47.0
 	github.com/elastic/go-elasticsearch/v8 v8.15.0
-	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/minio/minio-go/v7 v7.0.99
 	github.com/redis/go-redis/v9 v9.17.3
@@ -31,15 +30,12 @@ require (
 	github.com/elastic/elastic-transport-go/v8 v8.6.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/swag v0.22.4 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.9.3 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -63,7 +59,6 @@ require (
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.11 // indirect
 	github.com/klauspost/crc32 v1.3.0 // indirect
-	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -104,7 +99,7 @@ require (
 	go.uber.org/zap v1.24.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
+	golang.org/x/crypto v0.48.0
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect

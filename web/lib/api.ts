@@ -1,6 +1,7 @@
 import type {
   ApiResult,
   BackendEnvelope,
+  CommentInfo,
   CommentListResponse,
   CreateCommentRequest,
   CreateCommentResponse,
@@ -24,6 +25,7 @@ import type {
   SearchUserItem,
   TopicListResponse,
   UpdatePostRequest,
+  UpdateProfileRequest,
   VoteCommentResponse
 } from "@/lib/types";
 
@@ -175,6 +177,30 @@ export function voteComment(commentId: number, voteType: 1 | 2) {
   });
 }
 
+export function deleteComment(commentId: number) {
+  return request<BackendEnvelope>(`/api/comments/${commentId}`, {
+    method: "DELETE"
+  });
+}
+
+export function getReplyList(params: {
+  commentId: number;
+  cursor?: number;
+  pageSize?: number;
+}) {
+  return request<{
+    total: number;
+    list: CommentInfo[];
+    hasMore: boolean;
+    nextCursor: number;
+  }>(`/api/comments/${params.commentId}/replies`, {
+    query: {
+      cursor: params.cursor ?? 0,
+      pageSize: params.pageSize ?? 20
+    }
+  });
+}
+
 export function starPost(postId: number) {
   return request<InteractionToggleResponse>(`/api/posts/${postId}/star`, {
     method: "POST"
@@ -308,6 +334,13 @@ export function getMyCollections(params: PageRequest) {
       page: params.page ?? 1,
       pageSize: params.pageSize ?? 10
     }
+  });
+}
+
+export function updateProfile(input: UpdateProfileRequest) {
+  return request<BackendEnvelope>("/api/users/me/profile", {
+    method: "PUT",
+    body: JSON.stringify(input)
   });
 }
 

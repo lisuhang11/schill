@@ -25,6 +25,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		{Method: http.MethodDelete, Path: "/api/posts/:id", Handler: DeletePostHandler(serverCtx)},
 		{Method: http.MethodGet, Path: "/api/topics", Handler: GetTopicListHandler(serverCtx)},
 		{Method: http.MethodGet, Path: "/api/posts/:id/comments", Handler: GetCommentListHandler(serverCtx)},
+		{Method: http.MethodGet, Path: "/api/comments/:id/replies", Handler: GetReplyListHandler(serverCtx)},
 		{Method: http.MethodPost, Path: "/api/comments", Handler: CreateCommentHandler(serverCtx)},
 		{Method: http.MethodDelete, Path: "/api/comments/:id", Handler: DeleteCommentHandler(serverCtx)},
 		{Method: http.MethodPost, Path: "/api/comments/:id/vote", Handler: VoteCommentHandler(serverCtx)},

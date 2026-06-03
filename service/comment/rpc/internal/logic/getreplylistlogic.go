@@ -286,24 +286,31 @@ func (l *GetReplyListLogic) getReplyIDsFromRedis(commentId uint64, cursor, pageS
 		maxScore = fmt.Sprintf("(%d", cursor)
 	}
 
-	idStrings, err := l.svcCtx.Redis.ZRevRangeByScore(ctx, key, minScore, maxScore, 0, pageSize+1)
+	// Use ZRevRangeByScoreWithScores to get both member and score
+	zs, err := l.svcCtx.Redis.ZRevRangeByScoreWithScores(ctx, key, &goredis.ZRangeBy{
+		Min:    minScore,
+		Max:    maxScore,
+		Offset: 0,
+		Count:  pageSize + 1,
+	}).Result()
 	if err != nil {
 		return nil, err
 	}
 
-	hasMore := len(idStrings) > int(pageSize)
+	hasMore := len(zs) > int(pageSize)
 	if hasMore {
-		idStrings = idStrings[:pageSize]
+		zs = zs[:pageSize]
 	}
-	ids := make([]uint64, 0, len(idStrings))
-	for _, idStr := range idStrings {
-		id, _ := strconv.ParseUint(idStr, 10, 64)
+	ids := make([]uint64, 0, len(zs))
+	for _, z := range zs {
+		id, _ := strconv.ParseUint(z.Member.(string), 10, 64)
 		ids = append(ids, id)
 	}
 
 	var nextCursor int64
-	if len(ids) > 0 {
-		nextCursor = int64(ids[len(ids)-1])
+	if len(zs) > 0 {
+		// Use the score of the last item as the cursor for the next page
+		nextCursor = int64(zs[len(zs)-1].Score)
 	}
 	return &replyListCacheState{
 		IDs:        ids,

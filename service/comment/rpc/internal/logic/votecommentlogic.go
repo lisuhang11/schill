@@ -242,7 +242,10 @@ func (l *VoteCommentLogic) voteCommentDB(in *pb.VoteCommentReq) (*pb.VoteComment
 				}
 			}
 		} else if existingVoteErr != gorm.ErrRecordNotFound {
-			// 有其他错误
+			// 数据库查询出错，不应静默创建新记录，直接返回错误
+			return existingVoteErr
+		} else {
+			// 没有现有投票记录，创建新记录
 			if in.VoteType != 0 {
 				newVote := model.CommentVote{
 					CommentID: in.CommentId,
@@ -259,8 +262,6 @@ func (l *VoteCommentLogic) voteCommentDB(in *pb.VoteCommentReq) (*pb.VoteComment
 					comment.DislikeCount++
 				}
 			}
-		} else {
-			return existingVoteErr
 		}
 
 		if err := tx.WithContext(l.ctx).Save(&comment).Error; err != nil {

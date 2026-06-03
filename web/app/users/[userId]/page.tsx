@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPostList, getUserInfo } from "@/lib/api";
 import { ProfileContentTabs } from "@/components/ProfileContentTabs";
+import { ProfileHeader } from "@/components/ProfileHeader";
 import { StateBlock } from "@/components/StateBlock";
 import { formatDate } from "@/lib/format";
 
@@ -9,7 +10,6 @@ type UserPageProps = {
   searchParams: Promise<{ page?: string }>;
 };
 
-const STATUS_LABELS: Record<number, string> = { 1: "正常", 2: "禁言", 3: "冻结" };
 const PAGE_SIZE = 10;
 
 export default async function UserPage({ params, searchParams }: UserPageProps) {
@@ -54,53 +54,15 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
   return (
     <main className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 md:px-8 lg:grid-cols-[minmax(0,1fr)_300px]">
       <section>
-        <section className="rounded-lg border border-[rgba(77,100,124,0.18)] bg-gradient-to-br from-white to-[#f5fdff] p-6 shadow-soft">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-            <div className="grid h-[88px] w-[88px] shrink-0 place-items-center rounded-3xl border-4 border-white bg-gradient-to-br from-[#bcefff] to-[#fff2bf] text-3xl font-black text-marine-deep shadow-soft">
-              {userInfo.avatar ? "" : userInfo.username.slice(0, 2).toUpperCase()}
-            </div>
+        <ProfileHeader userId={userId} userInfo={userInfo} profile={profile} />
 
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-3xl font-semibold leading-tight text-marine-text">
-                  {userInfo.username}
-                </h1>
-                <span className="inline-flex h-6 items-center rounded-full bg-marine-mint/20 px-2.5 text-xs font-extrabold text-marine-deep">
-                  {STATUS_LABELS[userInfo.status] ?? `状态 ${userInfo.status}`}
-                </span>
-                <span className="inline-flex h-6 items-center rounded-full bg-marine-warm/45 px-2.5 text-xs font-extrabold text-[#7a5a00]">
-                  Lv.12 创作者
-                </span>
-              </div>
-
-              {profile.signature ? (
-                <p className="mt-3 text-sm leading-7 text-marine-muted">{profile.signature}</p>
-              ) : (
-                <p className="mt-3 text-sm leading-7 text-marine-muted">
-                  这个用户还没有填写个人签名。
-                </p>
-              )}
-
-              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm text-marine-muted">
-                <span>注册于 {formatDate(userInfo.createdAt)}</span>
-                {profile.location ? <span>{profile.location}</span> : null}
-                {profile.company ? <span>{profile.company}</span> : null}
-                {profile.jobTitle ? <span>{profile.jobTitle}</span> : null}
-                {profile.website ? (
-                  <span className="break-all text-marine-deep">{profile.website}</span>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-2.5 text-center sm:grid-cols-3 md:grid-cols-5">
-            <StatBox label="文章" value={stat.postCount ?? 0} />
-            <StatBox label="评论" value={stat.commentCount ?? 0} />
-            <StatBox label="粉丝" value={stat.followerCount ?? 0} />
-            <StatBox label="关注" value={stat.followingCount ?? 0} />
-            <StatBox label="获赞" value={stat.likeCount ?? 0} />
-          </div>
-        </section>
+        <div className="mt-5 grid grid-cols-2 gap-2.5 text-center sm:grid-cols-3 md:grid-cols-5">
+          <StatBox label="文章" value={stat.postCount ?? 0} />
+          <StatBox label="评论" value={stat.commentCount ?? 0} />
+          <StatBox label="粉丝" value={stat.followerCount ?? 0} />
+          <StatBox label="关注" value={stat.followingCount ?? 0} />
+          <StatBox label="获赞" value={stat.likeCount ?? 0} />
+        </div>
 
         <ProfileContentTabs
           userId={userId}

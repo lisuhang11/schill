@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 
 	"SChill/common/redis"
 	"SChill/service/content/rpc/internal/model"
@@ -56,8 +57,12 @@ func invalidatePostCaches(ctx context.Context, svcCtx *svc.ServiceContext, postI
 }
 
 // invalidatePostListCache bumps the list version, busting all list cache keys for a user.
+// Uses a timestamp to guarantee a new value every time, even on first invalidation.
+// (Incr on a non-existent key returns 1, which is the same as the default version,
+// so the first invalidation would be a no-op without using a timestamp.)
 func invalidatePostListCache(ctx context.Context, svcCtx *svc.ServiceContext, userID uint64) {
-	_, _ = svcCtx.Redis.Incr(ctx, postListVersionKey(userID))
+	newVersion := strconv.FormatInt(time.Now().UnixNano(), 10)
+	_ = svcCtx.Redis.Set(ctx, postListVersionKey(userID), newVersion, 0)
 }
 
 func invalidatePostCachesByModel(ctx context.Context, svcCtx *svc.ServiceContext, post *model.Post) {

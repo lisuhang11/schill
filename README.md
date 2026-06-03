@@ -23,7 +23,7 @@ SChill 面向内容社区、校园论坛、兴趣社区或轻量社交产品一�
 
 ### 后端
 
-- Go `1.25.0`
+- Go `1.23.0`
 - go-zero `1.10.0`
 - gRPC / Protocol Buffers
 - GORM / MySQL Driver
@@ -93,8 +93,8 @@ SChill 面向内容社区、校园论坛、兴趣社区或轻量社交产品一�
                                 Kafka <----------------+
 
                          +----------------+
-                         | Search API     |
-                         | :8895          |
+                         | Search RPC    |
+                         | :8088         |
                          +-------+--------+
                                  |
                                  v
@@ -103,7 +103,7 @@ SChill 面向内容社区、校园论坛、兴趣社区或轻量社交产品一�
        MySQL Binlog -> Canal Server -> Kafka -> Canal Sync -> Elasticsearch
 ```
 
-Etcd 用于 go-zero RPC 服务发现。Gateway 作为统一 HTTP 入口，直接调用各 RPC 服务，并将搜索请求代理到 Search API。
+Etcd 用于 go-zero RPC 服务发现。Gateway 作为统一 HTTP 入口，直接通过 gRPC 调用各 RPC 服务（包括 Search RPC）。
 
 ## 服务说明
 
@@ -115,9 +115,9 @@ Etcd 用于 go-zero RPC 服务发现。Gateway 作为统一 HTTP 入口，直接
 | content-rpc | `service/content/rpc` | `8082` | gRPC | 帖子、帖子内容、话题、标签、置顶/精华、浏览量 |
 | comment-rpc | `service/comment/rpc` | `8083` | gRPC | 评论、回复、删除、点赞/点踩 |
 | interaction-rpc | `service/interaction/rpc` | `8084` | gRPC | 帖子点赞、收藏、分享和互动状态 |
-| search-api | `service/search/api` | `8895` | HTTP API | 帖子、用户、话题搜索 |
+| search-rpc | `service/search/rpc` | `8088` | gRPC | 帖子、用户、话题搜索 |
 | feed-rpc | `service/feed/rpc` | `8087` | gRPC | 信息流聚合，组装内容、作者和浏览者状态 |
-| canal-sync | `service/canal` | `8088` | 后台服务 | 消费 Canal/Kafka 消息并同步 Elasticsearch |
+| canal-sync | `service/canal` | `8089` | 后台服务 | 消费 Canal/Kafka 消息并同步 Elasticsearch |
 
 ## 目录结构
 
@@ -146,7 +146,7 @@ Etcd 用于 go-zero RPC 服务发现。Gateway 作为统一 HTTP 入口，直接
 │   ├── comment/rpc/                # 评论 RPC 服务
 │   ├── interaction/rpc/            # 互动 RPC 服务
 │   ├── feed/rpc/                   # 信息流 RPC 服务
-│   ├── search/api/                 # 搜索 API 服务
+│   ├── search/rpc/                 # 搜索 RPC 服务
 │   └── canal/                      # Canal 到 ES 同步服务
 ├── web/                            # Next.js 前端应用
 ├── deploy/                         # Docker Compose 和 Kubernetes 部署
@@ -228,7 +228,7 @@ Docker Desktop Kubernetes 部署会通过 `job-es-init.yaml` 初始化这些索�
 MySQL -> Binlog -> Canal Server -> Kafka canal_topic -> canal-sync -> Elasticsearch
 ```
 
-Search API 直接查询 Elasticsearch。Gateway 中 `/api/search/*` 路由会代理到 Search API。
+Search RPC 直接查询 Elasticsearch。Gateway 通过 gRPC 调用 Search RPC 处理搜索请求。
 
 ## HTTP API 概览
 
@@ -293,7 +293,7 @@ Gateway 默认监听 `http://localhost:8086`。
 | GET | `/api/search/user` | 搜索用户 |
 | GET | `/api/search/topic` | 搜索话题 |
 
-Search API 自身默认监听 `http://localhost:8895`，内部路由为 `/search/post`、`/search/user`、`/search/topic`。
+Search RPC 通过 gRPC 提供服务，Gateway 直接调用其 `SearchPost`、`SearchUser`、`SearchTopic` 方法。
 
 ## 环境准备
 
@@ -319,7 +319,7 @@ Search API 自身默认监听 `http://localhost:8895`，内部路由为 `/search
 - `service/relation/rpc/etc/relation-rpc.yaml`
 - `service/interaction/rpc/etc/interaction-rpc.yaml`
 - `service/feed/rpc/etc/feed-rpc.yaml`
-- `service/search/api/etc/search-api.yaml`
+- `service/search/rpc/etc/search-rpc.yaml`
 - `service/canal/etc/canal.yaml`
 
 本地开发配置默认使用：
@@ -330,7 +330,7 @@ Search API 自身默认监听 `http://localhost:8895`，内部路由为 `/search
 - Kafka: `127.0.0.1:9092`
 - Elasticsearch: `http://127.0.0.1:9200`
 - Gateway: `http://127.0.0.1:8086`
-- Search API: `http://127.0.0.1:8895`
+- Search RPC: `http://127.0.0.1:8088`
 
 生产或容器网络中应使用 `deploy/k8s/docker-desktop/config/` 下的配置模板，里面的依赖地址会指向容器服务名，例如 `etcd:2379`、`mysql:3306`、`redis:6379`、`kafka:9092`、`elasticsearch:9200`。
 
@@ -361,7 +361,7 @@ docker compose -f deploy/docker-compose.prod.yml up -d --build
 常用访问地址：
 
 - Gateway: `http://localhost:8086`
-- Search API: `http://localhost:8895`
+- Search RPC: `localhost:8088` (gRPC)
 - Elasticsearch: `http://localhost:9200`
 - Kibana: `http://localhost:5601`
 - MinIO API: `http://localhost:9000`
@@ -400,7 +400,7 @@ go run service/content/rpc/content.go -f service/content/rpc/etc/content-rpc.yam
 go run service/comment/rpc/comment.go -f service/comment/rpc/etc/comment-rpc.yaml
 go run service/interaction/rpc/interaction.go -f service/interaction/rpc/etc/interaction-rpc.yaml
 go run service/feed/rpc/feed.go -f service/feed/rpc/etc/feed-rpc.yaml
-go run service/search/api/search.go -f service/search/api/etc/search-api.yaml
+go run service/search/rpc/search.go -f service/search/rpc/etc/search-rpc.yaml
 go run service/canal/canal.go -f service/canal/etc/canal.yaml
 go run service/gateway/gateway.go -f service/gateway/etc/gateway.yaml
 ```
@@ -414,7 +414,7 @@ go run service/gateway/gateway.go -f service/gateway/etc/gateway.yaml
 5. `comment-rpc`
 6. `interaction-rpc`
 7. `feed-rpc`
-8. `search-api`
+8. `search-rpc`
 9. `canal-sync`
 10. `gateway`
 
@@ -474,7 +474,7 @@ kubectl get pods -n schill -w
 kubectl get all -n schill
 kubectl logs -n schill deploy/gateway
 kubectl logs -n schill deploy/user-rpc
-kubectl logs -n schill deploy/search-api
+kubectl logs -n schill deploy/search-rpc
 kubectl logs -n schill job/schill-es-init
 ```
 
@@ -514,13 +514,13 @@ goctl rpc protoc content.proto --go_out=. --go-grpc_out=. --zrpc_out=.
 - `service/interaction/rpc/interaction.proto`
 - `service/feed/rpc/feed.proto`
 
-### API 服务
+### RPC 服务
 
-Search API 使用 `.api` 文件：
+Search RPC 使用 `.proto` 文件：
 
 ```powershell
-cd service/search/api
-goctl api go -api search.api -dir .
+cd service/search/rpc
+goctl rpc protoc search.proto --go_out=. --go-grpc_out=. --zrpc_out=.
 ```
 
 代码生成后应检查：
@@ -693,12 +693,12 @@ docker logs etcd
 
 - 后端业务遵循 go-zero 常见分层：handler 负责 HTTP 接入，logic 负责业务，model 负责数据访问。
 - RPC 接口优先通过 `.proto` 定义，再使用 goctl/protoc 生成代码。
-- Search API 通过 `.api` 定义 HTTP 接口，再生成 handler/types。
+- Search RPC 通过 `.proto` 定义接口，再生成 handler/types。
 - 公共逻辑放入 `common/`，业务服务内的私有逻辑放在各自 `internal/` 下。
 - 配置不要硬编码在业务逻辑中，应放入服务 `etc/*.yaml` 或部署配置。
 - 涉及跨服务统计更新时，优先通过 Kafka 事件和消费者维护最终一致性。
 - 修改数据库结构后，同步更新 `db.sql`、模型代码和相关文档。
-- 修改搜索字段后，同步更新 `es_index/` Mapping、Canal 同步逻辑和 Search API。
+- 修改搜索字段后，同步更新 `es_index/` Mapping、Canal 同步逻辑和 Search RPC。
 
 ## 安全注意事项
 

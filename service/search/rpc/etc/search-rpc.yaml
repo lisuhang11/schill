@@ -14,7 +14,7 @@ Elasticsearch:
   UserIndex: "user"
   TopicIndex: "topic"
 
-Redis:
+BizRedis:
   Host: "127.0.0.1"
   Port: "6379"
   Password: ""

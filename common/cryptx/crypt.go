@@ -1,17 +1,21 @@
 package cryptx
 
 import (
-	"crypto/sha256"
-	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
-// PasswordEncrypt 直接对密码进行 SHA256 哈希
-func PasswordEncrypt(password string) string {
-	hash := sha256.Sum256([]byte(password))
-	return fmt.Sprintf("%x", hash[:])
+// PasswordEncrypt 使用 bcrypt 对密码进行哈希
+// cost 设置为 12，在安全性和性能之间取得平衡
+func PasswordEncrypt(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }
 
-// PasswordVerify 验证明文密码是否与哈希匹配
+// PasswordVerify 验证明文密码是否与 bcrypt 哈希匹配
 func PasswordVerify(hashedPassword, plainPassword string) bool {
-	return PasswordEncrypt(plainPassword) == hashedPassword
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(plainPassword))
+	return err == nil
 }

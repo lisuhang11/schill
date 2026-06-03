@@ -25,7 +25,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       <div className="rounded-lg border border-[rgba(77,100,124,0.16)] bg-white p-6 shadow-soft">
         <h1 className="text-3xl font-semibold text-marine-text">搜索社区</h1>
         <p className="mt-2 text-sm leading-6 text-marine-muted">
-          支持搜索文章、用户和话题，接口来自 `service/search/api/search.api`。
+          支持搜索文章、用户和话题，接口来自 `service/search/rpc/search.proto`。
         </p>
         <SearchForm keyword={keyword} type={type} />
       </div>

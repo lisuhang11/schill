@@ -7,8 +7,8 @@ spec:
     app: canal-sync
   ports:
     - name: http
-      port: 8088
-      targetPort: 8088
+      port: 8089
+      targetPort: 8089
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -29,15 +29,15 @@ spec:
           image: schill-canal:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8088
+            - containerPort: 8089
           readinessProbe:
             tcpSocket:
-              port: 8088
+              port: 8089
             initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
-              port: 8088
+              port: 8089
             initialDelaySeconds: 20
             periodSeconds: 20
           resources:

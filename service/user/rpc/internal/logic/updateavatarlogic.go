@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"SChill/common/authctx"
 	errutil "SChill/common/error"
 	"SChill/service/user/rpc/internal/model"
 	"SChill/service/user/rpc/internal/svc"
@@ -33,6 +34,14 @@ func (l *UpdateAvatarLogic) UpdateAvatar(in *pb.UpdateAvatarReq) (*pb.UpdateAvat
 	}
 	if in.AvatarUrl == "" {
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
+	}
+
+	// Verify caller identity against authenticated user from gRPC interceptor.
+	// Falls back to trusting the request field if no interceptor-provided userId
+	// exists (backward compatibility with callers not yet setting metadata).
+	if authUserId := authctx.OptionalUserID(l.ctx); authUserId != 0 && authUserId != in.UserId {
+		logx.Errorf("update avatar rejected: request userId=%d does not match authenticated userId=%d", in.UserId, authUserId)
+		return nil, errutil.RpcBusinessError(errutil.ErrNoPermission)
 	}
 
 	var user model.User

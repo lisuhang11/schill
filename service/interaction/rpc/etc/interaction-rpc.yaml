@@ -33,7 +33,7 @@ RedisConf:
 KafkaConsumerConf:
   Brokers:
     - 127.0.0.1:9092
-  Group: interaction_consumer
+  Group: interaction-consumer
   Topics:
     - post-star
     - post-unstar

@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"context"
 	"net/http"
 
+	"SChill/common/authctx"
 	"SChill/service/gateway/internal/svc"
 	"SChill/service/gateway/internal/types"
 	"SChill/service/user/rpc/usercenter"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"google.golang.org/grpc/metadata"
 )
 
 func GetUserInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -40,7 +43,8 @@ func UpdateProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		resp, err := svcCtx.UserRpc.UpdateUserProfileInfo(r.Context(), &usercenter.UpdateUserProfileInfoReq{
+		ctx := withAuthMetadata(r.Context(), r)
+		resp, err := svcCtx.UserRpc.UpdateUserProfileInfo(ctx, &usercenter.UpdateUserProfileInfoReq{
 			UserId: userID,
 			UserProfile: &usercenter.UserProfile{
 				UserId:    userID,
@@ -75,7 +79,8 @@ func UpdateAvatarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			fail(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		resp, err := svcCtx.UserRpc.UpdateAvatar(r.Context(), &usercenter.UpdateAvatarReq{
+		ctx := withAuthMetadata(r.Context(), r)
+		resp, err := svcCtx.UserRpc.UpdateAvatar(ctx, &usercenter.UpdateAvatarReq{
 			UserId:    userID,
 			AvatarUrl: req.AvatarUrl,
 		})
@@ -85,4 +90,14 @@ func UpdateAvatarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		ok(w, resp)
 	}
+}
+
+// withAuthMetadata attaches the JWT access token from the HTTP request to gRPC outgoing metadata.
+// This allows the downstream RPC server to verify the caller's identity independently.
+func withAuthMetadata(ctx context.Context, r *http.Request) context.Context {
+	token := authctx.TokenFromContext(r.Context())
+	if token == "" {
+		return ctx
+	}
+	return metadata.AppendToOutgoingContext(ctx, "authorization", "Bearer "+token)
 }

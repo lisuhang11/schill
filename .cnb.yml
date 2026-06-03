@@ -15,7 +15,7 @@ triggers:
 
 # 环境变量
 env:
-  GO_VERSION: "1.25"
+  GO_VERSION: "1.23"
   CGO_ENABLED: "0"
 
 # 流水线阶段
@@ -23,7 +23,7 @@ stages:
   # ==================== 阶段 1: 代码检查 ====================
   - name: lint
     label: 代码静态检查
-    image: golang:1.25-alpine
+    image: golang:1.23-alpine
     commands:
       - apk add --no-cache git
       - go version
@@ -35,7 +35,7 @@ stages:
   # ==================== 阶段 2: 单元测试 + 性能测试 ====================
   - name: test
     label: 单元测试 & 性能测试
-    image: golang:1.25-alpine
+    image: golang:1.23-alpine
     commands:
       - apk add --no-cache git
       # 运行单元测试（带覆盖率报告）
@@ -50,7 +50,7 @@ stages:
   # 包含并发测试（-cpu 参数控制 GOMAXPROCS）
   - name: benchmark
     label: 性能基准测试
-    image: golang:1.25-alpine
+    image: golang:1.23-alpine
     commands:
       - apk add --no-cache git curl jq
       # 安装 benchstat 用于性能比较
@@ -89,7 +89,7 @@ stages:
   # ==================== 阶段 4: 构建 ====================
   - name: build
     label: 项目构建
-    image: golang:1.25-alpine
+    image: golang:1.23-alpine
     depends_on:
       - lint
       - test
@@ -110,11 +110,13 @@ stages:
       - echo "All services built successfully."
 
   # ==================== 阶段 5: Docker 镜像构建（可选） ====================
-  # - name: docker
-  #   label: Docker 镜像构建
-  #   image: docker:latest
-  #   depends_on:
-  #     - build
-  #   commands:
-  #     - docker build -t schill-gateway:${CNB_COMMIT_SHORT} -f deploy/Dockerfile.gateway .
-  #     - docker build -t schill-user:${CNB_COMMIT_SHORT} -f deploy/Dockerfile.user .
+  - name: docker
+    label: Docker 镜像构建
+    image: docker:latest
+    depends_on:
+      - build
+    commands:
+      - docker build -t schill-gateway:${CNB_COMMIT_SHORT} -f service/gateway/Dockerfile .
+      - docker build -t schill-user-rpc:${CNB_COMMIT_SHORT} -f service/user/rpc/Dockerfile .
+      - docker build -t schill-content-rpc:${CNB_COMMIT_SHORT} -f service/content/rpc/Dockerfile .
+      - docker build -t schill-search-rpc:${CNB_COMMIT_SHORT} -f service/search/rpc/Dockerfile .

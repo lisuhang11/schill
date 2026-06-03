@@ -18,7 +18,10 @@ import (
 // BenchmarkPasswordVerify 密码验证（登录链路第一步）
 func BenchmarkPasswordVerify(b *testing.B) {
 	password := "TestPass123!"
-	hashed := cryptx.PasswordEncrypt(password)
+	hashed, err := cryptx.PasswordEncrypt(password)
+	if err != nil {
+		b.Fatal("encrypt failed:", err)
+	}
 	b.ReportAllocs()
 	b.ResetTimer()
 	for b.Loop() {
@@ -196,7 +199,10 @@ func BenchmarkCacheKeyGenerationBatch(b *testing.B) {
 // BenchmarkConcurrentPasswordVerify 并发密码验证
 func BenchmarkConcurrentPasswordVerify(b *testing.B) {
 	password := "TestPass123!"
-	hashed := cryptx.PasswordEncrypt(password)
+	hashed, err := cryptx.PasswordEncrypt(password)
+	if err != nil {
+		b.Fatal("encrypt failed:", err)
+	}
 	b.ReportAllocs()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {

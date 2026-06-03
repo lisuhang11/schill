@@ -36,12 +36,22 @@ func (l *CheckPostCollectionLogic) CheckPostCollection(in *pb.CheckPostCollectio
 	if err != nil {
 		logx.Errorf("Redis SIsMember query failed: %v", err)
 	} else {
-		return &pb.CheckPostCollectionResp{
-			IsCollected: isCollected,
-		}, nil
+		// Check whether the Redis key still exists.
+		// SISMEMBER returns (false, nil) for non-existent keys, so we can't
+		// distinguish "key expired" from "member not in set" without Exists.
+		keyExists, existsErr := l.svcCtx.RedisClient.Exists(l.ctx, relationKey)
+		if existsErr != nil {
+			logx.Errorf("Redis Exists check failed: %v", existsErr)
+			// Fall through to DB fallback on uncertainty
+		} else if keyExists > 0 {
+			return &pb.CheckPostCollectionResp{
+				IsCollected: isCollected,
+			}, nil
+		}
+		// Key does not exist (TTL expired) — fall through to DB fallback
 	}
 
-	// Redis miss — fallback to DB and backfill Redis
+	// Redis miss (key expired or unavailable) — fallback to DB and backfill Redis
 	exists, dbErr := l.svcCtx.PostCollectionDAO.Exists(l.ctx, in.PostId, in.UserId)
 	if dbErr != nil {
 		logx.Errorf("DB fallback for collection check failed: postId=%d userId=%d err=%v", in.PostId, in.UserId, dbErr)

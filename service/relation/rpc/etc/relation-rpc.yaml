@@ -6,10 +6,7 @@ Etcd:
   Key: relation.rpc
 
 UserRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: user.rpc
+  Target: 127.0.0.1:8080
 
 Mysql:
   DataSource: "root:123456@tcp(127.0.0.1:3306)/schill?parseTime=true&loc=UTC"

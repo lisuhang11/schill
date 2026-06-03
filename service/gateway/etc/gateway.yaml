@@ -5,44 +5,52 @@ Port: 8086
 Jwt:
   AccessSecret: "change-me-gateway-access-secret"
 
+# Distributed rate limiting using go-zero PeriodLimit + Redis.
+# Redis is used for cross-instance consistency; remove the Redis block to
+# fall back to local in-memory rate limiting (single instance only).
+RateLimit:
+  Redis:
+    Host: 127.0.0.1:6379
+    Type: node
+    Pass: ""
+  # Auth endpoints: register / login / refresh-token
+  # 20 requests per 60 seconds per IP — prevents brute-force and abuse.
+  Auth:
+    PeriodSec: 60
+    Quota: 20
+  # Write endpoints: create/update/delete/vote/follow/star/collect/share
+  # 30 requests per 60 seconds per IP — prevents spammy writes.
+  Write:
+    PeriodSec: 60
+    Quota: 30
+  # Read endpoints: get/list/feed
+  # 200 requests per 60 seconds per IP — generous for browsing.
+  Read:
+    PeriodSec: 60
+    Quota: 200
+  # Search endpoints: stricter to protect Elasticsearch from overload.
+  # 30 requests per 60 seconds per IP.
+  Search:
+    PeriodSec: 60
+    Quota: 30
+
 UserRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: user.rpc
+  Target: 127.0.0.1:8080
 
 ContentRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: content.rpc
+  Target: 127.0.0.1:8082
 
 FeedRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: feed.rpc
+  Target: 127.0.0.1:8087
 
 CommentRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: comment.rpc
+  Target: 127.0.0.1:8083
 
 RelationRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: relation.rpc
+  Target: 127.0.0.1:8081
 
 InteractionRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: interaction.rpc
+  Target: 127.0.0.1:8084
 
 SearchRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: search.rpc
+  Target: 127.0.0.1:8088

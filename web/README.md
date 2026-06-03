@@ -41,7 +41,7 @@ HTTP contracts are derived from:
 - `docs/swagger/comment.json`
 - `docs/swagger/interaction.json`
 - `docs/swagger/relation.json`
-- `service/search/api/search.api`
+- `service/search/rpc/search.proto`
 
 Secondary type context is derived from:
 
@@ -72,7 +72,7 @@ The first editor intentionally keeps the backend contract narrow:
 
 - Gateway has real `/api` routes, but no generated `docs/swagger/gateway.json` is present. The current source of truth for gateway routes is `service/gateway/internal/handler/routes.go`.
 - Gateway supports feed and auth routes, so login/register and feed clients use real `/api` paths.
-- Gateway supports collect/uncollect and share, but no paginated "my collections" route is documented.
+- Gateway supports collect/uncollect, share, and collection list (`GET /api/users/me/collections`).
 
 ## Commands
 

@@ -14,7 +14,7 @@ message UserInfo {
   string phone = 4;       // 手机号
   string email = 5;       // 电子邮箱
   string avatar = 6;      // 头像URL
-  int32 status = 7;       // 用户状态（0:正常 1:封禁 2:删除等）
+  int32 status = 7;       // 用户状态（1:正常 2:禁言 3:冻结）
   bool isAdmin = 8;       // 是否为管理员
   int64 createdAt = 9;    // 创建时间（Unix时间戳，秒）
 }

@@ -283,6 +283,17 @@ export type SearchResponse<T> = BackendEnvelope & {
   list: T[];
 };
 
+export type UpdateProfileRequest = {
+  gender?: number;
+  birthday?: string;
+  signature?: string;
+  location?: string;
+  website?: string;
+  company?: string;
+  jobTitle?: string;
+  education?: string;
+};
+
 export type ApiGap = {
   capability: string;
   expectedRoute: string;

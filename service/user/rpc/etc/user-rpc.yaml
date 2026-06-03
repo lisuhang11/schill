@@ -24,7 +24,7 @@ KqConsumerConf:
   Name: userPostCountConsumer
   Brokers:
     - 127.0.0.1:9092
-  Group: userPostCountConsumerGroup
+  Group: user-post-count-consumer-group
   TopicCreated: post-created
   TopicDeleted: post-deleted
   TopicFollowed: user-followed

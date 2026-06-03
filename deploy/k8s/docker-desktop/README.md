@@ -61,7 +61,7 @@ kubectl delete job schill-es-init -n schill --ignore-not-found
 
 - `content-rpc` / `content-api`
 - `comment-rpc` / `comment-api`
-- `search-api`
+- `search-rpc`
 - `canal-sync`
 - `gateway`
 
@@ -85,7 +85,7 @@ kubectl get pvc -n schill
 ```powershell
 kubectl logs -n schill deploy/gateway
 kubectl logs -n schill deploy/user-rpc
-kubectl logs -n schill deploy/search-api
+kubectl logs -n schill deploy/search-rpc
 kubectl logs -n schill deploy/canal-sync
 ```
 

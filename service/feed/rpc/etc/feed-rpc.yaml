@@ -6,25 +6,13 @@ Etcd:
   Key: feed.rpc
 
 ContentRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: content.rpc
+  Target: 127.0.0.1:8082
 
 UserRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: user.rpc
+  Target: 127.0.0.1:8080
 
 RelationRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: relation.rpc
+  Target: 127.0.0.1:8081
 
 InteractionRpc:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: interaction.rpc
+  Target: 127.0.0.1:8084

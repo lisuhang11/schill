@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"SChill/service/user/rpc/internal/config"
+	"SChill/service/user/rpc/internal/interceptor"
 	"SChill/service/user/rpc/internal/mqs"
 	"SChill/service/user/rpc/internal/server"
 	"SChill/service/user/rpc/internal/svc"
@@ -33,6 +34,7 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+	s.AddUnaryInterceptors(interceptor.AuthUnaryInterceptor(c.Jwt.AccessSecret))
 	defer s.Stop()
 
 	serviceGroup := service.NewServiceGroup()

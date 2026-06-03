@@ -12,7 +12,7 @@ type UserStat struct {
 	FollowingCount  uint32    `gorm:"column:following_count;type:int unsigned;not null;default:0;comment:关注数"`
 	LikeCount       uint32    `gorm:"column:like_count;type:int unsigned;not null;default:0;comment:获赞总数"`
 	CollectionCount uint32    `gorm:"column:collection_count;type:int unsigned;not null;default:0;comment:被收藏总数"`
-	LastActiveTime  int64     `gorm:"column:last_active_time;not null;default:0;index:idx_last_active;comment:最后活跃时间"`
+	LastActiveTime  int64     `gorm:"column:last_active_time;type:bigint;not null;default:0;index:idx_last_active;comment:最后活跃时间"`
 	CreatedAt       time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt       time.Time `gorm:"column:updated_at;autoUpdateTime"`
 }

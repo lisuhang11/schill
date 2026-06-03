@@ -20,7 +20,7 @@ app routes
 The implementation must start from backend contracts. The known backend inputs include:
 
 - `service/feed/rpc/feed.proto` for feed request, response, feed item, author, and viewer-state shapes.
-- `service/search/api/search.api` for HTTP search endpoints and response models.
+- `service/search/rpc/search.proto` for search endpoints and response models.
 - `docs/swagger/*.json` for generated HTTP contracts for content, comment, interaction, and relation services.
 - other service `.api` files or generated HTTP code if present at implementation time.
 - `service/*/rpc/*.proto` for secondary type context when HTTP documentation is incomplete.
@@ -117,7 +117,7 @@ Use this priority when deriving frontend behavior:
 
 1. gateway route/type code under `service/gateway/internal/handler/routes.go` and `service/gateway/internal/types/types.go`,
 2. generated Swagger JSON under `docs/swagger/` for service-level HTTP route, method, parameter, body, and response shape,
-3. `.api` files where present, especially `service/search/api/search.api`,
+3. `.proto` files where present, especially `service/search/rpc/search.proto`,
 4. generated or handwritten HTTP API code if Swagger and `.api` disagree,
 5. `.proto` files for RPC-only type context,
 6. `db.sql` for enum meanings and storage details when the API exposes only numeric or string primitives.
@@ -135,7 +135,7 @@ Create `types.ts` files for shared contracts. The feed type model should map the
 - `FeedViewerState`
 - `FeedType`
 
-Search types should map `service/search/api/search.api`:
+Search types should map `service/search/rpc/search.proto`:
 
 - `SearchPostRequest`
 - `SearchPostResponse`

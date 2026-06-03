@@ -21,7 +21,7 @@
 ## 3. Implement backend contract types and API clients
 
 - [x] Create shared feed types matching `service/feed/rpc/feed.proto`.
-- [x] Create search types matching `service/search/api/search.api`.
+- [x] Create search types matching `service/search/rpc/search.proto`.
 - [x] Create content, comment, interaction, and relation types from `docs/swagger/*.json`.
 - [x] Create post create/edit form types that submit only plain-text `contents[]` items with backend content type `2`.
 - [x] Create a post visibility union for `0`, `10`, `20`, `50`, and `90` using labels confirmed from `db.sql`.

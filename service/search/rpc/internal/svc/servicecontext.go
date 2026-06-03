@@ -23,10 +23,10 @@ func NewServiceContext(c config.Config) *ServiceContext {
 	}
 
 	redisClient, err := redis.NewClient(redis.Config{
-		Host:     c.Redis.Host,
-		Port:     c.Redis.Port,
-		Password: c.Redis.Password,
-		DB:       c.Redis.DB,
+		Host:     c.BizRedis.Host,
+		Port:     c.BizRedis.Port,
+		Password: c.BizRedis.Password,
+		DB:       c.BizRedis.DB,
 	})
 	if err != nil {
 		panic("Redis client init failed: " + err.Error())

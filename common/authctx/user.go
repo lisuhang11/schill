@@ -7,6 +7,7 @@ import (
 )
 
 const userIDContextKey = "userId"
+const tokenContextKey = "authToken"
 
 var ErrMissingUserID = errors.New("missing user id in context")
 
@@ -48,4 +49,13 @@ func RequireUserID(ctx context.Context) (uint64, error) {
 		return 0, ErrMissingUserID
 	}
 	return userID, nil
+}
+
+// TokenFromContext returns the raw JWT token string stored in context (if any).
+func TokenFromContext(ctx context.Context) string {
+	if ctx == nil {
+		return ""
+	}
+	v, _ := ctx.Value(tokenContextKey).(string)
+	return v
 }

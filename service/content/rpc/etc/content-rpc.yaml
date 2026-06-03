@@ -22,10 +22,7 @@ MysqlRead:
 
 # relationRpc服务调用
 RelationRpcConf:
-  Etcd:
-    Hosts:
-      - 127.0.0.1:2379
-    Key: relation.rpc
+  Target: 127.0.0.1:8081
   Timeout: 5000
 
 # Kafka Pusher配置
@@ -39,7 +36,7 @@ KqPusherConf:
 KqConsumerConf:
   Brokers:
     - 127.0.0.1:9092
-  Group: postCommentCountConsumerGroup
+  Group: post-comment-count-consumer-group
   TopicCommentCreated: comment-created
   TopicCommentDeleted: comment-deleted
   TopicPostStar: post-star

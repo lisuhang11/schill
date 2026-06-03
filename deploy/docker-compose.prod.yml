@@ -253,16 +253,16 @@ services:
       - redis
     restart: always
 
-  search-api:
+  search-rpc:
     build:
       context: ..
-      dockerfile: service/search/api/Dockerfile
-    image: schill-search-api:latest
-    container_name: search-api
+      dockerfile: service/search/rpc/Dockerfile
+    image: schill-search-rpc:latest
+    container_name: search-rpc
     ports:
-      - "8895:8895"
+      - "8088:8088"
     volumes:
-      - ./k8s/docker-desktop/config/search-api.yaml:/app/etc/search-api.yaml:ro
+      - ./k8s/docker-desktop/config/search-rpc.yaml:/app/etc/search-rpc.yaml:ro
     networks:
       - backend
     depends_on:
@@ -276,6 +276,8 @@ services:
       dockerfile: service/canal/Dockerfile
     image: schill-canal:latest
     container_name: canal-sync
+    ports:
+      - "8089:8089"
     volumes:
       - ./k8s/docker-desktop/config/canal.yaml:/app/etc/canal.yaml:ro
     networks:
@@ -299,7 +301,7 @@ services:
     networks:
       - backend
     depends_on:
-      - search-api
+      - search-rpc
     restart: always
 
 volumes:

@@ -40,7 +40,11 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 		return nil, err
 	}
 
-	hashedPwd := cryptx.PasswordEncrypt(password)
+	hashedPwd, err := cryptx.PasswordEncrypt(password)
+	if err != nil {
+		logx.Errorf("密码哈希失败: %v", err)
+		return nil, errutil.RpcBusinessError(errutil.ErrInternalError)
+	}
 	user := &model.User{
 		Username:     username,
 		PasswordHash: hashedPwd,
@@ -51,7 +55,7 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 	}
 
 	var userId uint64
-	err := l.svcCtx.DB.WithContext(l.ctx).Transaction(func(tx *gorm.DB) error {
+	err = l.svcCtx.DB.WithContext(l.ctx).Transaction(func(tx *gorm.DB) error {
 		// 原子插入，如果 username 冲突则忽略插入
 		result := tx.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "username"}}, // 指定唯一键列

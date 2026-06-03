@@ -14,7 +14,7 @@ type Config struct {
 		TopicIndex string
 	}
 
-	Redis struct {
+	BizRedis struct {
 		Host     string
 		Port     string
 		Password string

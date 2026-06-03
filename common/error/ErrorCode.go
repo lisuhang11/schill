@@ -2,8 +2,9 @@ package error
 
 const (
 	// 通用错误
-	Success    = 0   // 成功
-	ErrUnknown = 999 // 未知错误
+	Success            = 0   // 成功
+	ErrUnknown         = 999 // 未知错误
+	ErrRateLimitExceed = 998 // 请求频率超限
 
 	// 用户模块错误码 (1000-1999)
 	ErrUsernameOrPasswordEmpty = 1001 // 用户名或密码为空
@@ -41,6 +42,7 @@ const (
 var messageMap = map[int]string{
 	Success:                    "ok",
 	ErrUnknown:                 "未知错误",
+	ErrRateLimitExceed:         "请求过于频繁，请稍后再试",
 	ErrUsernameOrPasswordEmpty: "用户名或密码为空",
 	ErrUsernameExists:          "用户名已存在",
 	ErrInvalidCredentials:      "用户名或密码错误",

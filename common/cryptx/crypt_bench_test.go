@@ -25,7 +25,10 @@ func BenchmarkPasswordEncryptLong(b *testing.B) {
 // BenchmarkPasswordVerify 测试密码验证性能
 func BenchmarkPasswordVerify(b *testing.B) {
 	password := "TestPassword123!"
-	hashed := PasswordEncrypt(password)
+	hashed, err := PasswordEncrypt(password)
+	if err != nil {
+		b.Fatal("encrypt failed:", err)
+	}
 	b.ResetTimer()
 	b.ReportAllocs()
 	for b.Loop() {

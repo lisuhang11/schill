@@ -1,5 +1,5 @@
 Name: canal.rpc
-ListenOn: 0.0.0.0:8088
+ListenOn: 0.0.0.0:8089
 Etcd:
   Hosts:
     - etcd:2379

@@ -8,9 +8,15 @@ export const API_GAPS: ApiGap[] = [
     impact: "Frontend uses gateway code as the source of truth for /api paths."
   },
   {
-    capability: "Collection center",
-    expectedRoute: "GET /api/users/me/collections or equivalent",
-    currentEvidence: "gateway exposes collect/uncollect but no paginated collection-list route.",
-    impact: "Post cards can collect/uncollect, but a My Collections page is deferred."
+    capability: "Rich content editor",
+    expectedRoute: "POST /api/posts (with multipart/form-data for images)",
+    currentEvidence: "PostEditor supports plain text only. DB schema supports 8 content types (text, image, video, audio, link, attachment, paid).",
+    impact: "Users cannot attach images, videos, or other media to posts."
+  },
+  {
+    capability: "Topic detail page",
+    expectedRoute: "GET /topics/[topicId]",
+    currentEvidence: "Clicking a topic in sidebar redirects to /search?type=topic, no dedicated topic detail page exists.",
+    impact: "Users cannot browse posts within a specific topic."
   }
 ];

@@ -36,7 +36,7 @@ secretGenerator:
       - config/comment-rpc.yaml
       - config/interaction-rpc.yaml
       - config/relation-rpc.yaml
-      - config/search-api.yaml
+      - config/search-rpc.yaml
       - config/canal.yaml
   - name: schill-canal-server-config
     files:

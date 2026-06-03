@@ -30,7 +30,9 @@ func OptionalJWTMiddleware(secret string) rest.Middleware {
 			return
 		}
 
-		next(w, r.WithContext(context.WithValue(r.Context(), userIDContextKey, claims.UserId)))
+		ctx := context.WithValue(r.Context(), userIDContextKey, claims.UserId)
+		ctx = context.WithValue(ctx, tokenContextKey, token)
+		next(w, r.WithContext(ctx))
 		}
 	}
 }
