@@ -16,6 +16,7 @@ type ProfileContentTabsProps = {
   postTotal: number;
   posts: PostInfo[] | null;
   postsError?: string;
+  onCollectionTotalChange?: (count: number) => void;
 };
 
 type TabKey = "posts" | "collections";
@@ -30,7 +31,8 @@ export function ProfileContentTabs({
   postPage,
   postTotal,
   posts,
-  postsError
+  postsError,
+  onCollectionTotalChange
 }: ProfileContentTabsProps) {
   const { userId: currentUserId } = useAuth();
   const isSelf = currentUserId === userId;
@@ -53,11 +55,13 @@ export function ProfileContentTabs({
       }
 
       const list = result.data.list ?? [];
+      const total = result.data.total ?? 0;
       setCollections(list);
-      setCollectionTotal(result.data.total ?? 0);
+      setCollectionTotal(total);
+      onCollectionTotalChange?.(total);
       setCollectionStatus(list.length === 0 ? "empty" : "ok");
     });
-  }, []);
+  }, [onCollectionTotalChange]);
 
   useEffect(() => {
     if (activeTab === "collections" && isSelf && collectionStatus === "idle") {

@@ -68,7 +68,11 @@ func parseUintParam(r *http.Request, name string) (uint64, bool) {
 func currentUserID(r *http.Request) (uint64, bool) {
 	userID := authctx.OptionalUserID(r.Context())
 	if userID == 0 {
-		return 0, false
+		headerUserID, err := strconv.ParseUint(strings.TrimSpace(r.Header.Get("X-User-Id")), 10, 64)
+		if err != nil || headerUserID == 0 {
+			return 0, false
+		}
+		return headerUserID, true
 	}
 	return userID, true
 }

@@ -179,6 +179,15 @@ export type InteractionToggleResponse = BackendEnvelope & {
   shareCount?: number;
 };
 
+export type PostStarStatusResponse = BackendEnvelope & {
+  isStarred: boolean;
+  starCount: number;
+};
+
+export type PostCollectionStatusResponse = BackendEnvelope & {
+  isCollected: boolean;
+};
+
 export type FollowInfo = {
   userId: number;
   username: string;

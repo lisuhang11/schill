@@ -87,6 +87,43 @@ func SharePostHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	}
 }
 
+func CheckPostStarHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		postID, userID, valid := postAndUser(r)
+		if !valid {
+			fail(w, http.StatusBadRequest, "invalid post id or missing X-User-Id")
+			return
+		}
+		resp, err := svcCtx.InteractionRpc.CheckPostStar(r.Context(), &interactioncenter.CheckPostStarReq{UserId: userID, PostId: postID})
+		if err != nil {
+			rpcFail(w, err)
+			return
+		}
+		ok(w, map[string]interface{}{
+			"isStarred": resp.IsStarred,
+			"starCount": resp.StarCount,
+		})
+	}
+}
+
+func CheckPostCollectionHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		postID, userID, valid := postAndUser(r)
+		if !valid {
+			fail(w, http.StatusBadRequest, "invalid post id or missing X-User-Id")
+			return
+		}
+		resp, err := svcCtx.InteractionRpc.CheckPostCollection(r.Context(), &interactioncenter.CheckPostCollectionReq{UserId: userID, PostId: postID})
+		if err != nil {
+			rpcFail(w, err)
+			return
+		}
+		ok(w, map[string]interface{}{
+			"isCollected": resp.IsCollected,
+		})
+	}
+}
+
 func postAndUser(r *http.Request) (uint64, uint64, bool) {
 	postID, valid := parseUintParam(r, "id")
 	if !valid {

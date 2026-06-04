@@ -15,7 +15,7 @@ export default function CollectionsPage() {
   const [items, setItems] = useState<PostInfo[]>([]);
   const [status, setStatus] = useState<"loading" | "empty" | "error" | "ok">("loading");
   const [message, setMessage] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const fetch = useCallback((pageNum: number) => {
     startTransition(async () => {

@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import { getPostList, getUserInfo } from "@/lib/api";
-import { ProfileContentTabs } from "@/components/ProfileContentTabs";
-import { ProfileHeader } from "@/components/ProfileHeader";
-import { StateBlock } from "@/components/StateBlock";
 import { formatDate } from "@/lib/format";
+import { ProfileHeader } from "@/components/ProfileHeader";
+import { ProfileMainContent } from "@/components/ProfileMainContent";
+import { StateBlock } from "@/components/StateBlock";
 
 type UserPageProps = {
   params: Promise<{ userId: string }>;
@@ -34,21 +34,10 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
   }
 
   const { userInfo, profile, stat } = userResult.data;
-  const hasProfile = Boolean(
-    profile.location || profile.company || profile.jobTitle || profile.website
-  );
-  const profileItems = [
-    profile.signature,
-    profile.location,
-    profile.company,
-    profile.jobTitle,
-    profile.website
-  ];
-  const profilePercent = Math.round(
-    (profileItems.filter(Boolean).length / profileItems.length) * 100
-  );
-
-  const postList = postsResult.ok ? (postsResult.data.list ?? []) : null;
+  const hasProfile = Boolean(profile.location || profile.company || profile.jobTitle || profile.website);
+  const profileItems = [profile.signature, profile.location, profile.company, profile.jobTitle, profile.website];
+  const profilePercent = Math.round((profileItems.filter(Boolean).length / profileItems.length) * 100);
+  const postList = postsResult.ok ? (postsResult.data.list ?? []) : [];
   const postTotal = postsResult.ok ? (postsResult.data.total ?? 0) : 0;
 
   return (
@@ -56,18 +45,16 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
       <section>
         <ProfileHeader userId={userId} userInfo={userInfo} profile={profile} />
 
-        <div className="mt-5 grid grid-cols-2 gap-2.5 text-center sm:grid-cols-3 md:grid-cols-5">
-          <StatBox label="文章" value={stat.postCount ?? 0} />
-          <StatBox label="评论" value={stat.commentCount ?? 0} />
-          <StatBox label="粉丝" value={stat.followerCount ?? 0} />
-          <StatBox label="关注" value={stat.followingCount ?? 0} />
-          <StatBox label="获赞" value={stat.likeCount ?? 0} />
-        </div>
-
-        <ProfileContentTabs
+        <ProfileMainContent
           userId={userId}
-          postCount={stat.postCount ?? postTotal}
-          collectionCount={stat.collectionCount ?? 0}
+          stats={{
+            postCount: stat.postCount ?? postTotal,
+            commentCount: stat.commentCount ?? 0,
+            followerCount: stat.followerCount ?? 0,
+            followingCount: stat.followingCount ?? 0,
+            likeCount: stat.likeCount ?? 0,
+            collectionCount: stat.collectionCount ?? 0
+          }}
           postPage={page}
           postTotal={postTotal}
           posts={postList}
@@ -92,22 +79,11 @@ export default async function UserPage({ params, searchParams }: UserPageProps) 
         <section className="rounded-lg border border-[rgba(77,100,124,0.18)] bg-white p-5 shadow-soft">
           <h2 className="text-base font-semibold text-marine-text">最近活跃</h2>
           <p className="mt-3 text-sm leading-6 text-marine-muted">
-            {stat.lastActiveTime
-              ? `最后活跃于 ${formatDate(stat.lastActiveTime)}。`
-              : "暂无最近活跃时间。"}
+            {stat.lastActiveTime ? `最后活跃于 ${formatDate(stat.lastActiveTime)}。` : "暂无最近活跃时间。"}
             {hasProfile ? " 个人资料已补充基础信息。" : " 该用户还没有补充更多资料。"}
           </p>
         </section>
       </aside>
     </main>
-  );
-}
-
-function StatBox({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-lg bg-marine-bg p-3">
-      <p className="text-2xl font-bold text-marine-deep">{value}</p>
-      <p className="mt-1 text-xs text-marine-muted">{label}</p>
-    </div>
   );
 }

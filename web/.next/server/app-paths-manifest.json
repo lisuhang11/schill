@@ -1,3 +1,7 @@
 {
-  "/page": "app/page.js"
+  "/page": "app/page.js",
+  "/posts/[postId]/page": "app/posts/[postId]/page.js",
+  "/users/[userId]/page": "app/users/[userId]/page.js",
+  "/search/page": "app/search/page.js",
+  "/feed/page": "app/feed/page.js"
 }

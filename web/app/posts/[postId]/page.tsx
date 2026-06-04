@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { getCommentList, getPostDetail } from "@/lib/api";
 import { formatDate, splitTags, toBoolean, visibilityLabel } from "@/lib/format";
-import { CommentComposer } from "@/components/CommentComposer";
 import { CommentList } from "@/components/CommentList";
 import { PostActions } from "@/components/PostActions";
 import { StateBlock } from "@/components/StateBlock";
@@ -74,16 +73,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
         <PostActions postId={post.id} counts={post} />
       </article>
 
-      <section className="mt-6 rounded-lg border border-[rgba(77,100,124,0.16)] bg-white p-6 shadow-soft">
-        <h2 className="text-xl font-semibold text-marine-text">评论</h2>
-        <CommentComposer postId={post.id} />
+      <section className="mt-4">
         {!commentsResult.ok ? (
           <div className="mt-5">
             <StateBlock tone="error" title="评论加载失败" description={commentsResult.message} />
-          </div>
-        ) : commentsResult.data.list.length === 0 ? (
-          <div className="mt-5">
-            <StateBlock tone="empty" title="暂无评论" description="可以发布第一条评论。" />
           </div>
         ) : (
           <CommentList comments={commentsResult.data.list} postId={post.id} />

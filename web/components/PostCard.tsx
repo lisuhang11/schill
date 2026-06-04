@@ -70,10 +70,18 @@ export function PostCard({ post, compact = false }: PostCardProps) {
       <footer className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[rgba(77,100,124,0.12)] pt-4 text-sm text-marine-muted">
         <span>{author}</span>
         <div className="flex items-center gap-3">
-          <span className="inline-flex items-center gap-1"><MessageCircle size={16} />{formatCount(post.commentCount)}</span>
-          <span className="inline-flex items-center gap-1"><Heart size={16} />{formatCount(post.upvoteCount)}</span>
-          <span className="inline-flex items-center gap-1"><Bookmark size={16} />{formatCount(post.collectionCount)}</span>
-          <span className="inline-flex items-center gap-1"><Share2 size={16} />{formatCount(post.shareCount)}</span>
+          <span className="inline-flex items-center gap-1" title="评论">
+            <MessageCircle size={16} />{formatCount(post.commentCount)}
+          </span>
+          <span className="inline-flex items-center gap-1" title="点赞">
+            <Heart size={16} />{formatCount(post.upvoteCount)}
+          </span>
+          <span className="inline-flex items-center gap-1" title="收藏">
+            <Bookmark size={16} />{formatCount(post.collectionCount)}
+          </span>
+          <span className="inline-flex items-center gap-1" title="分享">
+            <Share2 size={16} />{formatCount(post.shareCount)}
+          </span>
           <span className="sr-only"><Eye size={16} /></span>
         </div>
       </footer>

@@ -12,7 +12,7 @@ export default async function TopicsPage({ searchParams }: TopicsPageProps) {
   const page = Number(params.page ?? "1") || 1;
   const sort = params.sort === "new" ? "new" : "hot";
   const result = await getTopicList({ page, pageSize: 24, sort });
-  const topicList = result.ok ? (result.data.list ?? []) : null;
+  const topicList = result.ok ? (result.data.list ?? []) : [];
   const topicTotal = result.ok ? (result.data.total ?? 0) : 0;
 
   return (

@@ -28,7 +28,7 @@ func main() {
 	conf.MustLoad(*configFile, &c)
 
 	server := rest.MustNewServer(c.RestConf, rest.WithCustomCors(func(header http.Header) {
-		header.Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+		header.Set("Access-Control-Allow-Headers", "Authorization, Content-Type, X-User-Id")
 	}, nil, "http://localhost:3000"))
 	defer server.Stop()
 

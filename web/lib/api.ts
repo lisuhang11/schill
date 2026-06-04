@@ -14,9 +14,11 @@ import type {
   LoginRequest,
   LoginResponse,
   PageRequest,
+  PostCollectionStatusResponse,
   PostDetailResponse,
   PostInfo,
   PostListResponse,
+  PostStarStatusResponse,
   RegisterRequest,
   RegisterResponse,
   SearchPostItem,
@@ -54,7 +56,11 @@ function authHeaders(): Record<string, string> {
     return {};
   }
   const accessToken = window.localStorage.getItem("schill:accessToken");
-  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
+  const userId = window.localStorage.getItem("schill:userId");
+  return {
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...(userId ? { "X-User-Id": userId } : {})
+  };
 }
 
 async function request<T>(
@@ -74,11 +80,15 @@ async function request<T>(
       }
     });
 
+    const payload = (await response.json().catch(() => ({}))) as (T & BackendEnvelope) | BackendEnvelope;
     if (!response.ok) {
-      return { ok: false, message: `HTTP ${response.status}`, status: response.status };
+      return {
+        ok: false,
+        message: payload.msg || `HTTP ${response.status}`,
+        status: response.status
+      };
     }
 
-    const payload = (await response.json()) as (T & BackendEnvelope) | BackendEnvelope;
     if (typeof payload.code === "number" && payload.code !== 0) {
       return { ok: false, message: payload.msg || `业务错误 ${payload.code}` };
     }
@@ -207,6 +217,10 @@ export function starPost(postId: number) {
   });
 }
 
+export function checkPostStar(postId: number) {
+  return request<PostStarStatusResponse>(`/api/posts/${postId}/star`);
+}
+
 export function unstarPost(postId: number) {
   return request<InteractionToggleResponse>(`/api/posts/${postId}/star`, {
     method: "DELETE"
@@ -217,6 +231,10 @@ export function collectPost(postId: number) {
   return request<InteractionToggleResponse>(`/api/posts/${postId}/collect`, {
     method: "POST"
   });
+}
+
+export function checkPostCollection(postId: number) {
+  return request<PostCollectionStatusResponse>(`/api/posts/${postId}/collect`);
 }
 
 export function uncollectPost(postId: number) {
