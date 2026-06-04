@@ -4,8 +4,7 @@ import "time"
 
 // UserStat 用户统计表
 type UserStat struct {
-	ID              uint64    `gorm:"column:id;primaryKey;autoIncrement"`
-	UserID          uint64    `gorm:"column:user_id;uniqueIndex:uk_user_id;not null;comment:用户ID"`
+	UserID          uint64    `gorm:"column:user_id;primaryKey;not null;comment:用户ID"`
 	PostCount       uint32    `gorm:"column:post_count;type:int unsigned;not null;default:0;comment:发帖数"`
 	CommentCount    uint32    `gorm:"column:comment_count;type:int unsigned;not null;default:0;comment:评论数"`
 	FollowerCount   uint32    `gorm:"column:follower_count;type:int unsigned;not null;default:0;comment:粉丝数"`

@@ -69,11 +69,11 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 			// 用户名已存在（包括软删除的记录，因为唯一索引包含删除态）
 			return errutil.RpcBusinessError(errutil.ErrUsernameExists)
 		}
-		userId = user.ID
+		userId = user.UserID
 
 		// 插入 user_profile
 		profile := &model.UserProfile{
-			UserID:    user.ID,
+			UserID:    user.UserID,
 			Gender:    0,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -83,7 +83,7 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 		}
 		// 插入 user_stat
 		stat := &model.UserStat{
-			UserID:          user.ID,
+			UserID:          user.UserID,
 			PostCount:       0,
 			CommentCount:    0,
 			FollowerCount:   0,

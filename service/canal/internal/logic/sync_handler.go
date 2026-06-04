@@ -112,12 +112,12 @@ func (h *SyncHandler) syncUser(msg *model.CanalMessage) ([]bulkOperation, []uint
 			return nil, nil, err
 		}
 
-		id := h.getUint64(row, "id")
-		if id == 0 {
+		userID := h.getUint64(row, "user_id")
+		if userID == 0 {
 			continue
 		}
-		userIDs = append(userIDs, id)
-		docID := strconv.FormatUint(id, 10)
+		userIDs = append(userIDs, userID)
+		docID := strconv.FormatUint(userID, 10)
 		if msg.Type == "DELETE" || (row["deleted_at"] != nil && row["deleted_at"] != "") {
 			ops = append(ops, bulkOperation{action: bulkDelete, index: "user", docID: docID})
 			continue
@@ -128,7 +128,7 @@ func (h *SyncHandler) syncUser(msg *model.CanalMessage) ([]bulkOperation, []uint
 			index:  "user",
 			docID:  docID,
 			doc: model.ESUser{
-				ID:        id,
+				ID:        userID,
 				Username:  h.getString(row, "username"),
 				Status:    h.getInt8(row, "status"),
 				IsAdmin:   h.getBool(row, "is_admin"),

@@ -195,11 +195,11 @@ func loadRelationCacheRows(ctx context.Context, svcCtx *svc.ServiceContext, kind
 
 	if kind == relationCacheFollowers {
 		query = query.
-			Joins("JOIN user u ON u.id = f.user_id AND u.deleted_at IS NULL").
+			Joins("JOIN user u ON u.user_id = f.user_id AND u.deleted_at IS NULL").
 			Where("f.follow_id = ?", userID)
 	} else {
 		query = query.
-			Joins("JOIN user u ON u.id = f.follow_id AND u.deleted_at IS NULL").
+			Joins("JOIN user u ON u.user_id = f.follow_id AND u.deleted_at IS NULL").
 			Where("f.user_id = ?", userID)
 	}
 

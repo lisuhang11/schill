@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	ID        uint64         `gorm:"column:id;primaryKey"`
+	UserID    uint64         `gorm:"column:user_id;primaryKey"`
 	Username  string         `gorm:"column:username"`
 	Avatar    string         `gorm:"column:avatar"`
 	CreatedAt time.Time      `gorm:"column:created_at"`

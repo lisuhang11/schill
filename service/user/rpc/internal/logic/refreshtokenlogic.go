@@ -41,7 +41,7 @@ func (l *RefreshTokenLogic) RefreshToken(in *pb.RefreshTokenReq) (*pb.RefreshTok
 	userID := claims.UserId
 
 	var user model.User
-	err = l.svcCtx.DB.WithContext(l.ctx).Where("id = ?", userID).First(&user).Error
+	err = l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", userID).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errutil.RpcBusinessError(errutil.ErrInvalidRefreshToken)

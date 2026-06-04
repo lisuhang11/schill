@@ -24,15 +24,15 @@ func batchLoadRelationUsers(ctx context.Context, userRpc usercenter.UserCenter, 
 
 	result := make(map[uint64]relationUserProfile, len(resp.GetUsers()))
 	for _, user := range resp.GetUsers() {
-		if user == nil || user.GetId() == 0 {
+		if user == nil || user.GetUserId() == 0 {
 			continue
 		}
 		username := user.GetNickname()
 		if username == "" {
 			username = user.GetUsername()
 		}
-		result[user.GetId()] = relationUserProfile{
-			UserID:   user.GetId(),
+		result[user.GetUserId()] = relationUserProfile{
+			UserID:   user.GetUserId(),
 			Username: username,
 			Avatar:   user.GetAvatar(),
 		}

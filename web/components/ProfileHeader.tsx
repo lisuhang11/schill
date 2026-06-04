@@ -9,7 +9,7 @@ const STATUS_LABELS: Record<number, string> = { 1: "正常", 2: "禁言", 3: "�
 export type ProfileHeaderProps = {
   userId: number;
   userInfo: {
-    id: number;
+    userId: number;
     username: string;
     avatar: string;
     status: number;

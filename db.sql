@@ -1,6 +1,6 @@
 
 CREATE TABLE `user` (
-                        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+                        `user_id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '用户ID',
                         `username` VARCHAR(32) NOT NULL DEFAULT '' COMMENT '用户名（唯一）',
                         `phone` VARCHAR(16) DEFAULT NULL COMMENT '手机号',
                         `email` VARCHAR(64) DEFAULT NULL COMMENT '邮箱',
@@ -13,7 +13,7 @@ CREATE TABLE `user` (
                         `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) COMMENT '注册时间',
                         `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '更新时间',
                         `deleted_at` DATETIME(3) NULL DEFAULT NULL COMMENT '删除时间（软删除）',
-                        PRIMARY KEY (`id`),
+                        PRIMARY KEY (`user_id`),
                         UNIQUE KEY `uk_username` (`username`),
                         UNIQUE KEY `uk_phone` (`phone`),
                         UNIQUE KEY `uk_email` (`email`),
@@ -23,7 +23,6 @@ CREATE TABLE `user` (
 
 
 CREATE TABLE `user_profile` (
-                                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                                 `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
                                 `gender` TINYINT NOT NULL DEFAULT '0' COMMENT '性别：0未知，1男，2女',
                                 `birthday` DATE DEFAULT NULL COMMENT '生日',
@@ -35,13 +34,11 @@ CREATE TABLE `user_profile` (
                                 `education` VARCHAR(64) NOT NULL DEFAULT '' COMMENT '教育背景',
                                 `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
                                 `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-                                PRIMARY KEY (`id`),
-                                UNIQUE KEY `uk_user_id` (`user_id`)
+                                PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户扩展信息表';
 
 
 CREATE TABLE `user_stat` (
-                             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                              `user_id` BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
                              `post_count` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT '发帖数',
                              `comment_count` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT '评论数',
@@ -52,8 +49,7 @@ CREATE TABLE `user_stat` (
                              `last_active_time` DATETIME(3) DEFAULT NULL COMMENT '最后活跃时间',
                              `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
                              `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
-                             PRIMARY KEY (`id`),
-                             UNIQUE KEY `uk_user_id` (`user_id`),
+                             PRIMARY KEY (`user_id`),
                              KEY `idx_last_active` (`last_active_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户统计表';
 

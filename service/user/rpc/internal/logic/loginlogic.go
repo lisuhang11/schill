@@ -61,12 +61,12 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 	// 更新用户最后活跃时间
 	nowUnix := now.Unix()
 	var userStat model.UserStat
-	errStat := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", user.ID).First(&userStat).Error
+	errStat := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", user.UserID).First(&userStat).Error
 	if errStat != nil {
 		if errStat == gorm.ErrRecordNotFound {
 			// 用户统计记录不存在，创建新记录
 			userStat = model.UserStat{
-				UserID:         user.ID,
+				UserID:         user.UserID,
 				LastActiveTime: nowUnix,
 			}
 			if errCreate := l.svcCtx.DB.WithContext(l.ctx).Create(&userStat).Error; errCreate != nil {
@@ -82,9 +82,9 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 		}
 	}
 
-	invalidateUserCaches(l.ctx, l.svcCtx, user.ID)
+	invalidateUserCaches(l.ctx, l.svcCtx, user.UserID)
 
-	tokenVersion, err := getUserTokenVersion(l.ctx, l.svcCtx, user.ID)
+	tokenVersion, err := getUserTokenVersion(l.ctx, l.svcCtx, user.UserID)
 	if err != nil {
 		logx.Errorf("get user token version failed: %v", err)
 	}
@@ -95,7 +95,7 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 	accessToken, err := jwt.GenerateAccessTokenWithVersion(
 		l.svcCtx.Config.Jwt.AccessExpire,
 		l.svcCtx.Config.Jwt.AccessSecret,
-		user.ID,
+		user.UserID,
 		tokenVersion,
 	)
 	if err != nil {
@@ -106,7 +106,7 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 	refreshToken, err := jwt.GenerateRefreshTokenWithVersion(
 		l.svcCtx.Config.Jwt.RefreshExpire,
 		l.svcCtx.Config.Jwt.RefreshSecret,
-		user.ID,
+		user.UserID,
 		tokenVersion,
 	)
 	if err != nil {
@@ -115,7 +115,7 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 	}
 
 	return &pb.LoginResp{
-		UserId:          user.ID,
+		UserId:          user.UserID,
 		AccessToken:     accessToken,
 		AccessExpireIn:  l.svcCtx.Config.Jwt.AccessExpire,
 		RefreshToken:    refreshToken,

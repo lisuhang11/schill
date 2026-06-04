@@ -313,7 +313,7 @@ export function searchTopics(params: PageRequest & { keyword: string }) {
 export function getUserInfo(userId: number) {
   return request<{
     userInfo: {
-      id: number;
+      userId: number;
       username: string;
       avatar: string;
       status: number;

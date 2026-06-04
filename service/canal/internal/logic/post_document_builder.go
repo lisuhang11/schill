@@ -56,7 +56,7 @@ func (b *PostDocumentBuilder) Build(ctx context.Context, postIDs []uint64) ([]mo
 			UNIX_TIMESTAMP(p.created_at) * 1000 AS created_at,
 			UNIX_TIMESTAMP(p.updated_at) * 1000 AS updated_at,
 			u.username, u.avatar`).
-		Joins("LEFT JOIN user AS u ON u.id = p.user_id AND u.deleted_at IS NULL").
+		Joins("LEFT JOIN user AS u ON u.user_id = p.user_id AND u.deleted_at IS NULL").
 		Where("p.id IN ? AND p.deleted_at IS NULL", postIDs).
 		Scan(&posts).Error; err != nil {
 		return nil, err

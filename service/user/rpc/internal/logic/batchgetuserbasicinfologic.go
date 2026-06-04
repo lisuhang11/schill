@@ -44,7 +44,7 @@ func (l *BatchGetUserBasicInfoLogic) BatchGetUserBasicInfo(in *pb.BatchGetUserBa
 		var cached pb.UserBasicInfo
 		err := l.svcCtx.Cache.GetCtx(l.ctx, cacheKey, &cached)
 		if err == nil {
-			if cached.Id > 0 {
+			if cached.UserId > 0 {
 				userMap[userID] = &cached
 			}
 			continue
@@ -62,7 +62,7 @@ func (l *BatchGetUserBasicInfoLogic) BatchGetUserBasicInfo(in *pb.BatchGetUserBa
 	if len(missedIDs) > 0 {
 		var users []model.User
 		if err := l.svcCtx.DB.WithContext(l.ctx).
-			Where("id IN ? AND deleted_at IS NULL", missedIDs).
+			Where("user_id IN ? AND deleted_at IS NULL", missedIDs).
 			Find(&users).Error; err != nil {
 			logx.Errorf("batch get users failed: userIds=%v err=%v", missedIDs, err)
 			return nil, errutil.RpcBusinessError(errutil.ErrInternalError)
@@ -70,22 +70,22 @@ func (l *BatchGetUserBasicInfoLogic) BatchGetUserBasicInfo(in *pb.BatchGetUserBa
 
 		foundUserMap := make(map[uint64]*model.User, len(users))
 		for i := range users {
-			foundUserMap[users[i].ID] = &users[i]
+			foundUserMap[users[i].UserID] = &users[i]
 		}
 
 		for _, userID := range missedIDs {
 			cacheKey := buildUserBasicInfoCacheKey(userID)
-			
+
 			if user, ok := foundUserMap[userID]; ok {
 				pbUser := &pb.UserBasicInfo{
-					Id:       user.ID,
+					UserId:   user.UserID,
 					Username: user.Username,
 					Nickname: user.Username,
 					Avatar:   user.Avatar,
 					Status:   int32(user.Status),
 				}
 				userMap[userID] = pbUser
-				
+
 				if err := l.svcCtx.Cache.SetCtx(l.ctx, cacheKey, pbUser); err != nil {
 					logx.Errorf("cache user basic info failed: userId=%d err=%v", userID, err)
 				}

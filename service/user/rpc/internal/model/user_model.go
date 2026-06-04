@@ -7,7 +7,7 @@ import (
 
 // User 用户基础表
 type User struct {
-	ID            uint64         `gorm:"column:id;primaryKey;autoIncrement;comment:用户ID"`
+	UserID        uint64         `gorm:"column:user_id;primaryKey;autoIncrement;comment:用户ID"`
 	Username      string         `gorm:"column:username;uniqueIndex:uk_username;size:32;not null;default:'';comment:用户名（唯一）"`
 	Phone         *string        `gorm:"column:phone;uniqueIndex:uk_phone;size:16;comment:手机号"` // 可空字段用指针
 	Email         *string        `gorm:"column:email;uniqueIndex:uk_email;size:64;comment:邮箱"`  // 可空字段用指针

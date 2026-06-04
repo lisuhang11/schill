@@ -45,7 +45,7 @@ func (l *UpdateAvatarLogic) UpdateAvatar(in *pb.UpdateAvatarReq) (*pb.UpdateAvat
 	}
 
 	var user model.User
-	err := l.svcCtx.DB.WithContext(l.ctx).Where("id = ?", in.UserId).First(&user).Error
+	err := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", in.UserId).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, errutil.RpcBusinessError(errutil.ErrUserNotExist)

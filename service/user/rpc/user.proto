@@ -8,7 +8,7 @@ option go_package = "/pb";         // Go语言生成代码的路径
 
 // 用户基本信息
 message UserInfo {
-  uint64 id = 1;          // 用户ID
+  uint64 userId = 1;      // 用户ID
   string username = 2;    // 用户名
   string nickname = 3;    // 昵称
   string phone = 4;       // 手机号
@@ -98,7 +98,7 @@ message GetUserInfoResp {
 
 // 用户基础信息（用于列表展示等轻量场景）
 message UserBasicInfo {
-  uint64 id = 1;          // 用户ID
+  uint64 userId = 1;      // 用户ID
   string username = 2;    // 用户名
   string nickname = 3;    // 昵称
   string avatar = 4;      // 头像URL

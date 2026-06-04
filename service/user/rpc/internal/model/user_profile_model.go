@@ -4,8 +4,7 @@ import "time"
 
 // UserProfile 用户扩展信息表
 type UserProfile struct {
-	ID        uint64     `gorm:"column:id;primaryKey;autoIncrement"`
-	UserID    uint64     `gorm:"column:user_id;uniqueIndex:uk_user_id;not null;comment:用户ID"`
+	UserID    uint64     `gorm:"column:user_id;primaryKey;not null;comment:用户ID"`
 	Gender    int8       `gorm:"column:gender;default:0;comment:性别：0未知，1男，2女"`
 	Birthday  *time.Time `gorm:"column:birthday;type:date;comment:生日"` // 可为空
 	Signature string     `gorm:"column:signature;size:255;not null;default:'';comment:个性签名"`

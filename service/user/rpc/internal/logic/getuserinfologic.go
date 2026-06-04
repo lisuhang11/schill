@@ -29,7 +29,7 @@ func NewGetUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetUs
 // ==================== 查询结果结构体（用于 LEFT JOIN）====================
 type UserJoinResult struct {
 	// user 表
-	ID        uint64
+	UserID    uint64
 	Username  string
 	Phone     *string
 	Email     *string
@@ -97,7 +97,7 @@ func (l *GetUserInfoLogic) loadUserFromDB(ctx context.Context, userId uint64) (*
 	err := l.svcCtx.DB.WithContext(ctx).
 		Table("user").
 		Select(`
-			user.id,
+			user.user_id,
 			user.username,
 			user.phone,
 			user.email,
@@ -123,9 +123,9 @@ func (l *GetUserInfoLogic) loadUserFromDB(ctx context.Context, userId uint64) (*
 			stat.collection_count,
 			UNIX_TIMESTAMP(stat.last_active_time) AS last_active_time
 		`).
-		Joins("LEFT JOIN user_profile profile ON user.id = profile.user_id").
-		Joins("LEFT JOIN user_stat stat ON user.id = stat.user_id").
-		Where("user.id = ? AND user.deleted_at IS NULL", userId).
+		Joins("LEFT JOIN user_profile profile ON user.user_id = profile.user_id").
+		Joins("LEFT JOIN user_stat stat ON user.user_id = stat.user_id").
+		Where("user.user_id = ? AND user.deleted_at IS NULL", userId).
 		Take(&result).Error
 
 	if err != nil {
@@ -139,7 +139,7 @@ func (l *GetUserInfoLogic) loadUserFromDB(ctx context.Context, userId uint64) (*
 
 	// 组装响应（user 字段一定存在）
 	userInfo := &pb.UserInfo{
-		Id:        result.ID,
+		UserId:    result.UserID,
 		Username:  result.Username,
 		Phone:     getStringValue(result.Phone),
 		Email:     getStringValue(result.Email),
