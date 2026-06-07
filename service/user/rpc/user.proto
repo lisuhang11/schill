@@ -129,7 +129,6 @@ message UpdateUserStatusResp {
 // 更新用户个人资料请求
 message UpdateUserProfileInfoReq {
   UserProfile userProfile = 1;   // 要更新的个人资料
-  uint64 userId = 2;             // 用户ID
 }
 
 // 更新用户个人资料响应

@@ -78,7 +78,9 @@ message BatchCheckFollowStatusResp {
 
 service RelationCenter {
   rpc Follow(FollowReq) returns (FollowResp);
+  // 取消关注
   rpc Unfollow(UnfollowReq) returns (UnfollowResp);
+  // 查看两个用户间的关注关系
   rpc CheckFollowStatus(CheckFollowStatusReq) returns (CheckFollowStatusResp);
   rpc GetFollowingList(GetFollowingListReq) returns (GetFollowingListResp);
   rpc GetFollowerList(GetFollowerListReq) returns (GetFollowerListResp);

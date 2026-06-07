@@ -51,7 +51,7 @@ func buildUserMap(ctx *svc.ServiceContext, userIDs []uint64, r *http.Request) ma
 		return result
 	}
 	for _, u := range resp.Users {
-		result[u.Id] = u
+		result[u.UserId] = u
 	}
 	return result
 }

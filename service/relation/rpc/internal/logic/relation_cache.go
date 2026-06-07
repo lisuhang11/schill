@@ -191,7 +191,7 @@ func loadRelationCacheRows(ctx context.Context, svcCtx *svc.ServiceContext, kind
 	var rows []relationCacheEntry
 	query := svcCtx.DB.WithContext(ctx).
 		Table("following f").
-		Select("f.user_id, f.follow_id as target_id, UNIX_TIMESTAMP(f.created_at) as follow_time")
+		Select("f.user_id, f.follow_id as target_id, CAST(FLOOR(UNIX_TIMESTAMP(f.created_at)) AS SIGNED) as follow_time")
 
 	if kind == relationCacheFollowers {
 		query = query.

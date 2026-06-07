@@ -163,7 +163,7 @@ func (h *SyncHandler) syncUserStat(msg *model.CanalMessage) ([]bulkOperation, []
 				"follower_count":   h.getInt32(row, "follower_count"),
 				"like_count":       h.getInt32(row, "like_count"),
 				"collection_count": h.getInt32(row, "collection_count"),
-				"last_active_time": h.getInt64(row, "last_active_time"),
+				"last_active_time": h.getTimeUnix(row, "last_active_time"),
 			},
 		})
 	}

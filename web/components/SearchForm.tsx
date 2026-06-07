@@ -25,35 +25,35 @@ export function SearchForm({ keyword, type }: SearchFormValues) {
   });
 
   function onSubmit(values: SearchFormValues) {
-    const params = new URLSearchParams({ keyword: values.keyword, type: values.type });
+    const params = new URLSearchParams({
+      keyword: values.keyword.trim(),
+      type: values.type
+    });
     router.push(`/search?${params.toString()}`);
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-5 grid gap-3 md:grid-cols-[1fr_160px_auto]">
-      <div>
-        <input
-          {...register("keyword")}
-          placeholder="搜索文章、用户或话题"
-          className="focus-ring h-11 w-full rounded-lg border border-[rgba(77,100,124,0.18)] bg-white px-3 text-sm"
-        />
-        {errors.keyword ? <p className="mt-1 text-xs text-red-600">{errors.keyword.message}</p> : null}
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+      <input type="hidden" value={type} {...register("type")} />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="flex min-h-12 flex-1 items-center gap-3 rounded-lg border border-[rgba(77,100,124,0.18)] bg-white px-4 shadow-sm">
+          <Search size={20} className="shrink-0 text-marine-deep" />
+          <input
+            {...register("keyword")}
+            placeholder="搜索帖子、用户或话题"
+            className="h-12 min-w-0 flex-1 bg-transparent text-sm text-marine-text outline-none placeholder:text-marine-muted/70"
+          />
+        </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-lg bg-marine-deep px-5 text-sm font-semibold text-white shadow-soft transition hover:bg-[#244f86] disabled:opacity-60"
+        >
+          <Search size={18} />
+          搜索
+        </button>
       </div>
-      <select
-        {...register("type")}
-        className="focus-ring h-11 rounded-lg border border-[rgba(77,100,124,0.18)] bg-white px-3 text-sm"
-      >
-        <option value="post">文章</option>
-        <option value="user">用户</option>
-        <option value="topic">话题</option>
-      </select>
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-marine-deep px-4 text-sm font-semibold text-white disabled:opacity-60"
-      >
-        <Search size={18} /> 搜索
-      </button>
+      {errors.keyword ? <p className="mt-2 text-xs text-red-600">{errors.keyword.message}</p> : null}
     </form>
   );
 }

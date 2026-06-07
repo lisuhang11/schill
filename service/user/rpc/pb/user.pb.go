@@ -1068,7 +1068,6 @@ func (x *UpdateUserStatusResp) GetSuccess() bool {
 type UpdateUserProfileInfoReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserProfile   *UserProfile           `protobuf:"bytes,1,opt,name=userProfile,proto3" json:"userProfile,omitempty"` // 要更新的个人资料
-	UserId        uint64                 `protobuf:"varint,2,opt,name=userId,proto3" json:"userId,omitempty"`          // 用户ID
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1108,13 +1107,6 @@ func (x *UpdateUserProfileInfoReq) GetUserProfile() *UserProfile {
 		return x.UserProfile
 	}
 	return nil
-}
-
-func (x *UpdateUserProfileInfoReq) GetUserId() uint64 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
 }
 
 // 更新用户个人资料响应
@@ -1529,10 +1521,9 @@ const file_user_proto_rawDesc = "" +
 	"\x06userId\x18\x01 \x01(\x04R\x06userId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\x05R\x06status\"0\n" +
 	"\x14UpdateUserStatusResp\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"g\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"O\n" +
 	"\x18UpdateUserProfileInfoReq\x123\n" +
-	"\vuserProfile\x18\x01 \x01(\v2\x11.user.UserProfileR\vuserProfile\x12\x16\n" +
-	"\x06userId\x18\x02 \x01(\x04R\x06userId\"P\n" +
+	"\vuserProfile\x18\x01 \x01(\v2\x11.user.UserProfileR\vuserProfile\"P\n" +
 	"\x19UpdateUserProfileInfoResp\x123\n" +
 	"\vuserProfile\x18\x01 \x01(\v2\x11.user.UserProfileR\vuserProfile\"(\n" +
 	"\x0eGetUserStatReq\x12\x16\n" +

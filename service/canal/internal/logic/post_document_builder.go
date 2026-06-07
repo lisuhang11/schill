@@ -53,8 +53,8 @@ func (b *PostDocumentBuilder) Build(ctx context.Context, postIDs []uint64) ([]mo
 		Table("post AS p").
 		Select(`p.id, p.user_id, p.title, p.cover, p.comment_count, p.collection_count, p.upvote_count, p.share_count,
 			p.visibility, p.is_top, p.is_essence, p.is_lock, p.tags,
-			UNIX_TIMESTAMP(p.created_at) * 1000 AS created_at,
-			UNIX_TIMESTAMP(p.updated_at) * 1000 AS updated_at,
+			CAST(FLOOR(UNIX_TIMESTAMP(p.created_at) * 1000) AS SIGNED) AS created_at,
+			CAST(FLOOR(UNIX_TIMESTAMP(p.updated_at) * 1000) AS SIGNED) AS updated_at,
 			u.username, u.avatar`).
 		Joins("LEFT JOIN user AS u ON u.user_id = p.user_id AND u.deleted_at IS NULL").
 		Where("p.id IN ? AND p.deleted_at IS NULL", postIDs).

@@ -29,23 +29,15 @@ func NewUpdateUserProfileInfoLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *UpdateUserProfileInfoLogic) UpdateUserProfileInfo(in *pb.UpdateUserProfileInfoReq) (*pb.UpdateUserProfileInfoResp, error) {
-	if in.UserProfile == nil {
+	if in.UserProfile == nil || in.UserProfile.UserId == 0 {
 		logx.Errorf("invalid update user profile request: missing user profile or user id")
 		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
 	}
 
 	// Resolve userId: prefer authenticated identity from gRPC interceptor,
-	// fall back to request field for backward compatibility with callers
-	// that do not yet set gRPC metadata (e.g. tests, internal scripts).
+	// fall back to UserProfile.userId for callers without metadata.
 	authUserId := authctx.OptionalUserID(l.ctx)
-	userId := in.UserId
-	if userId == 0 {
-		userId = in.UserProfile.UserId
-	}
-	if userId == 0 {
-		logx.Errorf("invalid update user profile request: missing authenticated user id")
-		return nil, errutil.RpcBusinessError(errutil.ErrInvalidParams)
-	}
+	userId := in.UserProfile.UserId
 	if authUserId != 0 && userId != authUserId {
 		logx.Errorf("update user profile rejected: request userId=%d does not match authenticated userId=%d", userId, authUserId)
 		return nil, errutil.RpcBusinessError(errutil.ErrNoPermission)

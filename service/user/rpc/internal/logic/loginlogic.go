@@ -59,7 +59,6 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 	}
 
 	// 更新用户最后活跃时间
-	nowUnix := now.Unix()
 	var userStat model.UserStat
 	errStat := l.svcCtx.DB.WithContext(l.ctx).Where("user_id = ?", user.UserID).First(&userStat).Error
 	if errStat != nil {
@@ -67,7 +66,7 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 			// 用户统计记录不存在，创建新记录
 			userStat = model.UserStat{
 				UserID:         user.UserID,
-				LastActiveTime: nowUnix,
+				LastActiveTime: &now,
 			}
 			if errCreate := l.svcCtx.DB.WithContext(l.ctx).Create(&userStat).Error; errCreate != nil {
 				logx.Errorf("创建用户统计记录失败: %v", errCreate)
@@ -77,7 +76,7 @@ func (l *LoginLogic) Login(in *pb.LoginReq) (*pb.LoginResp, error) {
 		}
 	} else {
 		// 用户统计记录存在，更新最后活跃时间
-		if errUpdate := l.svcCtx.DB.WithContext(l.ctx).Model(&userStat).Update("last_active_time", nowUnix).Error; errUpdate != nil {
+		if errUpdate := l.svcCtx.DB.WithContext(l.ctx).Model(&userStat).Update("last_active_time", now).Error; errUpdate != nil {
 			logx.Errorf("更新用户最后活跃时间失败: %v", errUpdate)
 		}
 	}

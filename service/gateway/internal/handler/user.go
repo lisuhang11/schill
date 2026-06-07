@@ -45,7 +45,6 @@ func UpdateProfileHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 
 		ctx := withAuthMetadata(r.Context(), r)
 		resp, err := svcCtx.UserRpc.UpdateUserProfileInfo(ctx, &usercenter.UpdateUserProfileInfoReq{
-			UserId: userID,
 			UserProfile: &usercenter.UserProfile{
 				UserId:    userID,
 				Gender:    req.Gender,

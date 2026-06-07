@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Edit3, Home, LogOut, Search, Tags, User, Zap } from "lucide-react";
+import { Edit3, Home, Search, Tags, Zap } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { UserProfileMenu } from "@/components/UserProfileMenu";
 
 const navItems = [
   { href: "/", label: "首页", icon: Home },
@@ -46,23 +47,7 @@ export function AppHeader() {
 
           <div className="hidden items-center gap-2 border-l border-[rgba(77,100,124,0.16)] pl-3 md:flex">
             {userId ? (
-              <>
-                <Link
-                  href={`/users/${userId}`}
-                  className="focus-ring inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-marine-deep transition hover:bg-marine-bg"
-                >
-                  <User size={18} />
-                  <span>{username ?? `用户 ${userId}`}</span>
-                </Link>
-                <button
-                  type="button"
-                  onClick={logout}
-                  className="focus-ring inline-flex h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-marine-muted transition hover:bg-red-50 hover:text-red-600"
-                >
-                  <LogOut size={18} />
-                  <span>退出</span>
-                </button>
-              </>
+              <UserProfileMenu userId={userId} username={username} onLogout={logout} />
             ) : (
               <>
                 <Link

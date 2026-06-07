@@ -41,6 +41,11 @@ func (l *GetUserStatLogic) GetUserStat(in *pb.GetUserStatReq) (*pb.GetUserStatRe
 			return errutil.RpcBusinessError(errutil.ErrInternalError)
 		}
 
+		var lastActiveTime int64
+		if stat.LastActiveTime != nil {
+			lastActiveTime = stat.LastActiveTime.Unix()
+		}
+
 		*val.(*pb.GetUserStatResp) = pb.GetUserStatResp{
 			Stat: &pb.UserStat{
 				UserId:          stat.UserID,
@@ -50,7 +55,7 @@ func (l *GetUserStatLogic) GetUserStat(in *pb.GetUserStatReq) (*pb.GetUserStatRe
 				FollowingCount:  uint64(stat.FollowingCount),
 				LikeCount:       uint64(stat.LikeCount),
 				CollectionCount: uint64(stat.CollectionCount),
-				LastActiveTime:  stat.LastActiveTime,
+				LastActiveTime:  lastActiveTime,
 			},
 		}
 		return nil

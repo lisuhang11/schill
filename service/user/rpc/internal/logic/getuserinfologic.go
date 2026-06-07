@@ -121,7 +121,7 @@ func (l *GetUserInfoLogic) loadUserFromDB(ctx context.Context, userId uint64) (*
 			stat.following_count,
 			stat.like_count,
 			stat.collection_count,
-			UNIX_TIMESTAMP(stat.last_active_time) AS last_active_time
+			CAST(FLOOR(UNIX_TIMESTAMP(stat.last_active_time)) AS SIGNED) AS last_active_time
 		`).
 		Joins("LEFT JOIN user_profile profile ON user.user_id = profile.user_id").
 		Joins("LEFT JOIN user_stat stat ON user.user_id = stat.user_id").

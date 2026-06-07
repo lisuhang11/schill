@@ -90,7 +90,7 @@ func (l *RegisterLogic) Register(in *pb.RegisterReq) (*pb.RegisterResp, error) {
 			FollowingCount:  0,
 			LikeCount:       0,
 			CollectionCount: 0,
-			LastActiveTime:  0,
+			LastActiveTime:  nil,
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 		}
