@@ -74,15 +74,15 @@ const (
 	// 评论相关
 	CommentInfoKey        = KeyPrefix + "comment:info:"
 	CommentContentKey     = KeyPrefix + "comment:content:"
-	PostCommentsKey       = KeyPrefix + "post:comments:"   // + {postId}:list / :hot
+	PostCommentsKey       = KeyPrefix + "post:comments:"   // + {postId}:list
 	CommentRepliesKey     = KeyPrefix + "comment:replies:" // + {rootId}:list
 	CommentRepliesMetaKey = KeyPrefix + "comment:replies:meta:"
 	CommentVoteKey        = KeyPrefix + "comment:vote:"    // + {commentId}:user:{userId}
 	UserVoteCountKey      = KeyPrefix + "user:vote:count:" // + {userId}:{date}
 	PostCommentCountKey   = KeyPrefix + "post:comment_count:"
-	PostCommentsMetaKey   = KeyPrefix + "post:comments:meta:"
+	PostCommentsMetaKey   = KeyPrefix + "post:comments:meta:" // + {postId}
 	CommentReplyCountKey  = KeyPrefix + "comment:reply_count:"
-	CommentLockKey        = KeyPrefix + "comment:lock:" // + {postId}
+	CommentLockKey        = KeyPrefix + "comment:lock:" // + {postId} / + post:{postId} / + reply:{commentId}
 	CommentIdGenerator    = KeyPrefix + "comment:id:gen"
 	CommentExpire         = 600
 	VoteExpire            = 86400 * 30 // 30天

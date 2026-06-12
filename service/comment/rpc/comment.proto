@@ -46,7 +46,7 @@ message DeleteCommentResp {
 /*
 作用：分页获取某个作品（groupId）下的根评论列表。
 分页方式：使用游标（cursor）分页，cursor 通常是上一页最后一条评论的 id 或时间戳，比 offset 分页性能更好。
-排序：sortType 可以支持 "hot"（按热度，如点赞数+回复数）或 "new"（按时间倒序）
+排序：统一使用 Wilson 置信度 + 时间衰减算法排序，sortType 字段已废弃。
 */
 
 // 获取评论列表请求
@@ -54,7 +54,7 @@ message GetCommentListReq {
   uint64 postId = 1;
   int64 cursor = 2;
   int64 pageSize = 3;
-  string sortType = 4;
+  string sortType = 4 [deprecated = true]; // 已废弃：统一使用排名算法排序
 }
 
 /*

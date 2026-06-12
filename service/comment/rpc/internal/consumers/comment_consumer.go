@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"SChill/common/commentrank"
 	"SChill/common/kafka"
 	"SChill/common/mq"
 	"SChill/common/redis"
@@ -221,8 +222,9 @@ func (c *CommentConsumer) handleCommentCreateEvent(event mq.CommentCreateEvent) 
 
 	if event.ParentID == 0 {
 		postCommentsKey := fmt.Sprintf("%s%d:list", redis.PostCommentsKey, event.PostID)
+		score := commentrank.Score(0, 0, 0, time.Unix(event.CreatedAt, 0))
 		if err := c.redis.ZAdd(ctx, postCommentsKey, redis.Z{
-			Score:  float64(event.CreatedAt),
+			Score:  score,
 			Member: event.CommentID,
 		}); err != nil {
 			return err
@@ -288,7 +290,6 @@ func (c *CommentConsumer) handleCommentDeletedEvent(msg mq.CommentDeletedMessage
 	_ = c.redis.Del(ctx, commentInfoKey, commentContentKey)
 
 	_ = c.redis.ZRem(ctx, fmt.Sprintf("%s%d:list", redis.PostCommentsKey, comment.PostID), comment.ID)
-	_ = c.redis.ZRem(ctx, fmt.Sprintf("%s%d:hot", redis.PostCommentsKey, comment.PostID), comment.ID)
 	if comment.ParentID == 0 {
 		_, _ = c.redis.IncrBy(ctx, fmt.Sprintf("%s%d", redis.PostCommentCountKey, comment.PostID), -1)
 	}

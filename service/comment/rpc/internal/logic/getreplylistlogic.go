@@ -476,9 +476,10 @@ func (l *GetReplyListLogic) getReplyListFromDB(in *pb.GetReplyListReq, pageSize 
 
 func (l *GetReplyListLogic) getTotalReplyCount(commentId uint64) (int64, error) {
 	cacheKey := fmt.Sprintf("%s%d", redis.CommentReplyCountKey, commentId)
-	var cached int64
-	if err := l.svcCtx.Cache.GetCtx(l.ctx, cacheKey, &cached); err == nil {
-		return cached, nil
+	if val, err := l.svcCtx.Redis.Get(l.ctx, cacheKey); err == nil && val != "" {
+		if cached, parseErr := strconv.ParseInt(val, 10, 64); parseErr == nil {
+			return cached, nil
+		}
 	}
 
 	var total int64

@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"fmt"
-	"math"
 	"strconv"
 	"time"
 
@@ -187,10 +186,8 @@ func (l *VoteCommentLogic) VoteComment(in *pb.VoteCommentReq) (*pb.VoteCommentRe
 	isLiked := finalVoteType == 1
 	isDisliked := finalVoteType == 2
 
-	// Vote only changes like_count/dislike_count in the comment info hash.
-	// For "hot" sorted list, update the ZSet score for this comment instead of
-	// invalidating the entire list. For "time" sorted list, the score (created_at) is unchanged.
-	l.updateCommentScoreInLists(comment.PostID, comment.ID, likeCount, int32(comment.ReplyCount), comment.CreatedAt)
+	// Plan A: voting does not update the ZSet score in real time.
+	// The unified ranking list will naturally refresh on the next cache rebuild cycle.
 	if comment.ParentID > 0 {
 		invalidateReplyCache(l.ctx, l.svcCtx, comment.ParentID)
 	}
@@ -317,27 +314,6 @@ func (l *VoteCommentLogic) rebuildCommentInfo(comment model.Comment) {
 	}
 
 	l.svcCtx.Redis.HMSet(ctx, commentInfoKey, info)
-}
-
-// updateCommentScoreInLists updates the ZSet score for a single comment in the "hot" sorted list.
-// The "time" sorted list uses created_at as the score, which doesn't change on vote.
-func (l *VoteCommentLogic) updateCommentScoreInLists(postID, commentID uint64, likeCount, replyCount int32, createdAt time.Time) {
-	ctx := context.Background()
-
-	// Hot score formula: likeCount + replyCount*3 - ageInHours
-	ageInHours := math.Max(0, time.Since(createdAt).Hours())
-	hotScore := float64(likeCount) + float64(replyCount)*3 - ageInHours
-
-	hotListKey := buildCommentListKey(postID, "hot")
-	commentIDStr := strconv.FormatUint(commentID, 10)
-
-	// Only update if the key exists (not a full rebuild)
-	exists, err := l.svcCtx.Redis.Exists(ctx, hotListKey)
-	if err == nil && exists > 0 {
-		if zaddErr := l.svcCtx.Redis.ZAdd(ctx, hotListKey, redis.Z{Score: hotScore, Member: commentIDStr}); zaddErr != nil {
-			logx.Errorf("update hot score failed: commentId=%d err=%v", commentID, zaddErr)
-		}
-	}
 }
 
 func parseInt32(v interface{}) int32 {

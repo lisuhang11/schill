@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"SChill/common/cacheprotect"
+	"SChill/common/commentrank"
 	errutil "SChill/common/error"
 	"SChill/common/redis"
 	"SChill/service/comment/rpc/internal/model"
@@ -62,8 +63,7 @@ func (l *GetCommentListLogic) GetCommentList(in *pb.GetCommentListReq) (*pb.GetC
 		pageSize = 100
 	}
 
-	sortType := normalizeCommentSortType(in.SortType)
-	cacheState, err := l.getRootCommentIDsFromRedis(in.PostId, in.Cursor, pageSize, sortType)
+	cacheState, err := l.getRootCommentIDsFromRedis(in.PostId, in.Cursor, pageSize)
 	if err != nil {
 		logx.Errorf("get comment ids from redis failed: %v", err)
 		return l.getCommentListFromDB(in, pageSize)
@@ -79,11 +79,11 @@ func (l *GetCommentListLogic) GetCommentList(in *pb.GetCommentListReq) (*pb.GetC
 	}
 
 	if len(cacheState.IDs) == 0 {
-		if err := l.ensureCommentCache(in.PostId, sortType); err != nil {
+		if err := l.ensureCommentCache(in.PostId); err != nil {
 			logx.Errorf("ensure comment cache failed: %v", err)
 			return l.getCommentListFromDB(in, pageSize)
 		}
-		cacheState, err = l.getRootCommentIDsFromRedis(in.PostId, in.Cursor, pageSize, sortType)
+		cacheState, err = l.getRootCommentIDsFromRedis(in.PostId, in.Cursor, pageSize)
 		if err != nil {
 			logx.Errorf("get rebuilt comment ids from redis failed: %v", err)
 			return l.getCommentListFromDB(in, pageSize)
@@ -97,7 +97,7 @@ func (l *GetCommentListLogic) GetCommentList(in *pb.GetCommentListReq) (*pb.GetC
 			}, nil
 		}
 	} else if cacheState.Entry == nil || !cacheState.Entry.IsFresh(time.Now()) {
-		l.refreshCommentCacheAsync(in.PostId, sortType)
+		l.refreshCommentCacheAsync(in.PostId)
 	}
 
 	commentInfoMap, err := l.batchGetCommentInfo(cacheState.IDs)
@@ -125,21 +125,14 @@ func (l *GetCommentListLogic) GetCommentList(in *pb.GetCommentListReq) (*pb.GetC
 	}, nil
 }
 
-func normalizeCommentSortType(sortType string) string {
-	if sortType == "hot" {
-		return "hot"
-	}
-	return "time"
-}
-
-func (l *GetCommentListLogic) getRootCommentIDsFromRedis(postId uint64, cursor, pageSize int64, sortType string) (*commentListCacheState, error) {
+func (l *GetCommentListLogic) getRootCommentIDsFromRedis(postId uint64, cursor, pageSize int64) (*commentListCacheState, error) {
 	ctx := context.Background()
-	entry, err := cacheprotect.LoadEntry(ctx, l.svcCtx.Redis, buildCommentListMetaKey(postId, sortType))
+	entry, err := cacheprotect.LoadEntry(ctx, l.svcCtx.Redis, buildCommentListMetaKey(postId))
 	if err != nil {
 		entry = nil
 	}
 
-	key := buildCommentListKey(postId, sortType)
+	key := buildCommentListKey(postId)
 
 	maxScore := "+inf"
 	minScore := "-inf"
@@ -183,30 +176,30 @@ func (l *GetCommentListLogic) getRootCommentIDsFromRedis(postId uint64, cursor, 
 	}, nil
 }
 
-func (l *GetCommentListLogic) ensureCommentCache(postId uint64, sortType string) error {
-	flightKey := fmt.Sprintf("comment:list:%d:%s", postId, sortType)
+func (l *GetCommentListLogic) ensureCommentCache(postId uint64) error {
+	flightKey := fmt.Sprintf("comment:list:%d", postId)
 	_, err, _ := commentListGroup.Do(flightKey, func() (interface{}, error) {
-		cacheState, loadErr := l.getRootCommentIDsFromRedis(postId, 0, 1, sortType)
+		cacheState, loadErr := l.getRootCommentIDsFromRedis(postId, 0, 1)
 		if loadErr == nil && cacheState != nil && cacheState.Entry != nil && cacheState.Entry.IsFresh(time.Now()) {
 			return nil, nil
 		}
-		return nil, l.rebuildCommentCache(postId, sortType)
+		return nil, l.rebuildCommentCache(postId)
 	})
 	return err
 }
 
-func (l *GetCommentListLogic) refreshCommentCacheAsync(postId uint64, sortType string) {
+func (l *GetCommentListLogic) refreshCommentCacheAsync(postId uint64) {
 	go func() {
 		bgLogic := NewGetCommentListLogic(context.Background(), l.svcCtx)
-		if err := bgLogic.ensureCommentCache(postId, sortType); err != nil {
-			logx.Errorf("async refresh comment cache failed: postId=%d sortType=%s err=%v", postId, sortType, err)
+		if err := bgLogic.ensureCommentCache(postId); err != nil {
+			logx.Errorf("async refresh comment cache failed: postId=%d err=%v", postId, err)
 		}
 	}()
 }
 
-func (l *GetCommentListLogic) rebuildCommentCache(postId uint64, sortType string) error {
+func (l *GetCommentListLogic) rebuildCommentCache(postId uint64) error {
 	ctx := context.Background()
-	lockKey := buildCommentListLockKey(postId, sortType)
+	lockKey := buildCommentListLockKey(postId)
 
 	acquired, err := cacheprotect.TryLock(ctx, l.svcCtx.Redis, lockKey, commentListLockTTL)
 	if err != nil {
@@ -214,7 +207,7 @@ func (l *GetCommentListLogic) rebuildCommentCache(postId uint64, sortType string
 	}
 	if !acquired {
 		ok, waitErr := cacheprotect.WaitFor(ctx, commentListWaitAttempts, commentListWaitInterval, func() (bool, error) {
-			cacheState, loadErr := l.getRootCommentIDsFromRedis(postId, 0, 1, sortType)
+			cacheState, loadErr := l.getRootCommentIDsFromRedis(postId, 0, 1)
 			if loadErr != nil || cacheState == nil || cacheState.Entry == nil {
 				return false, nil
 			}
@@ -232,28 +225,17 @@ func (l *GetCommentListLogic) rebuildCommentCache(postId uint64, sortType string
 
 	var comments []*model.Comment
 	query := l.svcCtx.DB.WithContext(ctx).Where("post_id = ? AND parent_id = 0 AND deleted_at IS NULL", postId)
-	if sortType == "hot" {
-		query = query.Order("like_count DESC, created_at DESC")
-	} else {
-		query = query.Order("created_at DESC")
-	}
 	if err := query.Find(&comments).Error; err != nil {
 		return err
 	}
 
-	key := buildCommentListKey(postId, sortType)
-	metaKey := buildCommentListMetaKey(postId, sortType)
+	key := buildCommentListKey(postId)
+	metaKey := buildCommentListMetaKey(postId)
 	_ = l.svcCtx.Redis.Del(ctx, key)
 
 	members := make([]redis.Z, 0, len(comments))
 	for _, c := range comments {
-		var score float64
-		if sortType == "hot" {
-			score = float64(c.LikeCount + c.ReplyCount*3)
-			score -= float64(time.Now().Unix()-c.CreatedAt.Unix()) / 3600
-		} else {
-			score = float64(c.CreatedAt.Unix())
-		}
+		score := commentrank.Score(int64(c.LikeCount), int64(c.DislikeCount), int64(c.ReplyCount), c.CreatedAt)
 		members = append(members, redis.Z{Score: score, Member: c.ID})
 	}
 	if len(members) > 0 {
@@ -268,7 +250,7 @@ func (l *GetCommentListLogic) rebuildCommentCache(postId uint64, sortType string
 		if err := cacheprotect.StoreEmpty(ctx, l.svcCtx.Redis, metaKey, commentListEmptyTTL, commentListEmptyTTL); err != nil {
 			return err
 		}
-		_ = l.svcCtx.Cache.SetWithExpireCtx(ctx, fmt.Sprintf("%s%d", redis.PostCommentCountKey, postId), int64(0), commentListEmptyTTL)
+		_ = l.svcCtx.Redis.Set(ctx, fmt.Sprintf("%s%d", redis.PostCommentCountKey, postId), "0", commentListEmptyTTL)
 	}
 
 	return nil
@@ -434,11 +416,7 @@ func (l *GetCommentListLogic) getCommentListFromDB(in *pb.GetCommentListReq, pag
 	if in.Cursor > 0 {
 		query = query.Where("id < ?", in.Cursor)
 	}
-	if in.SortType == "hot" {
-		query = query.Order("like_count DESC, created_at DESC")
-	} else {
-		query = query.Order("created_at DESC")
-	}
+	query = query.Order("created_at DESC")
 
 	if err := query.Limit(int(pageSize + 1)).Find(&comments).Error; err != nil {
 		logx.Errorf("query comment list failed: %v", err)
@@ -512,9 +490,10 @@ func (l *GetCommentListLogic) getCommentListFromDB(in *pb.GetCommentListReq, pag
 
 func (l *GetCommentListLogic) getTotalCommentCount(postId uint64) (int64, error) {
 	cacheKey := fmt.Sprintf("%s%d", redis.PostCommentCountKey, postId)
-	var cached int64
-	if err := l.svcCtx.Cache.GetCtx(l.ctx, cacheKey, &cached); err == nil {
-		return cached, nil
+	if val, err := l.svcCtx.Redis.Get(l.ctx, cacheKey); err == nil && val != "" {
+		if cached, parseErr := strconv.ParseInt(val, 10, 64); parseErr == nil {
+			return cached, nil
+		}
 	}
 
 	var total int64
@@ -523,7 +502,7 @@ func (l *GetCommentListLogic) getTotalCommentCount(postId uint64) (int64, error)
 		Where("post_id = ? AND parent_id = 0 AND deleted_at IS NULL", postId).
 		Count(&total).Error
 	if err == nil {
-		_ = l.svcCtx.Cache.SetWithExpireCtx(l.ctx, cacheKey, total, time.Duration(redis.CommentExpire)*time.Second)
+		cacheCommentCount(l.ctx, l.svcCtx, postId, total)
 	}
 	return total, err
 }
